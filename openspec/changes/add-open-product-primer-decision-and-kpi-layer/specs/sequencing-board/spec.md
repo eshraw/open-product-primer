@@ -4,7 +4,7 @@
 The system SHALL represent sequencing in a structured artifact that includes at least `now`, `next`, `later`, and `backlog` collections.
 
 #### Scenario: Persist sequencing board state
-- **WHEN** a user updates roadmap ordering
+- **WHEN** a user updates primer sequencing
 - **THEN** the board state is stored in a structured file with all sequencing buckets
 
 ### Requirement: Sequencing entries SHALL model dependency relationships

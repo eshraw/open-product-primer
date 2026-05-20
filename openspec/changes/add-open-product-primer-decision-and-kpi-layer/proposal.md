@@ -4,18 +4,19 @@ Teams already using OpenSpec and Graphify can define and implement changes quick
 
 ## What Changes
 
-- Add a Product Decision Intelligence layer (`open-rmp`) that complements OpenSpec without duplicating implementation details.
+- Add a Product Decision Intelligence layer (**Open Product Primer**, CLI `open-product-primer`, short **`oprim`**) that complements OpenSpec without duplicating implementation details.
 - Introduce Product Decision Records (PDRs) for durable product decisions, separate from bet-level prioritization decisions.
 - Add sequencing support (`Now/Next/Later`) with explicit bet dependencies, unlock chains, and PDR preconditions.
 - Add KPI automation workflow for criteria imported from Notion into repo-native contracts, then measured via Amplitude and BigQuery/Metabase.
 - Define a promotion contract from bet decisions to OpenSpec changes so authority boundaries stay clear.
 - Include ready-to-use templates for PDRs, bet decisions, criteria contracts, sequencing board, and KPI reviews.
-- Add a reproducible **project installation** model (`open-rmp init` / `update` / `doctor`) so any repo can bootstrap the toolkit like OpenSpec or Graphify.
+- Add a reproducible **project installation** model (`open-product-primer init` / `update` / `doctor`, alias `oprim`) so any repo can bootstrap the toolkit like OpenSpec or Graphify.
+- Plan repository rename from legacy `open-rmp` naming to Open Product Primer / `oprim`, and artifact root from `roadmap/` to `primer/` (see design naming section and tasks §0).
 
 ## Capabilities
 
 ### New Capabilities
-- `project-installation`: Install and bootstrap open-rmp per repository with CLI commands, config, roadmap scaffold, and agent slash-command integration.
+- `project-installation`: Install and bootstrap Open Product Primer per repository with CLI commands, config, primer scaffold, and agent slash-command integration.
 - `product-decision-records`: Define and maintain durable product decisions with status, alternatives, consequences, and links to bets/specs.
 - `sequencing-board`: Manage `Now/Next/Later` prioritization with blockers, unlocks, WIP limits, and PDR preconditions.
 - `kpi-automation-pipeline`: Convert structured success criteria into executable Amplitude and BigQuery/Metabase measurements and write outcome reviews.
@@ -26,16 +27,17 @@ Teams already using OpenSpec and Graphify can define and implement changes quick
 
 ## Impact
 
-- **Distribution**: npm (or equivalent) global CLI package with `init`, `update`, and `doctor` commands for repeatable project setup.
-- **Artifacts**: new roadmap decision and sequencing artifacts under `roadmap/`, project config at `roadmap/config.yaml`, and OpenSpec-aligned promotion links under `openspec/changes/`.
-- **Agent workflows**: adds new command surface (`/rmp:*`) installed into supported AI assistants on `init`/`update`, with review loops before and after `/opsx:*`.
+- **Distribution**: npm (or equivalent) global CLI package `@open-product-primer/cli` with `init`, `update`, and `doctor` commands; short bin alias `oprim`.
+- **Artifacts**: new primer decision and sequencing artifacts under `primer/`, project config at `primer/config.yaml`, and OpenSpec-aligned promotion links under `openspec/changes/`.
+- **Agent workflows**: adds new command surface (`/oprim:*`) installed into supported AI assistants on `init`/`update`, with review loops before and after `/opsx:*`.
 - **Data integrations**: uses Amplitude and BigQuery/Metabase as measurement backends via criteria contracts.
 - **Traceability**: enables Graphify to connect decisions, specs, code, events, and outcomes.
 - **Ecosystem**: detects OpenSpec and Graphify presence during init and configures integration hooks when present.
+- **Rename**: legacy `open-rmp` / `/rmp:*` and `roadmap/` are superseded by Open Product Primer / `oprim` / `primer/` (tracked in tasks §0).
 
 ## Ready-to-use Templates
 
-### Project config (`roadmap/config.yaml`)
+### Project config (`primer/config.yaml`)
 
 ```yaml
 version: 1
@@ -59,7 +61,7 @@ sequencing:
     now: 2
 ```
 
-### Product Decision Record (`roadmap/decisions/PDR-XXX-name.md`)
+### Product Decision Record (`primer/decisions/PDR-XXX-name.md`)
 
 ```md
 # PDR-XXX: <Decision title>
@@ -92,7 +94,7 @@ Proposed | Accepted | Deprecated | Superseded by PDR-YYY
 - Supersedes: <PDR-ID or none>
 ```
 
-### Bet Decision (`roadmap/bets/BET-XXX/bet-decision.md`)
+### Bet Decision (`primer/bets/BET-XXX/bet-decision.md`)
 
 ```md
 # Decision: BET-XXX <Bet title>
@@ -120,7 +122,7 @@ Proposed | Accepted | Deprecated | Superseded by PDR-YYY
 - OpenSpec change: <path once promoted>
 ```
 
-### Criteria Contract (`roadmap/bets/BET-XXX/criteria.yaml`)
+### Criteria Contract (`primer/bets/BET-XXX/criteria.yaml`)
 
 ```yaml
 metrics:
@@ -139,7 +141,7 @@ metrics:
     segment: new_users
 ```
 
-### Sequencing Board (`roadmap/sequence.yaml`)
+### Sequencing Board (`primer/sequence.yaml`)
 
 ```yaml
 wip_limits:
@@ -163,7 +165,7 @@ later: []
 backlog: []
 ```
 
-### KPI Review (`roadmap/reviews/YYYY-MM-DD-BET-XXX-kpi.md`)
+### KPI Review (`primer/reviews/YYYY-MM-DD-BET-XXX-kpi.md`)
 
 ```md
 # KPI Review: BET-XXX
