@@ -1,0 +1,14 @@
+metrics:
+  - id: metric_id
+    name: "Metric name"
+    baseline: 0.00
+    target: 0.00
+    timeframe: "30 days post-launch"
+    launch_date: "YYYY-MM-DD"
+    source:
+      type: amplitude
+      definition:
+        event: event_name
+        aggregation: unique_users
+        denominator_event: null
+    segment: null

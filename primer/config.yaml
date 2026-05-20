@@ -1,0 +1,19 @@
+version: 1
+project:
+  name: "open-product-primer"
+integrations:
+  openspec:
+    enabled: true
+    changes_dir: openspec/changes
+  graphify:
+    enabled: false
+    graph_dir: graphify-out
+measurement:
+  amplitude:
+    enabled: false
+  bigquery:
+    enabled: false
+    metabase_url: null
+sequencing:
+  wip_limits:
+    now: 2

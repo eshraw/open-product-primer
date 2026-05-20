@@ -1,0 +1,118 @@
+import { Command } from 'commander';
+import * as path from 'path';
+import * as fs from 'fs';
+import chalk from 'chalk';
+
+interface Check {
+  name: string;
+  pass: boolean;
+  note?: string;
+  required: boolean;
+}
+
+export function doctorCommand(): Command {
+  return new Command('doctor')
+    .description('Check Open Product Primer install health and integration readiness')
+    .action(() => {
+      const projectRoot = process.cwd();
+      const checks: Check[] = [];
+
+      const primerDir = path.join(projectRoot, 'primer');
+
+      for (const dir of ['primer', 'primer/decisions', 'primer/bets', 'primer/reviews', 'primer/templates']) {
+        const exists = fs.existsSync(path.join(projectRoot, dir));
+        checks.push({
+          name: `scaffold: ${dir}/`,
+          pass: exists,
+          note: exists ? undefined : "Run 'oprim init' to create",
+          required: true,
+        });
+      }
+
+      const configPath = path.join(primerDir, 'config.yaml');
+      const configExists = fs.existsSync(configPath);
+      checks.push({
+        name: 'config: primer/config.yaml',
+        pass: configExists,
+        note: configExists ? undefined : "Run 'oprim init' to create",
+        required: true,
+      });
+
+      const sequenceExists = fs.existsSync(path.join(primerDir, 'sequence.yaml'));
+      checks.push({
+        name: 'config: primer/sequence.yaml',
+        pass: sequenceExists,
+        note: sequenceExists ? undefined : "Run 'oprim init' to create",
+        required: true,
+      });
+
+      const openspecPresent = fs.existsSync(path.join(projectRoot, 'openspec'));
+      checks.push({
+        name: 'integration: OpenSpec',
+        pass: openspecPresent,
+        note: openspecPresent ? undefined : 'Optional — install OpenSpec to enable change linking',
+        required: false,
+      });
+
+      const graphifyPresent = fs.existsSync(path.join(projectRoot, 'graphify-out'));
+      checks.push({
+        name: 'integration: Graphify',
+        pass: graphifyPresent,
+        note: graphifyPresent ? undefined : 'Optional — install Graphify for traceability',
+        required: false,
+      });
+
+      checks.push({
+        name: 'measurement: AMPLITUDE_API_KEY',
+        pass: !!process.env['AMPLITUDE_API_KEY'],
+        note: process.env['AMPLITUDE_API_KEY'] ? undefined : 'Optional — set to enable Amplitude measurements',
+        required: false,
+      });
+
+      checks.push({
+        name: 'measurement: GOOGLE_APPLICATION_CREDENTIALS',
+        pass: !!process.env['GOOGLE_APPLICATION_CREDENTIALS'],
+        note: process.env['GOOGLE_APPLICATION_CREDENTIALS']
+          ? undefined
+          : 'Optional — set to enable BigQuery measurements',
+        required: false,
+      });
+
+      const claudeInstalled = fs.existsSync(path.join(projectRoot, '.claude', 'commands', 'oprim'));
+      checks.push({
+        name: 'agent: Claude /oprim:* commands',
+        pass: claudeInstalled,
+        note: claudeInstalled ? undefined : "Run 'oprim update' to install",
+        required: false,
+      });
+
+      const cursorInstalled =
+        fs.existsSync(path.join(projectRoot, '.cursor', 'commands', 'oprim-promote.md')) ||
+        fs.existsSync(path.join(projectRoot, '.cursor', 'commands', 'oprim-sequence.md'));
+      checks.push({
+        name: 'agent: Cursor /oprim-* commands',
+        pass: cursorInstalled,
+        note: cursorInstalled ? undefined : "Run 'oprim update' to install",
+        required: false,
+      });
+
+      console.log(chalk.bold('Open Product Primer') + ' — health check\n');
+
+      for (const check of checks) {
+        const icon = check.pass ? chalk.green('✓') : check.required ? chalk.red('✗') : chalk.yellow('○');
+        const label = check.pass ? chalk.white(check.name) : chalk.gray(check.name);
+        const note = check.note ? chalk.dim(`  (${check.note})`) : '';
+        console.log(`  ${icon} ${label}${note}`);
+      }
+
+      const passed = checks.filter((c) => c.pass).length;
+      const requiredFailed = checks.filter((c) => c.required && !c.pass).length;
+      console.log(`\n${passed}/${checks.length} checks passed.`);
+
+      if (requiredFailed === 0) {
+        console.log(chalk.green('Core setup is healthy.'));
+      } else {
+        console.log(chalk.yellow(`${requiredFailed} required check(s) failed. Run `) + chalk.cyan('oprim init') + chalk.yellow(' to fix.'));
+      }
+    });
+}

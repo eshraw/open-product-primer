@@ -1,0 +1,31 @@
+{
+  "name": "@open-product-primer/cli",
+  "version": "0.1.0",
+  "description": "Open Product Primer CLI — product decisions, sequencing, and KPI tracking for repositories",
+  "keywords": ["product", "decisions", "sequencing", "kpi", "openspec"],
+  "license": "MIT",
+  "bin": {
+    "open-product-primer": "./dist/cli.js",
+    "oprim": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
