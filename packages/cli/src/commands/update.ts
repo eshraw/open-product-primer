@@ -38,7 +38,7 @@ export function updateCommand(): Command {
     });
 }
 
-function claudeCommandContent(id: string, name: string, body: string): string {
+function claudeCommandContent(_id: string, name: string, body: string): string {
   return `---
 name: "${name}"
 description: ${name}
