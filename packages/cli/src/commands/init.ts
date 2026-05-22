@@ -1,8 +1,9 @@
 import { Command } from 'commander';
 import * as path from 'path';
 import chalk from 'chalk';
-import { detectOpenSpec, detectGraphify } from '../lib/detect';
+import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
+import { installAgentSkills, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
 import {
   configTemplate,
   sequenceTemplate,
@@ -16,7 +17,13 @@ export function initCommand(): Command {
   return new Command('init')
     .description('Initialize Open Product Primer in the current repository')
     .option('--name <name>', 'project name (defaults to directory name)')
-    .action((opts) => {
+    .option(
+      '--agent <name>',
+      'AI agent to install skills for (repeatable; supported: claude, cursor)',
+      (val: string, prev: string[]) => [...prev, val],
+      [] as string[]
+    )
+    .action(async (opts) => {
       const projectRoot = process.cwd();
       const projectName = opts.name ?? path.basename(projectRoot);
 
@@ -55,7 +62,58 @@ export function initCommand(): Command {
       console.log('  ' + chalk.gray('primer/config.yaml') + ' — ' + configStatus);
       console.log('  ' + chalk.gray('primer/sequence.yaml') + ' — ' + sequenceStatus);
       console.log('  ' + chalk.gray('primer/templates/') + ' — refreshed');
+
+      // ── Agent selection ───────────────────────────────────────────────────────
+
+      let selectedAgents: string[];
+      const flaggedAgents: string[] = opts.agent;
+
+      if (flaggedAgents.length > 0) {
+        const invalid = flaggedAgents.filter((a) => !(SUPPORTED_AGENTS as readonly string[]).includes(a));
+        if (invalid.length > 0) {
+          console.error(chalk.red(`\nUnknown agent(s): ${invalid.join(', ')}`));
+          console.error(`Supported agents: ${SUPPORTED_AGENTS.join(', ')}`);
+          process.exit(1);
+        }
+        selectedAgents = flaggedAgents;
+      } else {
+        const existingAgents = readAgentsFromConfig(projectRoot);
+        if (existingAgents !== null) {
+          selectedAgents = existingAgents;
+          if (selectedAgents.length > 0) {
+            console.log('\n' + chalk.dim(`Re-installing for configured agents: ${selectedAgents.join(', ')}`));
+          }
+        } else {
+          console.log('');
+          const { checkbox } = await import('@inquirer/prompts');
+          selectedAgents = await checkbox({
+            message: 'Which AI tools should /oprim:* skills be installed for?',
+            choices: [
+              { name: 'Claude Code', value: 'claude' },
+              { name: 'Cursor', value: 'cursor' },
+            ],
+          });
+        }
+      }
+
+      writeAgentsToConfig(selectedAgents, projectRoot);
+
+      if (selectedAgents.length === 0) {
+        console.log(
+          '\n' +
+            chalk.yellow('No agents selected.') +
+            ' Run ' +
+            chalk.cyan('oprim update') +
+            ' after configuring an AI tool to install /oprim:* skills.'
+        );
+      } else {
+        console.log('\n' + chalk.bold('Installing agent skills...'));
+        for (const agent of selectedAgents) {
+          installAgentSkills(agent as Agent, projectRoot);
+        }
+        console.log('\n' + chalk.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
+      }
+
       console.log('\nRun ' + chalk.cyan('oprim doctor') + ' to verify your setup.');
-      console.log('Run ' + chalk.cyan('oprim update') + ' to install /oprim:* assistant commands.');
     });
 }

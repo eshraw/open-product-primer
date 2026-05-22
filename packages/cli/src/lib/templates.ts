@@ -2,6 +2,7 @@ export function configTemplate(projectName: string, openspecEnabled: boolean, gr
   return `version: 1
 project:
   name: "${projectName}"
+agents: []
 integrations:
   openspec:
     enabled: ${openspecEnabled}

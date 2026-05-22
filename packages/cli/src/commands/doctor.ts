@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
+import { readAgentsFromConfig } from '../lib/detect';
 
 interface Check {
   name: string;
@@ -9,6 +10,11 @@ interface Check {
   note?: string;
   required: boolean;
 }
+
+const AGENT_DIRS: Record<string, string> = {
+  claude: '.claude',
+  cursor: '.cursor',
+};
 
 export function doctorCommand(): Command {
   return new Command('doctor')
@@ -78,23 +84,44 @@ export function doctorCommand(): Command {
         required: false,
       });
 
-      const claudeInstalled = fs.existsSync(path.join(projectRoot, '.claude', 'commands', 'oprim'));
-      checks.push({
-        name: 'agent: Claude /oprim:* commands',
-        pass: claudeInstalled,
-        note: claudeInstalled ? undefined : "Run 'oprim update' to install",
-        required: false,
-      });
+      // ── Agent environment checks ──────────────────────────────────────────────
+      const configAgents = readAgentsFromConfig(projectRoot);
 
-      const cursorInstalled =
-        fs.existsSync(path.join(projectRoot, '.cursor', 'commands', 'oprim-promote.md')) ||
-        fs.existsSync(path.join(projectRoot, '.cursor', 'commands', 'oprim-sequence.md'));
-      checks.push({
-        name: 'agent: Cursor /oprim-* commands',
-        pass: cursorInstalled,
-        note: cursorInstalled ? undefined : "Run 'oprim update' to install",
-        required: false,
-      });
+      if (configAgents !== null) {
+        // Config-declared agents: check each declared agent's directory exists
+        for (const agent of configAgents) {
+          const dir = AGENT_DIRS[agent];
+          if (!dir) continue;
+          const exists = fs.existsSync(path.join(projectRoot, dir));
+          checks.push({
+            name: `agent: ${agent} environment (${dir}/)`,
+            pass: exists,
+            note: exists
+              ? undefined
+              : `${dir}/ directory not found — declared in config but missing`,
+            required: false,
+          });
+        }
+      } else {
+        // Legacy: check for installed commands by directory presence
+        const claudeInstalled = fs.existsSync(path.join(projectRoot, '.claude', 'commands', 'oprim'));
+        checks.push({
+          name: 'agent: Claude /oprim:* commands',
+          pass: claudeInstalled,
+          note: claudeInstalled ? undefined : "Run 'oprim update' to install",
+          required: false,
+        });
+
+        const cursorInstalled =
+          fs.existsSync(path.join(projectRoot, '.cursor', 'commands', 'oprim-promote.md')) ||
+          fs.existsSync(path.join(projectRoot, '.cursor', 'commands', 'oprim-sequence.md'));
+        checks.push({
+          name: 'agent: Cursor /oprim-* commands',
+          pass: cursorInstalled,
+          note: cursorInstalled ? undefined : "Run 'oprim update' to install",
+          required: false,
+        });
+      }
 
       console.log(chalk.bold('Open Product Primer') + ' — health check\n');
 
@@ -112,7 +139,11 @@ export function doctorCommand(): Command {
       if (requiredFailed === 0) {
         console.log(chalk.green('Core setup is healthy.'));
       } else {
-        console.log(chalk.yellow(`${requiredFailed} required check(s) failed. Run `) + chalk.cyan('oprim init') + chalk.yellow(' to fix.'));
+        console.log(
+          chalk.yellow(`${requiredFailed} required check(s) failed. Run `) +
+            chalk.cyan('oprim init') +
+            chalk.yellow(' to fix.')
+        );
       }
     });
 }
