@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { initCommand } from './commands/init';
 import { updateCommand } from './commands/update';
 import { doctorCommand } from './commands/doctor';
+import { measureCommand } from './commands/measure';
 
 const program = new Command();
 
@@ -14,5 +15,6 @@ program
 program.addCommand(initCommand());
 program.addCommand(updateCommand());
 program.addCommand(doctorCommand());
+program.addCommand(measureCommand());
 
 program.parse();

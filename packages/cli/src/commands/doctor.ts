@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
 import { readAgentsFromConfig } from '../lib/detect';
+import { scanCriteriaForSourceType } from '../lib/measure';
 
 interface Check {
   name: string;
@@ -68,19 +69,33 @@ export function doctorCommand(): Command {
         required: false,
       });
 
+      // 7.1–7.3: criteria-aware credential checks
+      const hasAmplitudeMetrics = scanCriteriaForSourceType(projectRoot, 'amplitude');
+      const hasBigQueryMetrics = scanCriteriaForSourceType(projectRoot, 'bigquery');
+      const amplitudeKeySet = !!process.env['AMPLITUDE_API_KEY'];
+      const googleCredsSet = !!process.env['GOOGLE_APPLICATION_CREDENTIALS'];
+
       checks.push({
         name: 'measurement: AMPLITUDE_API_KEY',
-        pass: !!process.env['AMPLITUDE_API_KEY'],
-        note: process.env['AMPLITUDE_API_KEY'] ? undefined : 'Optional — set to enable Amplitude measurements',
+        pass: !hasAmplitudeMetrics || amplitudeKeySet,
+        note:
+          hasAmplitudeMetrics && !amplitudeKeySet
+            ? 'Required for amplitude metrics — set AMPLITUDE_API_KEY to enable oprim measure'
+            : hasAmplitudeMetrics
+              ? undefined
+              : 'No amplitude metrics in criteria.yaml — not required',
         required: false,
       });
 
       checks.push({
         name: 'measurement: GOOGLE_APPLICATION_CREDENTIALS',
-        pass: !!process.env['GOOGLE_APPLICATION_CREDENTIALS'],
-        note: process.env['GOOGLE_APPLICATION_CREDENTIALS']
-          ? undefined
-          : 'Optional — set to enable BigQuery measurements',
+        pass: !hasBigQueryMetrics || googleCredsSet,
+        note:
+          hasBigQueryMetrics && !googleCredsSet
+            ? 'Required for bigquery metrics — set GOOGLE_APPLICATION_CREDENTIALS to enable oprim measure'
+            : hasBigQueryMetrics
+              ? undefined
+              : 'No bigquery metrics in criteria.yaml — not required',
         required: false,
       });
 
