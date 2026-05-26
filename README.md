@@ -120,4 +120,4 @@ Package: `@open-product-primer/cli`
 Bin aliases: `open-product-primer`, `oprim`
 Source: `packages/cli/`
 
-Releases are published via GitHub Actions on `v*` tags (see `.github/workflows/release.yml`).
+Releases are published via GitHub Actions on `v*` tags using [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (see `.github/workflows/release.yml`).
