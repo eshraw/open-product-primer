@@ -1,6 +1,6 @@
 ## Context
 
-`criteria.yaml` per bet already defines metrics with `source.type` (amplitude or bigquery), event/table mappings, baseline, target, timeframe, and launch date. The `docs/kpi-automation.md` document describes the intended output format for measurement definitions and run results — this design formalises that intent and makes it executable.
+`criteria.yaml` per bet already defines metrics with `source.type` (amplitude or bigquery), event/table mappings, baseline, target, timeframe, and launch date. The integration surface (mapping tables, artifact formats, review flow) is documented in `openspec/specs/kpi-automation-pipeline/design.md`; this change design formalises that intent and makes it executable via `oprim measure`.
 
 Currently there is no CLI surface to generate or run measurements. The `/oprim:review` skill prompts the user for actuals manually. `oprim doctor` already validates that `AMPLITUDE_API_KEY` and `GOOGLE_APPLICATION_CREDENTIALS` are present in the environment but nothing uses them.
 

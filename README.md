@@ -119,3 +119,5 @@ The link between the layers is the promotion contract (`/oprim:promote`).
 Package: `@open-product-primer/cli`
 Bin aliases: `open-product-primer`, `oprim`
 Source: `packages/cli/`
+
+Releases are published via GitHub Actions on `v*` tags (see `.github/workflows/release.yml`).

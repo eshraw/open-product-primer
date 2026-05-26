@@ -32,3 +32,32 @@ The review artifact SHALL contain an Actions checklist that includes entries to 
 #### Scenario: Review artifact contains standard follow-up actions
 - **WHEN** a KPI review is created
 - **THEN** the artifact includes an Actions section with checkboxes for updating bet-decision, updating PDRs, and re-sequencing impacted bets
+
+### Requirement: Post-review workflow SHALL update the bet decision with an Outcomes section
+After a KPI review is written, the workflow SHALL add or update an `## Outcomes` section on `primer/bets/BET-NNN/bet-decision.md` summarizing each metric as baseline → actual (target) with status, and linking to the review artifact path.
+
+#### Scenario: Bet decision gains Outcomes after review
+- **WHEN** a KPI review is completed for BET-NNN
+- **THEN** `bet-decision.md` contains an `## Outcomes` section with per-metric summaries and a link to `primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md`
+
+### Requirement: Post-review workflow SHALL update PDR status when outcomes invalidate policy
+When review outcomes invalidate or supersede a referenced PDR, the workflow SHALL update that PDR's `## Status` (for example to `Superseded by PDR-YYY`).
+
+#### Scenario: PDR status updated after invalidating outcome
+- **WHEN** review decision quality notes indicate a referenced PDR is no longer valid
+- **THEN** the PDR file's Status field is updated to reflect supersession or deprecation
+
+### Requirement: Post-review sequencing SHALL follow outcome-based recommendations
+After review, `/oprim:sequence` (or equivalent validation) SHALL surface sequencing moves based on outcomes: defer follow-on bets when metrics missed, unlock dependents when metrics hit, move bets to backlog when kill criteria triggered.
+
+#### Scenario: Missed metrics suggest deferral
+- **WHEN** a review records one or more metrics as `missed`
+- **THEN** sequence validation may recommend moving dependent bets from `next` to `later` until root cause is addressed
+
+#### Scenario: Hit metrics suggest unlocking dependents
+- **WHEN** a review records metrics as `hit` and dependent bets list the reviewed bet in `blocked_by`
+- **THEN** sequence validation may recommend promoting those bets when other preconditions are satisfied
+
+#### Scenario: Kill criteria triggered suggests backlog
+- **WHEN** review outcomes match a bet's documented kill criteria
+- **THEN** sequence validation may recommend moving associated bets to `backlog`

@@ -4,13 +4,14 @@ import { initCommand } from './commands/init';
 import { updateCommand } from './commands/update';
 import { doctorCommand } from './commands/doctor';
 import { measureCommand } from './commands/measure';
+import pkg from '../package.json';
 
 const program = new Command();
 
 program
   .name('open-product-primer')
   .description('Open Product Primer — product decisions, sequencing, and KPI tracking')
-  .version('0.1.0');
+  .version(pkg.version);
 
 program.addCommand(initCommand());
 program.addCommand(updateCommand());

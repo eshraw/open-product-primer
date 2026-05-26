@@ -2,19 +2,32 @@
   "name": "@open-product-primer/cli",
   "version": "0.1.0",
   "description": "Open Product Primer CLI — product decisions, sequencing, and KPI tracking for repositories",
-  "keywords": ["product", "decisions", "sequencing", "kpi", "openspec"],
+  "keywords": ["product", "decisions", "sequencing", "kpi", "openspec", "oprim"],
   "license": "MIT",
+  "author": "Eshane",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eshraw/open-product-primer.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/eshraw/open-product-primer/issues"
+  },
+  "homepage": "https://github.com/eshraw/open-product-primer#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "open-product-primer": "./dist/cli.js",
     "oprim": "./dist/cli.js"
   },
-  "main": "./dist/index.js",
-  "files": ["dist"],
+  "files": ["dist", "LICENSE", "README.md"],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.0.0",
