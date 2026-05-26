@@ -6,7 +6,7 @@ on:
       - 'v*'
 
 permissions:
-  id-token: write # Required for npm trusted publishing (OIDC)
+  id-token: write # Required for npm OIDC trusted publishing
   contents: read
 
 jobs:
@@ -21,8 +21,6 @@ jobs:
         with:
           node-version: '22'
           registry-url: https://registry.npmjs.org
-          package-manager-cache: false
-      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm test
-      - run: npm publish --access public
+      - run: npm publish --provenance --access public
