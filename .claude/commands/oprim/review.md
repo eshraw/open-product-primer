@@ -5,6 +5,6 @@ category: Workflow
 tags: [workflow, primer]
 ---
 
-Create a KPI review in `primer/reviews/` for a completed bet.
+Create a KPI review artifact pre-filled from a bet's criteria contract.
 
 Use the Skill tool to invoke the `oprim-review` skill.
