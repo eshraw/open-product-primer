@@ -3,7 +3,7 @@ import * as path from 'path';
 import chalk from 'chalk';
 import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
-import { installAgentSkills, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
+import { installAgentSkills, promptAgentSelection, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
 import {
   configTemplate,
   sequenceTemplate,
@@ -78,21 +78,12 @@ export function initCommand(): Command {
         selectedAgents = flaggedAgents;
       } else {
         const existingAgents = readAgentsFromConfig(projectRoot);
-        if (existingAgents !== null) {
+        if (existingAgents !== null && existingAgents.length > 0) {
           selectedAgents = existingAgents;
-          if (selectedAgents.length > 0) {
-            console.log('\n' + chalk.dim(`Re-installing for configured agents: ${selectedAgents.join(', ')}`));
-          }
+          console.log('\n' + chalk.dim(`Re-installing for configured agents: ${selectedAgents.join(', ')}`));
         } else {
           console.log('');
-          const { checkbox } = await import('@inquirer/prompts');
-          selectedAgents = await checkbox({
-            message: 'Which AI tools should /oprim:* skills be installed for?',
-            choices: [
-              { name: 'Claude Code', value: 'claude' },
-              { name: 'Cursor', value: 'cursor' },
-            ],
-          });
+          selectedAgents = await promptAgentSelection(projectRoot);
         }
       }
 

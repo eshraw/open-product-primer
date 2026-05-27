@@ -23,6 +23,13 @@ export function readAgentsFromConfig(projectRoot: string): string[] | null {
   return agents as string[];
 }
 
+export function detectAvailableAgents(projectRoot: string): string[] {
+  const detected: string[] = [];
+  if (fs.existsSync(path.join(projectRoot, '.claude'))) detected.push('claude');
+  if (fs.existsSync(path.join(projectRoot, '.cursor'))) detected.push('cursor');
+  return detected;
+}
+
 export function writeAgentsToConfig(agents: string[], projectRoot: string): void {
   const configPath = path.join(projectRoot, 'primer', 'config.yaml');
   if (!fs.existsSync(configPath)) return;

@@ -93,22 +93,13 @@ function initCommand() {
         }
         else {
             const existingAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
-            if (existingAgents !== null) {
+            if (existingAgents !== null && existingAgents.length > 0) {
                 selectedAgents = existingAgents;
-                if (selectedAgents.length > 0) {
-                    console.log('\n' + chalk_1.default.dim(`Re-installing for configured agents: ${selectedAgents.join(', ')}`));
-                }
+                console.log('\n' + chalk_1.default.dim(`Re-installing for configured agents: ${selectedAgents.join(', ')}`));
             }
             else {
                 console.log('');
-                const { checkbox } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
-                selectedAgents = await checkbox({
-                    message: 'Which AI tools should /oprim:* skills be installed for?',
-                    choices: [
-                        { name: 'Claude Code', value: 'claude' },
-                        { name: 'Cursor', value: 'cursor' },
-                    ],
-                });
+                selectedAgents = await (0, install_agent_1.promptAgentSelection)(projectRoot);
             }
         }
         (0, detect_1.writeAgentsToConfig)(selectedAgents, projectRoot);

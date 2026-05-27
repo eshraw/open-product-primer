@@ -2,13 +2,13 @@ import { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
-import { installAgentSkills, Agent } from '../lib/install-agent';
-import { readAgentsFromConfig } from '../lib/detect';
+import { installAgentSkills, promptAgentSelection, Agent } from '../lib/install-agent';
+import { readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 
 export function updateCommand(): Command {
   return new Command('update')
     .description('Refresh /oprim:* assistant commands and skills from package templates')
-    .action(() => {
+    .action(async () => {
       const projectRoot = process.cwd();
 
       const configAgents = readAgentsFromConfig(projectRoot);
@@ -18,28 +18,59 @@ export function updateCommand(): Command {
           installAgentSkills(agent as Agent, projectRoot);
         }
         console.log(`\nAgent skills updated: ${configAgents.join(', ')}`);
-      } else if (configAgents !== null && configAgents.length === 0) {
-        console.log(chalk.yellow('No agents configured') + ' — run ' + chalk.cyan('oprim init') + ' to select agents');
       } else {
         // Legacy: fall back to directory detection
-        let updated = 0;
+        const legacyAgents: string[] = [];
 
         if (fs.existsSync(path.join(projectRoot, '.claude'))) {
           installAgentSkills('claude', projectRoot);
-          updated++;
+          legacyAgents.push('claude');
         }
 
         if (fs.existsSync(path.join(projectRoot, '.cursor'))) {
           installAgentSkills('cursor', projectRoot);
-          updated++;
+          legacyAgents.push('cursor');
         }
 
-        if (updated === 0) {
-          console.log(chalk.yellow('No assistant environments detected (.claude/, .cursor/).'));
-          console.log('Run this command from a repository where AI tools are configured.');
+        if (legacyAgents.length > 0) {
+          console.log(`\nAgent skills updated for ${legacyAgents.length} environment(s).`);
         } else {
-          console.log(`\nAgent skills updated for ${updated} environment(s).`);
+          console.log(chalk.yellow('No agents configured or detected.'));
         }
       }
+
+      // ── Post-update: offer to add more agents ────────────────────────────────
+
+      const currentAgents = configAgents ?? [];
+      console.log('');
+      const { confirm } = await import('@inquirer/prompts');
+      const addMore = await confirm({
+        message: 'Would you like to install skills for additional agents?',
+        default: false,
+      });
+
+      if (!addMore) {
+        console.log('\nRun ' + chalk.cyan('oprim doctor') + ' to verify your setup.');
+        return;
+      }
+
+      console.log('');
+      const selected = await promptAgentSelection(projectRoot);
+
+      if (selected.length === 0) {
+        console.log('\n' + chalk.yellow('No agents selected.'));
+        console.log('\nRun ' + chalk.cyan('oprim doctor') + ' to verify your setup.');
+        return;
+      }
+
+      console.log('\n' + chalk.bold('Installing agent skills...'));
+      for (const agent of selected) {
+        installAgentSkills(agent as Agent, projectRoot);
+      }
+
+      const merged = Array.from(new Set([...currentAgents, ...selected]));
+      writeAgentsToConfig(merged, projectRoot);
+      console.log('\n' + chalk.green('✓') + ` Agent skills installed: ${selected.join(', ')}`);
+      console.log('\nRun ' + chalk.cyan('oprim doctor') + ' to verify your setup.');
     });
 }

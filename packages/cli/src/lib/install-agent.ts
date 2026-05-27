@@ -2,9 +2,26 @@ import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
 import { writeFile } from './scaffold';
+import { detectAvailableAgents } from './detect';
 
 export type Agent = 'claude' | 'cursor';
 export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor'];
+
+export async function promptAgentSelection(projectRoot: string): Promise<string[]> {
+  const detected = detectAvailableAgents(projectRoot);
+  if (detected.length > 0) {
+    console.log(chalk.dim(`Auto-detected AI tool environments: ${detected.join(', ')}`));
+  }
+  console.log('');
+  const { checkbox } = await import('@inquirer/prompts');
+  return checkbox({
+    message: 'Which AI tools should /oprim:* skills be installed for?',
+    choices: [
+      { name: 'Claude Code', value: 'claude', checked: detected.includes('claude') },
+      { name: 'Cursor', value: 'cursor', checked: detected.includes('cursor') },
+    ],
+  });
+}
 
 export function installAgentSkills(agent: Agent, projectRoot: string): void {
   if (agent === 'claude') {
