@@ -6,6 +6,11 @@ import { initCommand } from '../commands/init';
 import { updateCommand } from '../commands/update';
 import { readAgentsFromConfig } from '../lib/detect';
 
+vi.mock('@inquirer/prompts', () => ({
+  checkbox: vi.fn().mockResolvedValue([]),
+  confirm: vi.fn().mockResolvedValue(false),
+}));
+
 let tmpDir: string;
 
 beforeEach(() => {
