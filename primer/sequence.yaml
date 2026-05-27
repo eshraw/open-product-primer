@@ -1,7 +1,49 @@
 wip_limits:
   now: 2
 
-now: []
-next: []
-later: []
-backlog: []
+now:
+  - id: BET-004
+    title: "Double down on oprim branding over primer"
+    blocked_by: []
+    unlocks:
+      - BET-003
+      - BET-006
+    requires_pdrs: []
+  - id: BET-001
+    title: "Add product discovery structure to bets"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+
+next:
+  - id: BET-003
+    title: "Simplify agent presence by removing command/skill duplication"
+    blocked_by:
+      - BET-004
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-002
+    title: "Add a visual sequencing view"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+
+later:
+  - id: BET-006
+    title: "Add multi-tool agentic support (Codex, Gemini CLI, Copilot CLI, and beyond)"
+    blocked_by:
+      - BET-004
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-005
+    title: "Unify oprim, openspec, and grafiphy under a single context folder"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+
+backlog:
+  - id: BET-007
+    title: "Surface relevant product decisions proactively during agent sessions"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
