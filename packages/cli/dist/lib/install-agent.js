@@ -37,12 +37,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.CLAUDE_COMMANDS = exports.CLAUDE_SKILLS = exports.SUPPORTED_AGENTS = void 0;
+exports.promptAgentSelection = promptAgentSelection;
 exports.installAgentSkills = installAgentSkills;
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 const scaffold_1 = require("./scaffold");
+const detect_1 = require("./detect");
 exports.SUPPORTED_AGENTS = ['claude', 'cursor'];
+async function promptAgentSelection(projectRoot) {
+    const detected = (0, detect_1.detectAvailableAgents)(projectRoot);
+    if (detected.length > 0) {
+        console.log(chalk_1.default.dim(`Auto-detected AI tool environments: ${detected.join(', ')}`));
+    }
+    console.log('');
+    const { checkbox } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
+    return checkbox({
+        message: 'Which AI tools should /oprim:* skills be installed for?',
+        choices: [
+            { name: 'Claude Code', value: 'claude', checked: detected.includes('claude') },
+            { name: 'Cursor', value: 'cursor', checked: detected.includes('cursor') },
+        ],
+    });
+}
 function installAgentSkills(agent, projectRoot) {
     if (agent === 'claude') {
         const claudeDir = path.join(projectRoot, '.claude');

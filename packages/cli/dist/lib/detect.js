@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.detectOpenSpec = detectOpenSpec;
 exports.detectGraphify = detectGraphify;
 exports.readAgentsFromConfig = readAgentsFromConfig;
+exports.detectAvailableAgents = detectAvailableAgents;
 exports.writeAgentsToConfig = writeAgentsToConfig;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -60,6 +61,14 @@ function readAgentsFromConfig(projectRoot) {
     if (!Array.isArray(agents))
         return null;
     return agents;
+}
+function detectAvailableAgents(projectRoot) {
+    const detected = [];
+    if (fs.existsSync(path.join(projectRoot, '.claude')))
+        detected.push('claude');
+    if (fs.existsSync(path.join(projectRoot, '.cursor')))
+        detected.push('cursor');
+    return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {
     const configPath = path.join(projectRoot, 'primer', 'config.yaml');

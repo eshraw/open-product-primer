@@ -7,4 +7,5 @@ export declare function detectGraphify(projectRoot: string): {
     graphDir: string | null;
 };
 export declare function readAgentsFromConfig(projectRoot: string): string[] | null;
+export declare function detectAvailableAgents(projectRoot: string): string[];
 export declare function writeAgentsToConfig(agents: string[], projectRoot: string): void;
