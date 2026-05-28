@@ -47,3 +47,13 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+  - id: BET-008
+    title: "Improve bet naming for scannability"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-009
+    title: "Add a way to archive bets to avoid clutter"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
