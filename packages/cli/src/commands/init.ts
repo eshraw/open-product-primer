@@ -15,7 +15,7 @@ import {
 
 export function initCommand(): Command {
   return new Command('init')
-    .description('Initialize Open Product Primer in the current repository')
+    .description('Initialize oprim in the current repository')
     .option('--name <name>', 'project name (defaults to directory name)')
     .option(
       '--agent <name>',
@@ -27,7 +27,7 @@ export function initCommand(): Command {
       const projectRoot = process.cwd();
       const projectName = opts.name ?? path.basename(projectRoot);
 
-      console.log(chalk.bold('Open Product Primer') + ' — initializing project workspace...\n');
+      console.log(chalk.bold('oprim') + ' — initializing project workspace...\n');
 
       const openspec = detectOpenSpec(projectRoot);
       const graphify = detectGraphify(projectRoot);

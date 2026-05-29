@@ -49,7 +49,7 @@ const AGENT_DIRS = {
 };
 function doctorCommand() {
     return new commander_1.Command('doctor')
-        .description('Check Open Product Primer install health and integration readiness')
+        .description('Check oprim install health and integration readiness')
         .action(() => {
         const projectRoot = process.cwd();
         const checks = [];
@@ -154,7 +154,7 @@ function doctorCommand() {
                 required: false,
             });
         }
-        console.log(chalk_1.default.bold('Open Product Primer') + ' — health check\n');
+        console.log(chalk_1.default.bold('oprim') + ' — health check\n');
         for (const check of checks) {
             const icon = check.pass ? chalk_1.default.green('✓') : check.required ? chalk_1.default.red('✗') : chalk_1.default.yellow('○');
             const label = check.pass ? chalk_1.default.white(check.name) : chalk_1.default.gray(check.name);

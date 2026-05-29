@@ -19,7 +19,7 @@ const AGENT_DIRS: Record<string, string> = {
 
 export function doctorCommand(): Command {
   return new Command('doctor')
-    .description('Check Open Product Primer install health and integration readiness')
+    .description('Check oprim install health and integration readiness')
     .action(() => {
       const projectRoot = process.cwd();
       const checks: Check[] = [];
@@ -138,7 +138,7 @@ export function doctorCommand(): Command {
         });
       }
 
-      console.log(chalk.bold('Open Product Primer') + ' — health check\n');
+      console.log(chalk.bold('oprim') + ' — health check\n');
 
       for (const check of checks) {
         const icon = check.pass ? chalk.green('✓') : check.required ? chalk.red('✗') : chalk.yellow('○');

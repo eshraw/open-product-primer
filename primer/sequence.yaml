@@ -2,26 +2,18 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-004
-    title: "Double down on oprim branding over primer"
-    blocked_by: []
-    unlocks:
-      - BET-003
-      - BET-006
-    requires_pdrs: []
   - id: BET-001
     title: "Add product discovery structure to bets"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-
-next:
   - id: BET-003
     title: "Simplify agent presence by removing command/skill duplication"
-    blocked_by:
-      - BET-004
+    blocked_by: []
     unlocks: []
     requires_pdrs: []
+
+next:
   - id: BET-002
     title: "Add a visual sequencing view"
     blocked_by: []
@@ -31,8 +23,7 @@ next:
 later:
   - id: BET-006
     title: "Add multi-tool agentic support (Codex, Gemini CLI, Copilot CLI, and beyond)"
-    blocked_by:
-      - BET-004
+    blocked_by: []
     unlocks: []
     requires_pdrs: []
   - id: BET-005

@@ -9,8 +9,8 @@ import pkg from '../package.json';
 const program = new Command();
 
 program
-  .name('open-product-primer')
-  .description('Open Product Primer — product decisions, sequencing, and KPI tracking')
+  .name('oprim')
+  .description('oprim — product decisions, sequencing, and KPI tracking')
   .version(pkg.version);
 
 program.addCommand(initCommand());
