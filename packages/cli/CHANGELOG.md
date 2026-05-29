@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `oprim migrate` command — renames `primer/` to `oprim/` in an existing repo; idempotent and safe to re-run
+- `oprim init` now writes `oprim/templates/discovery.md` — a structured template for problem framing, user research signals, competitive context, and open questions
+- `oprim:bet` skill now prompts "Do you want to scaffold a discovery.md now? (y/N)" after writing `bet-decision.md`; writes `oprim/bets/BET-NNN/discovery.md` on confirmation
+- `oprim doctor` now warns (yellow `○`) for each bet directory that contains `bet-decision.md` but no `discovery.md`
 
 ### Changed
 
