@@ -21,4 +21,4 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: `openspec/changes/2026-05-29-oprim-branding-consolidation`
