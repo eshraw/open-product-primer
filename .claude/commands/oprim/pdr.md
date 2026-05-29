@@ -5,6 +5,6 @@ category: Workflow
 tags: [workflow, primer]
 ---
 
-Create a new Product Decision Record in `primer/decisions/`.
+Create a new Product Decision Record with auto-assigned ID.
 
 Use the Skill tool to invoke the `oprim-pdr` skill.

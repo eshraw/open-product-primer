@@ -5,6 +5,6 @@ category: Workflow
 tags: [workflow, primer]
 ---
 
-Create a new bet in `primer/bets/` and add it to `primer/sequence.yaml` backlog.
+Create a new bet decision and register it on the sequencing board.
 
 Use the Skill tool to invoke the `oprim-bet` skill.

@@ -1,6 +1,6 @@
 version: 1
 project:
-  name: "open-product-primer"
+  name: open-product-primer
 integrations:
   openspec:
     enabled: true
@@ -17,3 +17,6 @@ measurement:
 sequencing:
   wip_limits:
     now: 2
+agents:
+  - claude
+  - cursor

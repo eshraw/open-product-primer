@@ -3,64 +3,52 @@ name: oprim-review
 description: Create a KPI review artifact for a completed bet, pre-filled from criteria.yaml with actuals gathered from the user
 ---
 
-Create a KPI review artifact in `primer/reviews/`.
+Create a KPI review in `primer/reviews/`.
 
 ## Steps
 
 ### 1. Identify the bet
+If not provided, ask: "Which bet are you reviewing? (e.g. BET-042)"
 
-If a BET ID was not provided, ask: "Which bet are you reviewing? (e.g. BET-042)"
+### 2. Load criteria and check for a run result
 
-### 2. Load criteria for pre-fill
+Read `primer/bets/BET-NNN/criteria.yaml` if it exists (pre-fills baseline and target).
+If not found: inform user and continue with empty metrics list.
 
-Attempt to read `primer/bets/BET-NNN/criteria.yaml`.
+**Check for measurement run result:** Scan `primer/bets/BET-NNN/measurements/` for files matching `run-*.yaml`. If any exist, sort by filename (date-based) and read the most recent.
 
-**If the file exists:** parse the metrics list. You will pre-fill baseline and target columns from it.
+**If a run result exists:** use it to pre-populate actuals and status for every metric. Skip step 3 for those metrics. Note the run date — include "Actuals from run: YYYY-MM-DD" in the review artifact.
 
-**If the file does not exist:** inform the user — "No criteria.yaml found for BET-NNN. You can add metrics manually during this review, or run `/oprim:criteria BET-NNN` first." Continue with an empty metrics list.
+**If no run result exists:** proceed to step 3 to gather actuals manually.
 
-### 3. Gather actuals for each metric
+### 3. Gather actuals per metric (only when no run result)
+For each metric show name/baseline/target and ask: "What was the actual result? (number or 'pending')"
 
-For each metric in the criteria file (or if no criteria, ask how many metrics to review):
-
-Show:
-```
-Metric: <name>
-Baseline: <baseline>  Target: <target>
-```
-
-Ask: "What was the actual result? (enter a number, or 'pending' if not yet available)"
-
-**Determine status:**
-- If actual is a number and `actual >= target`: status = `hit`
-- If actual is a number and `actual < target`: status = `missed`
-- If user enters 'pending' or leaves blank: status = `pending`
+Status logic:
+- actual >= target → `hit`
+- actual < target → `missed`
+- 'pending' or not provided → `pending`
 
 ### 4. Get review metadata
+Ask: reviewer name, decision quality notes.
 
-Ask:
-- "Who is conducting this review?"
-- "What is your assessment of decision quality? Did the outcomes validate the original decision? What would you do differently?"
+### 5. Output path
+`primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md` (today's date)
 
-### 5. Build the output path
-
-Output path: `primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md` where YYYY-MM-DD is today's date.
-
-### 6. Write the review artifact
-
+### 6. Write the review file
 ```markdown
 # KPI Review: BET-NNN
 
 **Review date:** YYYY-MM-DD
 **Reviewed by:** <reviewer>
+**Actuals from run:** YYYY-MM-DD  ← include only when a run result was ingested
 
 | Metric | Baseline | Target | Actual | Status |
 |--------|----------|--------|--------|--------|
-| <metric 1 name> | <baseline> | <target> | <actual> | <hit|missed|pending> |
-| <metric 2 name> | ...        | ...      | ...      | ...                   |
+| <name> | <baseline> | <target> | <actual> | <status> |
 
 ## Decision quality
-<decision quality notes>
+<notes>
 
 ## Actions
 - [ ] Update bet-decision outcome section
@@ -68,18 +56,4 @@ Output path: `primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md` where YYYY-MM-DD is toda
 - [ ] Re-sequence impacted bets
 ```
 
-### 7. Report
-
-```
-## Review created: BET-NNN
-
-File: primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md
-
-Results:
-<for each metric: name — actual/target (status)>
-
-Next steps:
-- Complete the Actions checklist in the review file
-- Update primer/bets/BET-NNN/bet-decision.md with an Outcomes section
-- Run /oprim:sequence to re-evaluate sequencing based on outcomes
-```
+### 7. Report what was created
