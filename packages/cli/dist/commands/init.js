@@ -70,6 +70,7 @@ function initCommand() {
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'bet-decision.md'), templates_1.betDecisionTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'criteria.yaml'), templates_1.criteriaTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'kpi-review.md'), templates_1.kpiReviewTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'discovery.md'), templates_1.discoveryTemplate);
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'decisions', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'reviews', '.gitkeep'), '');

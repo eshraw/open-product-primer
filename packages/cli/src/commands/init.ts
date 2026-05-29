@@ -11,6 +11,7 @@ import {
   betDecisionTemplate,
   criteriaTemplate,
   kpiReviewTemplate,
+  discoveryTemplate,
 } from '../lib/templates';
 
 export function initCommand(): Command {
@@ -51,6 +52,7 @@ export function initCommand(): Command {
       writeFile(path.join(primerDir, 'templates', 'bet-decision.md'), betDecisionTemplate);
       writeFile(path.join(primerDir, 'templates', 'criteria.yaml'), criteriaTemplate);
       writeFile(path.join(primerDir, 'templates', 'kpi-review.md'), kpiReviewTemplate);
+      writeFile(path.join(primerDir, 'templates', 'discovery.md'), discoveryTemplate);
 
       writeFileIfAbsent(path.join(primerDir, 'decisions', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'bets', '.gitkeep'), '');

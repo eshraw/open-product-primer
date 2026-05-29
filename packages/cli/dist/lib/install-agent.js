@@ -271,7 +271,12 @@ Read → parse YAML → append → write back (2-space indentation):
   requires_pdrs: []
 \`\`\`
 
-### 7. Report what was created
+### 7. Prompt for optional discovery scaffolding
+Ask: "Do you want to scaffold a discovery.md now? (y/N)"
+- If "y": write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (same structure as \`oprim/templates/discovery.md\`).
+- If "n" or Enter: skip silently.
+
+### 8. Report what was created
 `;
 }
 function criteriaSkill() {
@@ -394,7 +399,7 @@ function pdrInlineContent() {
     return `Create a new PDR in \`oprim/decisions/\`. Scan for \`PDR-(\\d+)-\` to assign next ID (zero-padded, default 001). Gather: title, context, decision, alternatives, consequences, evidence, related bets/specs. Ask if superseding an existing PDR. Write \`oprim/decisions/PDR-NNN-<slug>.md\`. If superseding: update old PDR Status to "Superseded by PDR-NNN". Report what was created.`;
 }
 function betInlineContent() {
-    return `Create a new bet in \`oprim/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Report what was created.`;
+    return `Create a new bet in \`oprim/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
 }
 function criteriaInlineContent() {
     return `Add metrics to \`oprim/bets/BET-NNN/criteria.yaml\`. Verify bet dir exists. Gather: metric ID, name, baseline, target, timeframe, launch date, segment. Ask source type (amplitude or bigquery). Amplitude: event, aggregation, denominator_event. BigQuery: table, metric_column, filter, aggregation, denominator_query. If file exists: append to metrics list (never overwrite). If not: create. Ask if adding more metrics. Report what was created.`;

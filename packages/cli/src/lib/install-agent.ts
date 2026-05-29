@@ -253,7 +253,12 @@ Read → parse YAML → append → write back (2-space indentation):
   requires_pdrs: []
 \`\`\`
 
-### 7. Report what was created
+### 7. Prompt for optional discovery scaffolding
+Ask: "Do you want to scaffold a discovery.md now? (y/N)"
+- If "y": write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (same structure as \`oprim/templates/discovery.md\`).
+- If "n" or Enter: skip silently.
+
+### 8. Report what was created
 `;
 }
 
@@ -381,7 +386,7 @@ function pdrInlineContent(): string {
 }
 
 function betInlineContent(): string {
-  return `Create a new bet in \`oprim/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Report what was created.`;
+  return `Create a new bet in \`oprim/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
 }
 
 function criteriaInlineContent(): string {
