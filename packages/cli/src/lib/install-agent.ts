@@ -40,6 +40,17 @@ export function installAgentSkills(agent: Agent, projectRoot: string): void {
       console.log(chalk.green('✓') + ` .claude/commands/oprim/${filename}`);
     }
 
+    // Tombstone cleanup: remove command wrappers deleted in v0.2.0 (bet/criteria/pdr/review
+    // became skills-only). Safe to remove this block once the user base has migrated past v0.2.0.
+    const tombstones = ['bet.md', 'criteria.md', 'pdr.md', 'review.md'];
+    for (const filename of tombstones) {
+      const filepath = path.join(cmdsDir, filename);
+      if (fs.existsSync(filepath)) {
+        fs.unlinkSync(filepath);
+        console.log(chalk.dim(`  removed legacy command .claude/commands/oprim/${filename}`));
+      }
+    }
+
     if (dirCreated) {
       console.log(chalk.dim('  .claude/ created — Claude Code will discover these files automatically.'));
     }
@@ -79,10 +90,6 @@ export const CLAUDE_SKILLS: Record<string, string> = {
 export const CLAUDE_COMMANDS: Record<string, string> = {
   'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
   'sequence.md': claudeWrapper('OPRIM: Sequence', 'Validate and update the primer sequencing board', sequenceContent()),
-  'pdr.md': claudeWrapper('OPRIM: PDR', 'Create a new Product Decision Record with auto-assigned ID', 'Use the Skill tool to invoke the `oprim-pdr` skill.'),
-  'bet.md': claudeWrapper('OPRIM: Bet', 'Create a new bet decision and register it on the sequencing board', 'Use the Skill tool to invoke the `oprim-bet` skill.'),
-  'criteria.md': claudeWrapper('OPRIM: Criteria', 'Create or append to a criteria.yaml contract for a bet', 'Use the Skill tool to invoke the `oprim-criteria` skill.'),
-  'review.md': claudeWrapper('OPRIM: Review', "Create a KPI review artifact pre-filled from a bet's criteria contract", 'Use the Skill tool to invoke the `oprim-review` skill.'),
 };
 
 // ─── Cursor skill playbooks ───────────────────────────────────────────────────
@@ -276,7 +283,7 @@ Create or append to \`oprim/bets/BET-NNN/criteria.yaml\`.
 If not provided, ask: "Which bet are you adding criteria for? (e.g. BET-042)"
 
 ### 2. Verify bet exists
-If \`oprim/bets/BET-NNN/\` not found: report and stop — advise \`/oprim:bet\` first.
+If \`oprim/bets/BET-NNN/\` not found: report and stop — advise using the \`oprim-bet\` skill first.
 
 ### 3. Gather metric details
 Ask: metric ID (snake_case), metric name, baseline (numeric), target (numeric), timeframe, launch date (YYYY-MM-DD or TBD), segment (optional).
