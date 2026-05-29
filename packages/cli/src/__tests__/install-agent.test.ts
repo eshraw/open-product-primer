@@ -30,9 +30,17 @@ describe('installAgentSkills', () => {
 
     it('creates .claude/commands/oprim/ and command files', () => {
       installAgentSkills('claude', tmpDir);
-      for (const cmd of ['pdr.md', 'bet.md', 'criteria.md', 'review.md', 'promote.md', 'sequence.md']) {
+      for (const cmd of ['promote.md', 'sequence.md']) {
         const cmdPath = path.join(tmpDir, '.claude', 'commands', 'oprim', cmd);
         expect(fs.existsSync(cmdPath)).toBe(true);
+      }
+    });
+
+    it('does not create command wrappers for skill-backed commands', () => {
+      installAgentSkills('claude', tmpDir);
+      for (const cmd of ['pdr.md', 'bet.md', 'criteria.md', 'review.md']) {
+        const cmdPath = path.join(tmpDir, '.claude', 'commands', 'oprim', cmd);
+        expect(fs.existsSync(cmdPath)).toBe(false);
       }
     });
 

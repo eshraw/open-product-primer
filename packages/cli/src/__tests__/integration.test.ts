@@ -40,7 +40,7 @@ describe('oprim init --agent claude', () => {
     expect(readAgentsFromConfig(tmpDir)).toEqual(['claude']);
 
     // Claude skills installed
-    expect(fs.existsSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'pdr.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'))).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-pdr', 'SKILL.md'))).toBe(true);
 
     // Cursor NOT installed
@@ -86,7 +86,7 @@ describe('oprim update with agents: [claude] in config', () => {
     await cmd.parseAsync([], { from: 'user' });
 
     // Claude skills installed
-    expect(fs.existsSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'pdr.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'))).toBe(true);
 
     // Cursor commands NOT installed (even though .cursor/ exists)
     expect(fs.existsSync(path.join(tmpDir, '.cursor', 'commands', 'oprim-pdr.md'))).toBe(false);
