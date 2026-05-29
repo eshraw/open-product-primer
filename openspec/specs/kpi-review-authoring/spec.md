@@ -1,18 +1,18 @@
-## ADDED Requirements
+## Requirements
 
-### Requirement: The system SHALL provide a /oprim:review command to create KPI review artifacts
-The system SHALL provide an agent command `/oprim:review` that creates `primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md`, pre-populated from the bet's `criteria.yaml` with baseline and target values, and prompts the user for actual results.
+### Requirement: The system SHALL provide the oprim-review skill to create KPI review artifacts
+The system SHALL provide the `oprim-review` skill that creates `primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md`, pre-populated from the bet's `criteria.yaml` with baseline and target values, and prompts the user for actual results.
 
 #### Scenario: Create a KPI review pre-filled from criteria contract
-- **WHEN** a user invokes `/oprim:review BET-NNN` and `primer/bets/BET-NNN/criteria.yaml` exists
-- **THEN** the command creates a review artifact with a metric table containing baseline and target values from the criteria contract and prompts the user to supply actual values for each metric
+- **WHEN** a user invokes the `oprim-review` skill with a bet ID and `primer/bets/BET-NNN/criteria.yaml` exists
+- **THEN** the skill creates a review artifact with a metric table containing baseline and target values from the criteria contract and prompts the user to supply actual values for each metric
 
 #### Scenario: Create a KPI review without a criteria contract
-- **WHEN** `/oprim:review BET-NNN` is invoked and no `criteria.yaml` exists for that bet
-- **THEN** the command creates a review with an empty metric table and advises the user to either add metrics manually or run `/oprim:criteria` first
+- **WHEN** the `oprim-review` skill is invoked for a bet with no `criteria.yaml`
+- **THEN** the skill creates a review with an empty metric table and advises the user to either add metrics manually or use the `oprim-criteria` skill first
 
-### Requirement: /oprim:review SHALL set metric status based on actual vs target comparison
-The command SHALL evaluate each metric's actual value against its target and set the status field to `hit`, `missed`, or `pending` accordingly.
+### Requirement: oprim-review SHALL set metric status based on actual vs target comparison
+The skill SHALL evaluate each metric's actual value against its target and set the status field to `hit`, `missed`, or `pending` accordingly.
 
 #### Scenario: Actual value meets or exceeds target
 - **WHEN** the actual value provided by the user is greater than or equal to the metric target
@@ -26,7 +26,7 @@ The command SHALL evaluate each metric's actual value against its target and set
 - **WHEN** the user indicates that actuals are not yet available for a metric
 - **THEN** the metric status is set to `pending`
 
-### Requirement: /oprim:review SHALL include decision-quality follow-up actions
+### Requirement: oprim-review SHALL include decision-quality follow-up actions
 The review artifact SHALL contain an Actions checklist that includes entries to update the bet-decision outcome section, update affected PDRs, and re-sequence impacted bets.
 
 #### Scenario: Review artifact contains standard follow-up actions
@@ -48,7 +48,7 @@ When review outcomes invalidate or supersede a referenced PDR, the workflow SHAL
 - **THEN** the PDR file's Status field is updated to reflect supersession or deprecation
 
 ### Requirement: Post-review sequencing SHALL follow outcome-based recommendations
-After review, `/oprim:sequence` (or equivalent validation) SHALL surface sequencing moves based on outcomes: defer follow-on bets when metrics missed, unlock dependents when metrics hit, move bets to backlog when kill criteria triggered.
+After review, sequence validation SHALL surface sequencing moves based on outcomes: defer follow-on bets when metrics missed, unlock dependents when metrics hit, move bets to backlog when kill criteria triggered.
 
 #### Scenario: Missed metrics suggest deferral
 - **WHEN** a review records one or more metrics as `missed`
