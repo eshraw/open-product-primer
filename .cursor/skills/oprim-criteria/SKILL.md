@@ -3,7 +3,7 @@ name: oprim-criteria
 description: Create or append to a criteria.yaml contract for a bet, with structured Amplitude and BigQuery source mapping
 ---
 
-Create or append to `primer/bets/BET-NNN/criteria.yaml`.
+Create or append to `oprim/bets/BET-NNN/criteria.yaml`.
 
 ## Steps
 
@@ -11,7 +11,7 @@ Create or append to `primer/bets/BET-NNN/criteria.yaml`.
 If not provided, ask: "Which bet are you adding criteria for? (e.g. BET-042)"
 
 ### 2. Verify bet exists
-If `primer/bets/BET-NNN/` not found: report and stop — advise `/oprim:bet` first.
+If `oprim/bets/BET-NNN/` not found: report and stop — advise `/oprim:bet` first.
 
 ### 3. Gather metric details
 Ask: metric ID (snake_case), metric name, baseline (numeric), target (numeric), timeframe, launch date (YYYY-MM-DD or TBD), segment (optional).

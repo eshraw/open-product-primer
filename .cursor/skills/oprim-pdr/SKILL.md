@@ -1,9 +1,9 @@
 ---
 name: oprim-pdr
-description: Create a new Product Decision Record in primer/decisions/ with auto-assigned ID and guided prompting
+description: Create a new Product Decision Record in oprim/decisions/ with auto-assigned ID and guided prompting
 ---
 
-Create a new Product Decision Record (PDR) in `primer/decisions/`.
+Create a new Product Decision Record (PDR) in `oprim/decisions/`.
 
 ## Steps
 
@@ -11,9 +11,9 @@ Create a new Product Decision Record (PDR) in `primer/decisions/`.
 If not provided, ask: "What is the title of this product decision?"
 
 ### 2. Assign the next PDR ID
-Scan `primer/decisions/` for files matching `PDR-(\d+)-`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default `001` if none found.
+Scan `oprim/decisions/` for files matching `PDR-(\d+)-`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default `001` if none found.
 Slug: title → lowercase → spaces to hyphens → remove non-alphanumeric (except hyphens).
-Output path: `primer/decisions/PDR-NNN-<slug>.md`
+Output path: `oprim/decisions/PDR-NNN-<slug>.md`
 
 ### 3. Gather content
 Ask: Context (what forced this decision), Decision (clear statement), Alternatives considered (why rejected), Consequences (positives / trade-offs / follow-ups), Evidence links (optional), Related bets (optional), Related OpenSpec changes (optional).
