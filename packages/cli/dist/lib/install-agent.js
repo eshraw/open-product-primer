@@ -414,7 +414,7 @@ Promote a prioritized bet to an OpenSpec change and link criteria contracts.
 1. **Locate the bet** — read \`primer/bets/BET-XXX/bet-decision.md\`
 2. **Validate status** — decision must be "Build now"
 3. **Check authority boundary** — confirm primer artifact owns why/order/outcome only
-4. **Create OpenSpec change** — invoke the \`/openspec-propose\` skill (or \`/opsx:propose\`) to create the change directory with **all required artifacts**: \`proposal.md\`, \`design.md\`, \`tasks.md\`, and \`specs/<capability>/spec.md\` for every capability listed under \`## Capabilities\`.
+4. **Create OpenSpec change** — derive the change name as \`bet-NNN-<slug>\` where \`NNN\` is the zero-padded bet number (e.g. BET-004 → \`bet-004\`) and \`<slug>\` is a short kebab-case summary of the change. Then invoke the \`/openspec-propose\` skill (or \`/opsx:propose\`) with that name to create the change directory with **all required artifacts**: \`proposal.md\`, \`design.md\`, \`tasks.md\`, and \`specs/<capability>/spec.md\` for every capability listed under \`## Capabilities\`.
    - Pass the bet decision content as context so the proposal reflects the bet's why/outcome
    - **Do not manually create a partial change directory** — the propose skill ensures no artifact is omitted
    - The spec file(s) are mandatory: each capability modified or added must have WHEN/THEN scenarios under \`## ADDED Requirements\` or \`## MODIFIED Requirements\`
