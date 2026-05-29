@@ -35,7 +35,7 @@ export function initCommand(): Command {
       if (openspec.detected) console.log(chalk.green('✓') + ' OpenSpec detected');
       if (graphify.detected) console.log(chalk.green('✓') + ' Graphify detected');
 
-      const primerDir = path.join(projectRoot, 'primer');
+      const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'decisions'));
       ensureDir(path.join(primerDir, 'bets'));
       ensureDir(path.join(primerDir, 'reviews'));
@@ -56,12 +56,12 @@ export function initCommand(): Command {
       writeFileIfAbsent(path.join(primerDir, 'bets', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'reviews', '.gitkeep'), '');
 
-      console.log('\n' + chalk.green('✓') + ' primer/ workspace created');
+      console.log('\n' + chalk.green('✓') + ' oprim/ workspace created');
       const configStatus = configWritten ? 'written' : 'preserved (already exists)';
       const sequenceStatus = sequenceWritten ? 'written' : 'preserved (already exists)';
-      console.log('  ' + chalk.gray('primer/config.yaml') + ' — ' + configStatus);
-      console.log('  ' + chalk.gray('primer/sequence.yaml') + ' — ' + sequenceStatus);
-      console.log('  ' + chalk.gray('primer/templates/') + ' — refreshed');
+      console.log('  ' + chalk.gray('oprim/config.yaml') + ' — ' + configStatus);
+      console.log('  ' + chalk.gray('oprim/sequence.yaml') + ' — ' + sequenceStatus);
+      console.log('  ' + chalk.gray('oprim/templates/') + ' — refreshed');
 
       // ── Agent selection ───────────────────────────────────────────────────────
 

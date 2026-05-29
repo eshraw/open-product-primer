@@ -1,6 +1,6 @@
 # Open Product Primer
 
-Open Product Primer (`open-product-primer`, short **`oprim`**) stores product decisions, sequencing, and KPI outcomes under **`primer/`** in the repo — the foundation layer before OpenSpec.
+**`oprim`** stores product decisions, sequencing, and KPI outcomes under **`oprim/`** in the repo — the foundation layer before OpenSpec.
 
 > Legacy names: `open-rmp` tool, `roadmap/` artifact root (see `openspec/changes/add-open-product-primer-decision-and-kpi-layer`).
 
@@ -10,21 +10,21 @@ Open Product Primer answers **why / order / outcomes** before OpenSpec answers *
 
 | Layer | Tool | Artifacts |
 |-------|------|-----------|
-| Decision & sequencing | Open Product Primer (`oprim`) | `primer/` |
+| Decision & sequencing | oprim | `oprim/` |
 | Implementation planning | OpenSpec (`opsx`) | `openspec/changes/` |
 | Semantic traceability | Graphify | `graphify-out/` |
 
 ## Installation
 
 ```bash
-npm install -g @open-product-primer/cli@latest
+npm install -g @open-product-oprim/cli@latest
 ```
 
 ## Quick start
 
 ```bash
 cd your-project
-open-product-primer init   # scaffold primer/ workspace
+open-product-primer init   # scaffold oprim/ workspace
 open-product-primer doctor # verify setup
 open-product-primer update # install /oprim:* assistant commands
 ```
@@ -41,12 +41,12 @@ oprim update
 
 ### `oprim init`
 
-Creates the project-local `primer/` workspace. Idempotent — safe to re-run; existing decision artifacts and config values are preserved.
+Creates the project-local `oprim/` workspace. Idempotent — safe to re-run; existing decision artifacts and config values are preserved. Existing repos with `primer/` should run `oprim migrate` first.
 
 **Creates:**
 
 ```
-primer/
+oprim/
 ├── config.yaml          # project config and integration flags
 ├── sequence.yaml        # Now/Next/Later board
 ├── decisions/           # PDR artifacts
@@ -59,7 +59,7 @@ primer/
     └── kpi-review.md
 ```
 
-Detects OpenSpec (`openspec/`) and Graphify (`graphify-out/`) and enables integration flags in `primer/config.yaml` without requiring those tools to be present.
+Detects OpenSpec (`openspec/`) and Graphify (`graphify-out/`) and enables integration flags in `oprim/config.yaml` without requiring those tools to be present.
 
 ### `oprim update`
 
@@ -69,7 +69,7 @@ Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Curs
 
 Reports pass/fail status for:
 
-- primer scaffold and config
+- oprim/ scaffold and config
 - OpenSpec and Graphify integrations (optional)
 - measurement environment variables (`AMPLITUDE_API_KEY`, `GOOGLE_APPLICATION_CREDENTIALS`)
 - installed assistant commands
@@ -78,23 +78,23 @@ Reports pass/fail status for:
 
 ### Product Decision Records (PDRs)
 
-Durable product policy decisions stored at `primer/decisions/PDR-XXX-name.md`. Separate from bet prioritization decisions so policy is never duplicated across initiative artifacts.
+Durable product policy decisions stored at `oprim/decisions/PDR-XXX-name.md`. Separate from bet prioritization decisions so policy is never duplicated across initiative artifacts.
 
 ### Bet decisions
 
-Time-bound prioritization decisions at `primer/bets/BET-XXX/bet-decision.md`. Reference PDRs by ID instead of restating policy — a bet links to the relevant PDRs.
+Time-bound prioritization decisions at `oprim/bets/BET-XXX/bet-decision.md`. Reference PDRs by ID instead of restating policy — a bet links to the relevant PDRs.
 
 ### Sequencing board
 
-`primer/sequence.yaml` — structured Now/Next/Later board with `blocked_by`, `unlocks`, `requires_pdrs`, and WIP limits. Use `/oprim:sequence` to validate the board state.
+`oprim/sequence.yaml` — structured Now/Next/Later board with `blocked_by`, `unlocks`, `requires_pdrs`, and WIP limits. Use `/oprim:sequence` to validate the board state.
 
 ### Criteria contracts
 
-`primer/bets/BET-XXX/criteria.yaml` — metric definitions with baseline, target, timeframe, and data source. Imported from Notion at bet promotion time and linked forward to OpenSpec changes.
+`oprim/bets/BET-XXX/criteria.yaml` — metric definitions with baseline, target, timeframe, and data source. Imported from Notion at bet promotion time and linked forward to OpenSpec changes.
 
 ### KPI reviews
 
-`primer/reviews/YYYY-MM-DD-BET-XXX-kpi.md` — post-launch metric comparison and decision-quality reflection. Outcomes feed back into bet decisions, PDRs, and sequencing.
+`oprim/reviews/YYYY-MM-DD-BET-XXX-kpi.md` — post-launch metric comparison and decision-quality reflection. Outcomes feed back into bet decisions, PDRs, and sequencing.
 
 ## Agent commands
 
@@ -116,7 +116,7 @@ The link between the layers is the promotion contract (`/oprim:promote`).
 
 ## npm package
 
-Package: `@open-product-primer/cli`
+Package: `@open-product-oprim/cli`
 Bin aliases: `open-product-primer`, `oprim`
 Source: `packages/cli/`
 

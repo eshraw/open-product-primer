@@ -17,25 +17,25 @@ afterEach(() => {
 // 7.1 ─────────────────────────────────────────────────────────────────────────
 
 describe('readAgentsFromConfig', () => {
-  it('returns null when primer/config.yaml does not exist', () => {
+  it('returns null when oprim/config.yaml does not exist', () => {
     expect(readAgentsFromConfig(tmpDir)).toBeNull();
   });
 
   it('returns null when agents field is absent', () => {
-    fs.mkdirSync(path.join(tmpDir, 'primer'));
-    fs.writeFileSync(path.join(tmpDir, 'primer', 'config.yaml'), 'version: 1\nproject:\n  name: test\n');
+    fs.mkdirSync(path.join(tmpDir, 'oprim'));
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'version: 1\nproject:\n  name: test\n');
     expect(readAgentsFromConfig(tmpDir)).toBeNull();
   });
 
   it('returns empty array when agents field is an empty list', () => {
-    fs.mkdirSync(path.join(tmpDir, 'primer'));
-    fs.writeFileSync(path.join(tmpDir, 'primer', 'config.yaml'), 'version: 1\nagents: []\n');
+    fs.mkdirSync(path.join(tmpDir, 'oprim'));
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'version: 1\nagents: []\n');
     expect(readAgentsFromConfig(tmpDir)).toEqual([]);
   });
 
   it('returns array of agents when field is present', () => {
-    fs.mkdirSync(path.join(tmpDir, 'primer'));
-    fs.writeFileSync(path.join(tmpDir, 'primer', 'config.yaml'), 'version: 1\nagents:\n  - claude\n  - cursor\n');
+    fs.mkdirSync(path.join(tmpDir, 'oprim'));
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'version: 1\nagents:\n  - claude\n  - cursor\n');
     expect(readAgentsFromConfig(tmpDir)).toEqual(['claude', 'cursor']);
   });
 });
@@ -44,9 +44,9 @@ describe('readAgentsFromConfig', () => {
 
 describe('writeAgentsToConfig', () => {
   beforeEach(() => {
-    fs.mkdirSync(path.join(tmpDir, 'primer'));
+    fs.mkdirSync(path.join(tmpDir, 'oprim'));
     fs.writeFileSync(
-      path.join(tmpDir, 'primer', 'config.yaml'),
+      path.join(tmpDir, 'oprim', 'config.yaml'),
       'version: 1\nproject:\n  name: my-project\nagents: []\nmeasurement:\n  amplitude:\n    enabled: false\n'
     );
   });
@@ -59,7 +59,7 @@ describe('writeAgentsToConfig', () => {
 
   it('does not clobber other config fields', () => {
     writeAgentsToConfig(['claude'], tmpDir);
-    const content = fs.readFileSync(path.join(tmpDir, 'primer', 'config.yaml'), 'utf-8');
+    const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
     expect(content).toContain('my-project');
     expect(content).toContain('amplitude');
     expect(content).toContain('version');
@@ -71,7 +71,7 @@ describe('writeAgentsToConfig', () => {
   });
 
   it('is a no-op when config file does not exist', () => {
-    fs.rmSync(path.join(tmpDir, 'primer', 'config.yaml'));
+    fs.rmSync(path.join(tmpDir, 'oprim', 'config.yaml'));
     expect(() => writeAgentsToConfig(['claude'], tmpDir)).not.toThrow();
   });
 });

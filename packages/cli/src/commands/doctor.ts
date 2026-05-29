@@ -24,9 +24,20 @@ export function doctorCommand(): Command {
       const projectRoot = process.cwd();
       const checks: Check[] = [];
 
-      const primerDir = path.join(projectRoot, 'primer');
+      const primerDir = path.join(projectRoot, 'oprim');
 
-      for (const dir of ['primer', 'primer/decisions', 'primer/bets', 'primer/reviews', 'primer/templates']) {
+      const legacyPrimerExists = fs.existsSync(path.join(projectRoot, 'primer'));
+      const oprimExists = fs.existsSync(path.join(projectRoot, 'oprim'));
+      if (legacyPrimerExists && !oprimExists) {
+        checks.push({
+          name: 'migration: primer/ detected',
+          pass: false,
+          note: "Run 'oprim migrate' to rename primer/ to oprim/",
+          required: true,
+        });
+      }
+
+      for (const dir of ['oprim', 'oprim/decisions', 'oprim/bets', 'oprim/reviews', 'oprim/templates']) {
         const exists = fs.existsSync(path.join(projectRoot, dir));
         checks.push({
           name: `scaffold: ${dir}/`,
@@ -39,7 +50,7 @@ export function doctorCommand(): Command {
       const configPath = path.join(primerDir, 'config.yaml');
       const configExists = fs.existsSync(configPath);
       checks.push({
-        name: 'config: primer/config.yaml',
+        name: 'config: oprim/config.yaml',
         pass: configExists,
         note: configExists ? undefined : "Run 'oprim init' to create",
         required: true,
@@ -47,7 +58,7 @@ export function doctorCommand(): Command {
 
       const sequenceExists = fs.existsSync(path.join(primerDir, 'sequence.yaml'));
       checks.push({
-        name: 'config: primer/sequence.yaml',
+        name: 'config: oprim/sequence.yaml',
         pass: sequenceExists,
         note: sequenceExists ? undefined : "Run 'oprim init' to create",
         required: true,
