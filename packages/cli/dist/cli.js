@@ -12,8 +12,8 @@ const measure_1 = require("./commands/measure");
 const package_json_1 = __importDefault(require("../package.json"));
 const program = new commander_1.Command();
 program
-    .name('open-product-primer')
-    .description('Open Product Primer — product decisions, sequencing, and KPI tracking')
+    .name('oprim')
+    .description('oprim — product decisions, sequencing, and KPI tracking')
     .version(package_json_1.default.version);
 program.addCommand((0, init_1.initCommand)());
 program.addCommand((0, update_1.updateCommand)());

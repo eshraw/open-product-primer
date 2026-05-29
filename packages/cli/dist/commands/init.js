@@ -46,13 +46,13 @@ const install_agent_1 = require("../lib/install-agent");
 const templates_1 = require("../lib/templates");
 function initCommand() {
     return new commander_1.Command('init')
-        .description('Initialize Open Product Primer in the current repository')
+        .description('Initialize oprim in the current repository')
         .option('--name <name>', 'project name (defaults to directory name)')
         .option('--agent <name>', 'AI agent to install skills for (repeatable; supported: claude, cursor)', (val, prev) => [...prev, val], [])
         .action(async (opts) => {
         const projectRoot = process.cwd();
         const projectName = opts.name ?? path.basename(projectRoot);
-        console.log(chalk_1.default.bold('Open Product Primer') + ' — initializing project workspace...\n');
+        console.log(chalk_1.default.bold('oprim') + ' — initializing project workspace...\n');
         const openspec = (0, detect_1.detectOpenSpec)(projectRoot);
         const graphify = (0, detect_1.detectGraphify)(projectRoot);
         if (openspec.detected)
