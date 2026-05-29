@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: The system SHALL provide the oprim-pdr skill to create new Product Decision Records
 The system SHALL provide the `oprim-pdr` skill that guides the user through creating a new PDR, auto-assigns the next sequential PDR-NNN ID by scanning `primer/decisions/`, and writes the populated artifact to `primer/decisions/PDR-NNN-<slug>.md`.
@@ -24,3 +24,9 @@ The skill SHALL accept an optional existing PDR ID to supersede, and SHALL updat
 #### Scenario: Create a superseding PDR
 - **WHEN** the user invokes the `oprim-pdr` skill and specifies an existing PDR ID to supersede
 - **THEN** the new PDR has `Supersedes: PDR-NNN` in its Related section AND the superseded PDR's Status line is updated to `Superseded by PDR-MMM`
+
+## REMOVED Requirements
+
+### Requirement: The system SHALL provide a /oprim:pdr command to create new Product Decision Records
+**Reason**: The `/oprim:pdr` slash command was a thin wrapper that only delegated to the `oprim-pdr` skill with no ergonomic advantage. Removing it eliminates a duplicate entry point.
+**Migration**: Use the `oprim-pdr` skill directly via the Skill tool.

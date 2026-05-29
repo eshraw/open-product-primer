@@ -5,6 +5,22 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-29
+
+### Added
+
+- `oprim sequence` command — generates `oprim/sequence-view.md`, a Markdown board grouping all bets by status (now / next / later / done) with sequencing metadata
+
+### Changed
+
+- `oprim update` now removes legacy command wrappers (`bet.md`, `criteria.md`, `pdr.md`, `review.md`) from `.claude/commands/oprim/` that were made redundant when those workflows moved to skills-only in v0.2.0
+
+### Removed
+
+- Claude Code command wrappers for `oprim-bet`, `oprim-criteria`, `oprim-pdr`, and `oprim-review` — these are now invoked as skills directly, eliminating redundant UI entries; `promote` and `sequence` commands remain as they carry distinct arguments
+
+[0.3.0]: https://github.com/eshraw/open-product-primer/releases/tag/v0.3.0
+
 ## [0.2.0] - 2026-05-29
 
 ### Added

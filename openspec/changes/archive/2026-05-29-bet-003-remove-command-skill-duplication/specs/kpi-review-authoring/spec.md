@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: The system SHALL provide the oprim-review skill to create KPI review artifacts
 The system SHALL provide the `oprim-review` skill that creates `primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md`, pre-populated from the bet's `criteria.yaml` with baseline and target values, and prompts the user for actual results.
@@ -48,7 +48,7 @@ When review outcomes invalidate or supersede a referenced PDR, the workflow SHAL
 - **THEN** the PDR file's Status field is updated to reflect supersession or deprecation
 
 ### Requirement: Post-review sequencing SHALL follow outcome-based recommendations
-After review, sequence validation SHALL surface sequencing moves based on outcomes: defer follow-on bets when metrics missed, unlock dependents when metrics hit, move bets to backlog when kill criteria triggered.
+After review, the sequencing skill (or equivalent validation) SHALL surface sequencing moves based on outcomes: defer follow-on bets when metrics missed, unlock dependents when metrics hit, move bets to backlog when kill criteria triggered.
 
 #### Scenario: Missed metrics suggest deferral
 - **WHEN** a review records one or more metrics as `missed`
@@ -61,3 +61,9 @@ After review, sequence validation SHALL surface sequencing moves based on outcom
 #### Scenario: Kill criteria triggered suggests backlog
 - **WHEN** review outcomes match a bet's documented kill criteria
 - **THEN** sequence validation may recommend moving associated bets to `backlog`
+
+## REMOVED Requirements
+
+### Requirement: The system SHALL provide a /oprim:review command to create KPI review artifacts
+**Reason**: The `/oprim:review` slash command was a thin wrapper that only delegated to the `oprim-review` skill with no ergonomic advantage. Removing it eliminates a duplicate entry point.
+**Migration**: Use the `oprim-review` skill directly via the Skill tool.

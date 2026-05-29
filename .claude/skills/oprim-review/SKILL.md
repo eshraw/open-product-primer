@@ -3,7 +3,7 @@ name: oprim-review
 description: Create a KPI review artifact for a completed bet, pre-filled from criteria.yaml with actuals gathered from the user
 ---
 
-Create a KPI review in `primer/reviews/`.
+Create a KPI review in `oprim/reviews/`.
 
 ## Steps
 
@@ -12,10 +12,10 @@ If not provided, ask: "Which bet are you reviewing? (e.g. BET-042)"
 
 ### 2. Load criteria and check for a run result
 
-Read `primer/bets/BET-NNN/criteria.yaml` if it exists (pre-fills baseline and target).
+Read `oprim/bets/BET-NNN/criteria.yaml` if it exists (pre-fills baseline and target).
 If not found: inform user and continue with empty metrics list.
 
-**Check for measurement run result:** Scan `primer/bets/BET-NNN/measurements/` for files matching `run-*.yaml`. If any exist, sort by filename (date-based) and read the most recent.
+**Check for measurement run result:** Scan `oprim/bets/BET-NNN/measurements/` for files matching `run-*.yaml`. If any exist, sort by filename (date-based) and read the most recent.
 
 **If a run result exists:** use it to pre-populate actuals and status for every metric. Skip step 3 for those metrics. Note the run date — include "Actuals from run: YYYY-MM-DD" in the review artifact.
 
@@ -33,7 +33,7 @@ Status logic:
 Ask: reviewer name, decision quality notes.
 
 ### 5. Output path
-`primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md` (today's date)
+`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md` (today's date)
 
 ### 6. Write the review file
 ```markdown

@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: The system SHALL provide the oprim-criteria skill to create criteria contracts
 The system SHALL provide the `oprim-criteria` skill that creates or appends to `primer/bets/BET-NNN/criteria.yaml`, populating metric definitions with source mapping for Amplitude or BigQuery.
@@ -28,3 +28,9 @@ The skill SHALL verify that `primer/bets/BET-NNN/` exists before writing a crite
 #### Scenario: Bet directory does not exist
 - **WHEN** the user invokes the `oprim-criteria` skill with a BET ID whose directory does not exist in `primer/bets/`
 - **THEN** the skill reports that the bet was not found and advises the user to use the `oprim-bet` skill first
+
+## REMOVED Requirements
+
+### Requirement: The system SHALL provide a /oprim:criteria command to create criteria contracts
+**Reason**: The `/oprim:criteria` slash command was a thin wrapper that only delegated to the `oprim-criteria` skill with no ergonomic advantage. Removing it eliminates a duplicate entry point.
+**Migration**: Use the `oprim-criteria` skill directly via the Skill tool.

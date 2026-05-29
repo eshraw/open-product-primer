@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: The system SHALL provide the oprim-bet skill to scaffold new bet artifacts
 The system SHALL provide the `oprim-bet` skill that creates a new bet directory `primer/bets/BET-NNN/`, writes a populated `bet-decision.md` from the template, and adds the bet to the `backlog` list in `primer/sequence.yaml`.
@@ -45,3 +45,9 @@ The skill SHALL accept one or more existing PDR IDs to link at creation, populat
 #### Scenario: Link PDRs during bet creation
 - **WHEN** the user specifies PDR IDs when creating a bet
 - **THEN** the bet-decision Links section references those PDR IDs
+
+## REMOVED Requirements
+
+### Requirement: The system SHALL provide a /oprim:bet command to scaffold new bet artifacts
+**Reason**: The `/oprim:bet` slash command was a thin wrapper that only delegated to the `oprim-bet` skill with no ergonomic advantage. Removing it eliminates a duplicate entry point.
+**Migration**: Use the `oprim-bet` skill directly via the Skill tool.
