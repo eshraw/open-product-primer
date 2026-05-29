@@ -7,13 +7,18 @@ now:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-003
-    title: "Simplify agent presence by removing command/skill duplication"
+  - id: BET-010
+    title: "Rename primer/ directory to oprim/"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
 
 next:
+  - id: BET-003
+    title: "Simplify agent presence by removing command/skill duplication"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
   - id: BET-002
     title: "Add a visual sequencing view"
     blocked_by: []
