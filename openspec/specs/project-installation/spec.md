@@ -8,30 +8,28 @@ The system SHALL provide a globally installable CLI (for example via npm package
 - **THEN** the `open-product-primer` command is available in the shell
 - **AND** the `oprim` bin alias resolves to the same CLI entrypoint
 
-### Requirement: Project initialization SHALL scaffold a complete primer workspace
-The system SHALL provide `open-product-primer init` (alias `oprim init`) that creates a project-local primer workspace with config, sequencing file, decision/bet/review directories, and starter templates.
+### Requirement: Project initialization SHALL scaffold a complete oprim workspace
+The system SHALL provide `oprim init` that creates a project-local workspace under `oprim/` with config, sequencing file, decision/bet/review directories, and starter templates.
 
-#### Scenario: Initialize Open Product Primer in a new repository
-- **WHEN** a user runs `open-product-primer init` or `oprim init` at the repository root
-- **THEN** the command creates `primer/config.yaml`, `primer/sequence.yaml`, `primer/decisions/`, `primer/bets/`, `primer/reviews/`, and `primer/templates/` with default starter files
+#### Scenario: Initialize oprim in a new repository
+- **WHEN** a user runs `oprim init` at the repository root
+- **THEN** the command creates `oprim/config.yaml`, `oprim/sequence.yaml`, `oprim/decisions/`, `oprim/bets/`, `oprim/reviews/`, and `oprim/templates/` with default starter files
+- **AND** no `primer/` directory is created
 
-### Requirement: Initialization SHALL be idempotent and non-destructive
-The system SHALL allow repeated `open-product-primer init` runs without deleting existing decision artifacts, bet records, reviews, or user-edited configuration values.
+#### Scenario: Re-run init on an existing oprim project
+- **WHEN** a user runs `oprim init` in a repository that already contains `oprim/` artifacts
+- **THEN** the command completes successfully and preserves existing user-authored content under `oprim/`
 
-#### Scenario: Re-run init on an existing project
-- **WHEN** a user runs `open-product-primer init` in a repository that already contains primer artifacts
-- **THEN** the command completes successfully and preserves existing user-authored primer content
-
-### Requirement: Initialization SHALL detect OpenSpec and Graphify integrations
-The system SHALL detect optional OpenSpec and Graphify installations during init and SHALL write integration settings in `primer/config.yaml` without requiring those tools to be present.
+### Requirement: Initialization SHALL detect OpenSpec and Graphify integrations and write config to oprim/
+The system SHALL detect optional OpenSpec and Graphify installations during init and SHALL write integration settings to `oprim/config.yaml`.
 
 #### Scenario: Init in repository with OpenSpec present
-- **WHEN** `openspec/` exists and the user runs `open-product-primer init`
-- **THEN** `primer/config.yaml` enables OpenSpec integration with the detected changes directory
+- **WHEN** `openspec/` exists and the user runs `oprim init`
+- **THEN** `oprim/config.yaml` enables OpenSpec integration with the detected changes directory
 
 #### Scenario: Init in repository without Graphify output
-- **WHEN** `graphify-out/` does not exist and the user runs `open-product-primer init`
-- **THEN** initialization succeeds with Graphify integration disabled by default
+- **WHEN** `graphify-out/` does not exist and the user runs `oprim init`
+- **THEN** initialization succeeds with Graphify integration disabled in `oprim/config.yaml`
 
 ### Requirement: Update SHALL refresh agent command integrations
 The system SHALL provide `open-product-primer update` to refresh assistant-specific slash commands and skills from packaged templates for supported AI tools. When `primer/config.yaml` contains an `agents:` list, update SHALL install for the declared agents; otherwise it SHALL fall back to detecting `.claude/` and `.cursor/` by directory presence.
@@ -44,12 +42,16 @@ The system SHALL provide `open-product-primer update` to refresh assistant-speci
 - **WHEN** a user runs `open-product-primer update` in an initialized project with no `agents:` in config
 - **THEN** the command updates packaged `/oprim:*` command definitions for detected assistant environments
 
-### Requirement: Doctor SHALL validate install health and integration readiness
-The system SHALL provide `open-product-primer doctor` that reports scaffold validity, config schema compatibility, optional ecosystem integrations, and optional measurement credentials.
+### Requirement: Doctor SHALL validate oprim/ scaffold
+The system SHALL provide `oprim doctor` that reports scaffold validity, config schema compatibility, optional ecosystem integrations, and optional measurement credentials.
 
 #### Scenario: Run health check after init
-- **WHEN** a user runs `open-product-primer doctor` after initialization
-- **THEN** the command reports pass/fail status for primer scaffold, config version, and detected OpenSpec/Graphify integrations
+- **WHEN** a user runs `oprim doctor` after initialization
+- **THEN** the command reports pass/fail for the `oprim/` scaffold, config version, and detected integrations
+
+#### Scenario: Doctor detects legacy primer/ directory
+- **WHEN** `primer/` exists in the project root but `oprim/` does not
+- **THEN** `oprim doctor` reports a failure: "primer/ detected — run `oprim migrate` to rename to oprim/"
 
 ### Requirement: Installation documentation SHALL define reproducible setup steps
 The system SHALL document a minimal setup path that includes global install, per-project init, doctor validation, and update refresh, comparable to OpenSpec and Graphify onboarding flows. Documentation SHALL use the brand name **Open Product Primer** and refer to the short form **`oprim`** for daily CLI and agent usage.

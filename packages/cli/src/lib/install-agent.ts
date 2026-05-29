@@ -136,10 +136,10 @@ ${body}`;
 function pdrSkill(): string {
   return `---
 name: oprim-pdr
-description: Create a new Product Decision Record in primer/decisions/ with auto-assigned ID and guided prompting
+description: Create a new Product Decision Record in oprim/decisions/ with auto-assigned ID and guided prompting
 ---
 
-Create a new Product Decision Record (PDR) in \`primer/decisions/\`.
+Create a new Product Decision Record (PDR) in \`oprim/decisions/\`.
 
 ## Steps
 
@@ -147,9 +147,9 @@ Create a new Product Decision Record (PDR) in \`primer/decisions/\`.
 If not provided, ask: "What is the title of this product decision?"
 
 ### 2. Assign the next PDR ID
-Scan \`primer/decisions/\` for files matching \`PDR-(\\d+)-\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none found.
+Scan \`oprim/decisions/\` for files matching \`PDR-(\\d+)-\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none found.
 Slug: title → lowercase → spaces to hyphens → remove non-alphanumeric (except hyphens).
-Output path: \`primer/decisions/PDR-NNN-<slug>.md\`
+Output path: \`oprim/decisions/PDR-NNN-<slug>.md\`
 
 ### 3. Gather content
 Ask: Context (what forced this decision), Decision (clear statement), Alternatives considered (why rejected), Consequences (positives / trade-offs / follow-ups), Evidence links (optional), Related bets (optional), Related OpenSpec changes (optional).
@@ -197,10 +197,10 @@ Read the superseded file → replace Status value with \`Superseded by PDR-NNN\`
 function betSkill(): string {
   return `---
 name: oprim-bet
-description: Create a new bet directory and bet-decision artifact in primer/bets/, and add the bet to primer/sequence.yaml backlog
+description: Create a new bet directory and bet-decision artifact in oprim/bets/, and add the bet to oprim/sequence.yaml backlog
 ---
 
-Create a new bet in \`primer/bets/\` and register it on the sequencing board.
+Create a new bet in \`oprim/bets/\` and register it on the sequencing board.
 
 ## Steps
 
@@ -208,15 +208,15 @@ Create a new bet in \`primer/bets/\` and register it on the sequencing board.
 If not provided, ask: "What is the title of this bet?"
 
 ### 2. Assign the next BET ID
-Scan \`primer/bets/\` for directories matching \`BET-(\\d+)$\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none.
+Scan \`oprim/bets/\` for directories matching \`BET-(\\d+)$\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none.
 
 ### 3. Check sequence.yaml exists
-If \`primer/sequence.yaml\` not found: report and stop — advise \`oprim init\`.
+If \`oprim/sequence.yaml\` not found: report and stop — advise \`oprim init\`.
 
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 
-### 5. Write primer/bets/BET-NNN/bet-decision.md
+### 5. Write oprim/bets/BET-NNN/bet-decision.md
 \`\`\`
 # Decision: BET-NNN <title>
 
@@ -243,7 +243,7 @@ Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date 
 - OpenSpec change: <to be filled when promoted>
 \`\`\`
 
-### 6. Append to primer/sequence.yaml backlog
+### 6. Append to oprim/sequence.yaml backlog
 Read → parse YAML → append → write back (2-space indentation):
 \`\`\`yaml
 - id: BET-NNN
@@ -253,7 +253,12 @@ Read → parse YAML → append → write back (2-space indentation):
   requires_pdrs: []
 \`\`\`
 
-### 7. Report what was created
+### 7. Prompt for optional discovery scaffolding
+Ask: "Do you want to scaffold a discovery.md now? (y/N)"
+- If "y": write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (same structure as \`oprim/templates/discovery.md\`).
+- If "n" or Enter: skip silently.
+
+### 8. Report what was created
 `;
 }
 
@@ -263,7 +268,7 @@ name: oprim-criteria
 description: Create or append to a criteria.yaml contract for a bet, with structured Amplitude and BigQuery source mapping
 ---
 
-Create or append to \`primer/bets/BET-NNN/criteria.yaml\`.
+Create or append to \`oprim/bets/BET-NNN/criteria.yaml\`.
 
 ## Steps
 
@@ -271,7 +276,7 @@ Create or append to \`primer/bets/BET-NNN/criteria.yaml\`.
 If not provided, ask: "Which bet are you adding criteria for? (e.g. BET-042)"
 
 ### 2. Verify bet exists
-If \`primer/bets/BET-NNN/\` not found: report and stop — advise \`/oprim:bet\` first.
+If \`oprim/bets/BET-NNN/\` not found: report and stop — advise \`/oprim:bet\` first.
 
 ### 3. Gather metric details
 Ask: metric ID (snake_case), metric name, baseline (numeric), target (numeric), timeframe, launch date (YYYY-MM-DD or TBD), segment (optional).
@@ -317,7 +322,7 @@ name: oprim-review
 description: Create a KPI review artifact for a completed bet, pre-filled from criteria.yaml with actuals gathered from the user
 ---
 
-Create a KPI review in \`primer/reviews/\`.
+Create a KPI review in \`oprim/reviews/\`.
 
 ## Steps
 
@@ -326,10 +331,10 @@ If not provided, ask: "Which bet are you reviewing? (e.g. BET-042)"
 
 ### 2. Load criteria and check for a run result
 
-Read \`primer/bets/BET-NNN/criteria.yaml\` if it exists (pre-fills baseline and target).
+Read \`oprim/bets/BET-NNN/criteria.yaml\` if it exists (pre-fills baseline and target).
 If not found: inform user and continue with empty metrics list.
 
-**Check for measurement run result:** Scan \`primer/bets/BET-NNN/measurements/\` for files matching \`run-*.yaml\`. If any exist, sort by filename (date-based) and read the most recent.
+**Check for measurement run result:** Scan \`oprim/bets/BET-NNN/measurements/\` for files matching \`run-*.yaml\`. If any exist, sort by filename (date-based) and read the most recent.
 
 **If a run result exists:** use it to pre-populate actuals and status for every metric. Skip step 3 for those metrics. Note the run date — include "Actuals from run: YYYY-MM-DD" in the review artifact.
 
@@ -347,7 +352,7 @@ Status logic:
 Ask: reviewer name, decision quality notes.
 
 ### 5. Output path
-\`primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md\` (today's date)
+\`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\` (today's date)
 
 ### 6. Write the review file
 \`\`\`markdown
@@ -377,19 +382,19 @@ Ask: reviewer name, decision quality notes.
 // ─── Cursor inline content (condensed versions for command files) ─────────────
 
 function pdrInlineContent(): string {
-  return `Create a new PDR in \`primer/decisions/\`. Scan for \`PDR-(\\d+)-\` to assign next ID (zero-padded, default 001). Gather: title, context, decision, alternatives, consequences, evidence, related bets/specs. Ask if superseding an existing PDR. Write \`primer/decisions/PDR-NNN-<slug>.md\`. If superseding: update old PDR Status to "Superseded by PDR-NNN". Report what was created.`;
+  return `Create a new PDR in \`oprim/decisions/\`. Scan for \`PDR-(\\d+)-\` to assign next ID (zero-padded, default 001). Gather: title, context, decision, alternatives, consequences, evidence, related bets/specs. Ask if superseding an existing PDR. Write \`oprim/decisions/PDR-NNN-<slug>.md\`. If superseding: update old PDR Status to "Superseded by PDR-NNN". Report what was created.`;
 }
 
 function betInlineContent(): string {
-  return `Create a new bet in \`primer/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`primer/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`primer/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Report what was created.`;
+  return `Create a new bet in \`oprim/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
 }
 
 function criteriaInlineContent(): string {
-  return `Add metrics to \`primer/bets/BET-NNN/criteria.yaml\`. Verify bet dir exists. Gather: metric ID, name, baseline, target, timeframe, launch date, segment. Ask source type (amplitude or bigquery). Amplitude: event, aggregation, denominator_event. BigQuery: table, metric_column, filter, aggregation, denominator_query. If file exists: append to metrics list (never overwrite). If not: create. Ask if adding more metrics. Report what was created.`;
+  return `Add metrics to \`oprim/bets/BET-NNN/criteria.yaml\`. Verify bet dir exists. Gather: metric ID, name, baseline, target, timeframe, launch date, segment. Ask source type (amplitude or bigquery). Amplitude: event, aggregation, denominator_event. BigQuery: table, metric_column, filter, aggregation, denominator_query. If file exists: append to metrics list (never overwrite). If not: create. Ask if adding more metrics. Report what was created.`;
 }
 
 function reviewInlineContent(): string {
-  return `Create KPI review in \`primer/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`. Read \`criteria.yaml\` for pre-fill (baseline/target). Check \`primer/bets/BET-NNN/measurements/\` for \`run-*.yaml\` files — if found, use the most recent to pre-populate actuals and status (include "Actuals from run: YYYY-MM-DD" note). If no run result, ask for each metric's actual value. Status: actual >= target → hit, actual < target → missed, not provided → pending. Ask reviewer name and decision quality notes. Write review with metric table and Actions checklist. Report what was created.`;
+  return `Create KPI review in \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`. Read \`criteria.yaml\` for pre-fill (baseline/target). Check \`oprim/bets/BET-NNN/measurements/\` for \`run-*.yaml\` files — if found, use the most recent to pre-populate actuals and status (include "Actuals from run: YYYY-MM-DD" note). If no run result, ask for each metric's actual value. Status: actual >= target → hit, actual < target → missed, not provided → pending. Ask reviewer name and decision quality notes. Write review with metric table and Actions checklist. Report what was created.`;
 }
 
 // ─── Legacy content (promote / sequence remain inline) ───────────────────────
@@ -402,7 +407,7 @@ Promote a prioritized bet to an OpenSpec change and link criteria contracts.
 
 **Steps**
 
-1. **Locate the bet** — read \`primer/bets/BET-XXX/bet-decision.md\`
+1. **Locate the bet** — read \`oprim/bets/BET-XXX/bet-decision.md\`
 2. **Validate status** — decision must be "Build now"
 3. **Check authority boundary** — confirm primer artifact owns why/order/outcome only
 4. **Create OpenSpec change** — derive the change name as \`bet-NNN-<slug>\` where \`NNN\` is the zero-padded bet number (e.g. BET-004 → \`bet-004\`) and \`<slug>\` is a short kebab-case summary of the change. Then invoke the \`/openspec-propose\` skill (or \`/opsx:propose\`) with that name to create the change directory with **all required artifacts**: \`proposal.md\`, \`design.md\`, \`tasks.md\`, and \`specs/<capability>/spec.md\` for every capability listed under \`## Capabilities\`.
@@ -412,7 +417,7 @@ Promote a prioritized bet to an OpenSpec change and link criteria contracts.
 5. **Link artifacts**:
    - Add OpenSpec change path to bet-decision \`## Links\` section
    - Add bet ID to OpenSpec proposal \`## Context\` section
-6. **Copy criteria** — if \`primer/bets/BET-XXX/criteria.yaml\` exists, link it from OpenSpec proposal
+6. **Copy criteria** — if \`oprim/bets/BET-XXX/criteria.yaml\` exists, link it from OpenSpec proposal
 7. **Verify completeness** — confirm the change directory contains:
    - \`proposal.md\`
    - \`design.md\`
@@ -429,10 +434,10 @@ Validate the primer sequencing board and suggest rebalancing if needed.
 
 **Steps**
 
-1. **Read board** — load \`primer/sequence.yaml\`
+1. **Read board** — load \`oprim/sequence.yaml\`
 2. **Check WIP limits** — compare \`now\` count against \`wip_limits.now\`
 3. **Validate blockers** — for each bet in \`now\`, confirm all \`blocked_by\` entries are complete or absent
-4. **Validate PDR preconditions** — confirm all \`requires_pdrs\` entries exist in \`primer/decisions/\`
+4. **Validate PDR preconditions** — confirm all \`requires_pdrs\` entries exist in \`oprim/decisions/\`
 5. **Report violations** — list any WIP excess, unresolved blockers, or missing PDRs
 6. **Suggest moves** — recommend bets to defer to \`next\` or \`later\` to resolve violations
 `;

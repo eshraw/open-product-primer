@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.kpiReviewTemplate = exports.criteriaTemplate = exports.betDecisionTemplate = exports.pdrTemplate = exports.sequenceTemplate = void 0;
+exports.kpiReviewTemplate = exports.discoveryTemplate = exports.criteriaTemplate = exports.betDecisionTemplate = exports.pdrTemplate = exports.sequenceTemplate = void 0;
 exports.configTemplate = configTemplate;
 function configTemplate(projectName, openspecEnabled, graphifyEnabled) {
     return `version: 1
@@ -100,6 +100,28 @@ exports.criteriaTemplate = `metrics:
         aggregation: unique_users
         denominator_event: null
     segment: null
+`;
+exports.discoveryTemplate = `# Discovery: BET-XXX <Bet title>
+
+## Problem Framing
+- **Problem statement**: <What problem are we solving and for whom?>
+- **Evidence this is real**: <Data, support tickets, user quotes, etc.>
+- **Why it matters**: <Business or user impact if left unsolved>
+
+## User Research Signals
+- **Research conducted**: <Interviews, surveys, usability tests, etc.>
+- **Key findings**: <What did we learn?>
+- **Assumptions to validate**: <What are we still unsure about?>
+
+## Competitive Context
+- **How others solve this**: <Competitor or adjacent solutions>
+- **Our differentiation**: <Why our approach is better or different>
+- **Gaps / opportunities**: <What's underserved in the market?>
+
+## Open Questions
+- [ ] <Question 1 — what needs to be answered before committing?>
+- [ ] <Question 2>
+- [ ] <Question 3>
 `;
 exports.kpiReviewTemplate = `# KPI Review: BET-XXX
 

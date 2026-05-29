@@ -53,8 +53,18 @@ function doctorCommand() {
         .action(() => {
         const projectRoot = process.cwd();
         const checks = [];
-        const primerDir = path.join(projectRoot, 'primer');
-        for (const dir of ['primer', 'primer/decisions', 'primer/bets', 'primer/reviews', 'primer/templates']) {
+        const primerDir = path.join(projectRoot, 'oprim');
+        const legacyPrimerExists = fs.existsSync(path.join(projectRoot, 'primer'));
+        const oprimExists = fs.existsSync(path.join(projectRoot, 'oprim'));
+        if (legacyPrimerExists && !oprimExists) {
+            checks.push({
+                name: 'migration: primer/ detected',
+                pass: false,
+                note: "Run 'oprim migrate' to rename primer/ to oprim/",
+                required: true,
+            });
+        }
+        for (const dir of ['oprim', 'oprim/decisions', 'oprim/bets', 'oprim/reviews', 'oprim/templates']) {
             const exists = fs.existsSync(path.join(projectRoot, dir));
             checks.push({
                 name: `scaffold: ${dir}/`,
@@ -66,14 +76,14 @@ function doctorCommand() {
         const configPath = path.join(primerDir, 'config.yaml');
         const configExists = fs.existsSync(configPath);
         checks.push({
-            name: 'config: primer/config.yaml',
+            name: 'config: oprim/config.yaml',
             pass: configExists,
             note: configExists ? undefined : "Run 'oprim init' to create",
             required: true,
         });
         const sequenceExists = fs.existsSync(path.join(primerDir, 'sequence.yaml'));
         checks.push({
-            name: 'config: primer/sequence.yaml',
+            name: 'config: oprim/sequence.yaml',
             pass: sequenceExists,
             note: sequenceExists ? undefined : "Run 'oprim init' to create",
             required: true,
@@ -117,6 +127,26 @@ function doctorCommand() {
                     : 'No bigquery metrics in criteria.yaml — not required',
             required: false,
         });
+        // ── Discovery checks — warn if bet is missing discovery.md ───────────────
+        const betsDir = path.join(primerDir, 'bets');
+        if (fs.existsSync(betsDir)) {
+            const betEntries = fs.readdirSync(betsDir, { withFileTypes: true });
+            for (const entry of betEntries) {
+                if (!entry.isDirectory())
+                    continue;
+                const betDir = path.join(betsDir, entry.name);
+                const hasDecision = fs.existsSync(path.join(betDir, 'bet-decision.md'));
+                if (!hasDecision)
+                    continue;
+                const hasDiscovery = fs.existsSync(path.join(betDir, 'discovery.md'));
+                checks.push({
+                    name: `discovery: ${entry.name}/discovery.md`,
+                    pass: hasDiscovery,
+                    note: hasDiscovery ? undefined : 'discovery.md missing — consider adding discovery context',
+                    required: false,
+                });
+            }
+        }
         // ── Agent environment checks ──────────────────────────────────────────────
         const configAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
         if (configAgents !== null) {

@@ -5,6 +5,24 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-29
+
+### Added
+
+- `oprim migrate` command — renames `primer/` to `oprim/` in an existing repo; idempotent and safe to re-run
+- `oprim init` now writes `oprim/templates/discovery.md` — a structured template for problem framing, user research signals, competitive context, and open questions
+- `oprim:bet` skill now prompts "Do you want to scaffold a discovery.md now? (y/N)" after writing `bet-decision.md`; writes `oprim/bets/BET-NNN/discovery.md` on confirmation
+- `oprim doctor` now warns (yellow `○`) for each bet directory that contains `bet-decision.md` but no `discovery.md`
+
+### Changed
+
+- **BREAKING**: workspace directory renamed from `primer/` to `oprim/`; existing repos must run `oprim migrate` before using this version
+- `oprim init` now scaffolds `oprim/` instead of `primer/`
+- `oprim doctor` now validates `oprim/` scaffold; warns when `primer/` detected without `oprim/`
+- All agent skills and command content updated to reference `oprim/` paths
+
+[0.2.0]: https://github.com/eshraw/open-product-primer/releases/tag/v0.2.0
+
 ## [0.1.2] - 2026-05-29
 
 ### Changed

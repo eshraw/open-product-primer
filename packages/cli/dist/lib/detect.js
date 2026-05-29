@@ -50,7 +50,7 @@ function detectGraphify(projectRoot) {
     return { detected, graphDir: detected ? 'graphify-out' : null };
 }
 function readAgentsFromConfig(projectRoot) {
-    const configPath = path.join(projectRoot, 'primer', 'config.yaml');
+    const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
     if (!fs.existsSync(configPath))
         return null;
     const content = fs.readFileSync(configPath, 'utf-8');
@@ -71,7 +71,7 @@ function detectAvailableAgents(projectRoot) {
     return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {
-    const configPath = path.join(projectRoot, 'primer', 'config.yaml');
+    const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
     if (!fs.existsSync(configPath))
         return;
     const content = fs.readFileSync(configPath, 'utf-8');

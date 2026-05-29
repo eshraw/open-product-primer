@@ -2,20 +2,25 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-001
-    title: "Add product discovery structure to bets"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-003
     title: "Simplify agent presence by removing command/skill duplication"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-
-next:
   - id: BET-002
     title: "Add a visual sequencing view"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+
+next:
+  - id: BET-008
+    title: "Improve bet naming for scannability"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-009
+    title: "Add a way to archive bets to avoid clutter"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
@@ -35,16 +40,6 @@ later:
 backlog:
   - id: BET-007
     title: "Surface relevant product decisions proactively during agent sessions"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-008
-    title: "Improve bet naming for scannability"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-009
-    title: "Add a way to archive bets to avoid clutter"
     blocked_by: []
     unlocks: []
     requires_pdrs: []

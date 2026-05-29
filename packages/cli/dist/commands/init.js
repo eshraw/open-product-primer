@@ -59,7 +59,7 @@ function initCommand() {
             console.log(chalk_1.default.green('✓') + ' OpenSpec detected');
         if (graphify.detected)
             console.log(chalk_1.default.green('✓') + ' Graphify detected');
-        const primerDir = path.join(projectRoot, 'primer');
+        const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'decisions'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'reviews'));
@@ -70,15 +70,16 @@ function initCommand() {
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'bet-decision.md'), templates_1.betDecisionTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'criteria.yaml'), templates_1.criteriaTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'kpi-review.md'), templates_1.kpiReviewTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'discovery.md'), templates_1.discoveryTemplate);
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'decisions', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'reviews', '.gitkeep'), '');
-        console.log('\n' + chalk_1.default.green('✓') + ' primer/ workspace created');
+        console.log('\n' + chalk_1.default.green('✓') + ' oprim/ workspace created');
         const configStatus = configWritten ? 'written' : 'preserved (already exists)';
         const sequenceStatus = sequenceWritten ? 'written' : 'preserved (already exists)';
-        console.log('  ' + chalk_1.default.gray('primer/config.yaml') + ' — ' + configStatus);
-        console.log('  ' + chalk_1.default.gray('primer/sequence.yaml') + ' — ' + sequenceStatus);
-        console.log('  ' + chalk_1.default.gray('primer/templates/') + ' — refreshed');
+        console.log('  ' + chalk_1.default.gray('oprim/config.yaml') + ' — ' + configStatus);
+        console.log('  ' + chalk_1.default.gray('oprim/sequence.yaml') + ' — ' + sequenceStatus);
+        console.log('  ' + chalk_1.default.gray('oprim/templates/') + ' — refreshed');
         // ── Agent selection ───────────────────────────────────────────────────────
         let selectedAgents;
         const flaggedAgents = opts.agent;

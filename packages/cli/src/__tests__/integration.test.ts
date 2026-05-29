@@ -28,13 +28,13 @@ afterEach(() => {
 // 7.4 ─────────────────────────────────────────────────────────────────────────
 
 describe('oprim init --agent claude', () => {
-  it('scaffolds primer/ and installs Claude skills without a prompt', async () => {
+  it('scaffolds oprim/ and installs Claude skills without a prompt', async () => {
     const cmd = initCommand();
     await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
 
-    // primer/ structure created
-    expect(fs.existsSync(path.join(tmpDir, 'primer', 'config.yaml'))).toBe(true);
-    expect(fs.existsSync(path.join(tmpDir, 'primer', 'sequence.yaml'))).toBe(true);
+    // oprim/ structure created
+    expect(fs.existsSync(path.join(tmpDir, 'oprim', 'config.yaml'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'oprim', 'sequence.yaml'))).toBe(true);
 
     // agents persisted to config
     expect(readAgentsFromConfig(tmpDir)).toEqual(['claude']);
@@ -74,10 +74,10 @@ describe('oprim init --agent unknown', () => {
 
 describe('oprim update with agents: [claude] in config', () => {
   it('installs only Claude skills even when .cursor/ exists', async () => {
-    // Bootstrap: primer with agents: [claude] and a pre-existing .cursor/
-    fs.mkdirSync(path.join(tmpDir, 'primer'));
+    // Bootstrap: oprim with agents: [claude] and a pre-existing .cursor/
+    fs.mkdirSync(path.join(tmpDir, 'oprim'));
     fs.writeFileSync(
-      path.join(tmpDir, 'primer', 'config.yaml'),
+      path.join(tmpDir, 'oprim', 'config.yaml'),
       'version: 1\nagents:\n  - claude\n'
     );
     fs.mkdirSync(path.join(tmpDir, '.cursor'), { recursive: true });

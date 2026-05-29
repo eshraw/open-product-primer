@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { initCommand } from './commands/init';
 import { updateCommand } from './commands/update';
 import { doctorCommand } from './commands/doctor';
+import { migrateCommand } from './commands/migrate';
 import { measureCommand } from './commands/measure';
 import pkg from '../package.json';
 
@@ -16,6 +17,7 @@ program
 program.addCommand(initCommand());
 program.addCommand(updateCommand());
 program.addCommand(doctorCommand());
+program.addCommand(migrateCommand());
 program.addCommand(measureCommand());
 
 program.parse();

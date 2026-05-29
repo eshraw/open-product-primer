@@ -13,7 +13,7 @@ export function detectGraphify(projectRoot: string): { detected: boolean; graphD
 }
 
 export function readAgentsFromConfig(projectRoot: string): string[] | null {
-  const configPath = path.join(projectRoot, 'primer', 'config.yaml');
+  const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
   if (!fs.existsSync(configPath)) return null;
   const content = fs.readFileSync(configPath, 'utf-8');
   const config = yaml.load(content) as Record<string, unknown> | null;
@@ -31,7 +31,7 @@ export function detectAvailableAgents(projectRoot: string): string[] {
 }
 
 export function writeAgentsToConfig(agents: string[], projectRoot: string): void {
-  const configPath = path.join(projectRoot, 'primer', 'config.yaml');
+  const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
   if (!fs.existsSync(configPath)) return;
   const content = fs.readFileSync(configPath, 'utf-8');
   const config = yaml.load(content) as Record<string, unknown>;
