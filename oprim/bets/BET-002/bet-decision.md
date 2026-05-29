@@ -24,4 +24,4 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: openspec/changes/bet-002-visual-sequencing-view/
