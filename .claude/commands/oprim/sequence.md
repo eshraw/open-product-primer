@@ -18,4 +18,3 @@ Validate the primer sequencing board and suggest rebalancing if needed.
 4. **Validate PDR preconditions** — confirm all `requires_pdrs` entries exist in `oprim/decisions/`
 5. **Report violations** — list any WIP excess, unresolved blockers, or missing PDRs
 6. **Suggest moves** — recommend bets to defer to `next` or `later` to resolve violations
-7. **Regenerate view** — run `node oprim/scripts/generate-sequence-view.js` to update `oprim/sequence-view.md`. Report the path written. If `sequence.yaml` was changed in this session, both files should be staged together.
