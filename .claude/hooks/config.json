@@ -1,4 +1,7 @@
 {
   "framework": "openspec",
-  "archive_commands": ["/opsx:archive", "/openspec-archive-change"]
+  "archive_commands": [
+    "/opsx:archive",
+    "/openspec-archive-change"
+  ]
 }
