@@ -5,6 +5,27 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-03
+
+### Added
+
+- `oprim:archive` skill — archives a completed bet by moving it to `oprim/bets/archived/BET-NNN/` and removing its entry from `sequence.yaml`; warns if other active bets reference it via `blocked_by` or `unlocks`
+- `archive.md` command wrapper — exposes `/oprim:archive` as a Claude Code slash command
+- `UserPromptSubmit` + `Stop` hooks for co-archival coordination — when `/opsx:archive` is run, the Stop hook detects the linked bet ID from the archived `proposal.md` and prompts Claude to invoke `oprim:archive` automatically
+- `oprim init` and `oprim update` now prompt for speccing framework (OpenSpec or None) on first install and write `.claude/hooks/config.json`, `on-prompt-submit.sh`, and `on-stop.sh`
+- `oprim doctor` now validates that `on-prompt-submit.sh` and `on-stop.sh` are present and registered in `.claude/settings.json`
+
+### Changed
+
+- `oprim:bet` now displays a naming tip ("verb + object [for context]") before asking for the bet title, and validates the title has at least 4 words or 25 characters — warns and offers a suggested reformulation if the title is too vague
+- `bet-decision.md` template includes an inline naming tip comment in the header
+
+### Removed
+
+- Legacy `on-skill-archive.sh` hook and its `PostToolUse/Skill` entry in `settings.json` — replaced by the `on-prompt-submit.sh` + `on-stop.sh` hook pair; `oprim update` tombstones and removes the old file automatically
+
+[0.4.0]: https://github.com/eshraw/open-product-primer/releases/tag/v0.4.0
+
 ## [0.3.0] - 2026-05-29
 
 ### Added
