@@ -10,7 +10,8 @@ The bet list grows unboundedly as bets complete — without an archival mechanis
 ## What Changes
 
 - A new `oprim:archive` skill archives a completed bet — moves it to `oprim/bets/archived/BET-NNN/` and removes its `sequence.yaml` entry; the skill has no knowledge of openspec
-- A `PostToolUse` hook (`.claude/hooks/on-skill-archive.sh`, wired in `.claude/settings.json`) fires after `opsx:archive` runs and prompts co-archival of the linked bet — neither skill package owns the dependency
+- A `UserPromptSubmit` hook (`.claude/hooks/on-prompt-submit.sh`) fires when the user types an archive slash command, writing the change name to a flag file; a `Stop` hook (`.claude/hooks/on-stop.sh`) reads the flag after Claude finishes and injects a co-archival prompt — neither skill package owns the dependency
+- An install-time prompt in `oprim init/update` records which speccing framework is in use (`.claude/hooks/config.json`) so the hooks know which slash commands to watch for
 - `sequence.yaml` entries for archived bets are removed from all active buckets (now/next/later/backlog)
 - The original `bet-decision.md` is preserved in the archive folder — nothing is deleted
 - Archival is always explicit and user-triggered — no automatic triggers
@@ -19,7 +20,7 @@ The bet list grows unboundedly as bets complete — without an archival mechanis
 
 ### New Capabilities
 
-- `bet-archiving`: Skill and PostToolUse hook for archiving a completed bet — the skill handles bet-only archival; the hook coordinates co-archival when an openspec change is archived first
+- `bet-archiving`: Skill and UserPromptSubmit+Stop hooks for archiving a completed bet — the skill handles bet-only archival; the hooks coordinate co-archival when an openspec change is archived first
 
 ### Modified Capabilities
 
@@ -28,8 +29,10 @@ The bet list grows unboundedly as bets complete — without an archival mechanis
 ## Impact
 
 - New `oprim:archive` skill file
-- New `.claude/hooks/on-skill-archive.sh` hook script
-- `.claude/settings.json` (PostToolUse hook registration)
+- New `.claude/hooks/on-prompt-submit.sh` — UserPromptSubmit hook
+- New `.claude/hooks/on-stop.sh` — Stop hook
+- New `.claude/hooks/config.json` — framework config written by installer
+- `.claude/settings.json` (UserPromptSubmit + Stop hook registration; legacy PostToolUse entry removed)
 - `oprim/bets/` directory structure gains an `archived/` subfolder convention
 - `sequence.yaml` (entries removed on archive)
 - `openspec/specs/sequencing-board/spec.md` (delta: archived bets excluded from active buckets)

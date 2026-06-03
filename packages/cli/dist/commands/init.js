@@ -112,9 +112,13 @@ function initCommand() {
                 ' after configuring an AI tool to install /oprim:* skills.');
         }
         else {
+            let specFramework = 'openspec';
+            if (selectedAgents.includes('claude')) {
+                specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
+            }
             console.log('\n' + chalk_1.default.bold('Installing agent skills...'));
             for (const agent of selectedAgents) {
-                (0, install_agent_1.installAgentSkills)(agent, projectRoot);
+                (0, install_agent_1.installAgentSkills)(agent, projectRoot, specFramework);
             }
             console.log('\n' + chalk_1.default.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
         }

@@ -19,12 +19,6 @@ next:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-009
-    title: "Add a way to archive bets to avoid clutter"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-
 later:
   - id: BET-006
     title: "Add multi-tool agentic support (Codex, Gemini CLI, Copilot CLI, and beyond)"

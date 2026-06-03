@@ -9,6 +9,7 @@ import { readAgentsFromConfig } from '../lib/detect';
 vi.mock('@inquirer/prompts', () => ({
   checkbox: vi.fn().mockResolvedValue([]),
   confirm: vi.fn().mockResolvedValue(false),
+  select: vi.fn().mockResolvedValue('openspec'),
 }));
 
 let tmpDir: string;

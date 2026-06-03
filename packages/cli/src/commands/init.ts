@@ -3,7 +3,7 @@ import * as path from 'path';
 import chalk from 'chalk';
 import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
-import { installAgentSkills, promptAgentSelection, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
+import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
 import {
   configTemplate,
   sequenceTemplate,
@@ -100,9 +100,13 @@ export function initCommand(): Command {
             ' after configuring an AI tool to install /oprim:* skills.'
         );
       } else {
+        let specFramework = 'openspec';
+        if (selectedAgents.includes('claude')) {
+          specFramework = await promptFrameworkSelection(projectRoot);
+        }
         console.log('\n' + chalk.bold('Installing agent skills...'));
         for (const agent of selectedAgents) {
-          installAgentSkills(agent as Agent, projectRoot);
+          installAgentSkills(agent as Agent, projectRoot, specFramework);
         }
         console.log('\n' + chalk.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
       }

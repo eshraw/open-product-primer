@@ -18,37 +18,65 @@ const AGENT_DIRS: Record<string, string> = {
 };
 
 function checkClaudeHooks(projectRoot: string, checks: Check[]): void {
-  const hookPath = path.join(projectRoot, '.claude', 'hooks', 'on-skill-archive.sh');
-  const hookExists = fs.existsSync(hookPath);
+  const hooksDir = path.join(projectRoot, '.claude', 'hooks');
+
+  const promptSubmitPath = path.join(hooksDir, 'on-prompt-submit.sh');
+  const promptSubmitExists = fs.existsSync(promptSubmitPath);
   checks.push({
-    name: 'agent: Claude hook (on-skill-archive.sh)',
-    pass: hookExists,
-    note: hookExists ? undefined : "Run 'oprim update' to install",
+    name: 'agent: Claude hook (on-prompt-submit.sh)',
+    pass: promptSubmitExists,
+    note: promptSubmitExists ? undefined : "Run 'oprim update' to install",
+    required: false,
+  });
+
+  const stopHookPath = path.join(hooksDir, 'on-stop.sh');
+  const stopHookExists = fs.existsSync(stopHookPath);
+  checks.push({
+    name: 'agent: Claude hook (on-stop.sh)',
+    pass: stopHookExists,
+    note: stopHookExists ? undefined : "Run 'oprim update' to install",
     required: false,
   });
 
   const settingsPath = path.join(projectRoot, '.claude', 'settings.json');
-  let hookRegistered = false;
+  let promptSubmitRegistered = false;
+  let stopRegistered = false;
   if (fs.existsSync(settingsPath)) {
     try {
       const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8')) as Record<string, unknown>;
-      const postToolUse = (settings.hooks as Record<string, unknown> | undefined)?.PostToolUse as
+      const hooksMap = settings.hooks as Record<string, unknown> | undefined;
+
+      const userPromptSubmit = hooksMap?.UserPromptSubmit as
         | Array<Record<string, unknown>>
         | undefined;
-      const hookCommand = 'bash ".claude/hooks/on-skill-archive.sh"';
-      hookRegistered =
-        postToolUse?.some((entry) => {
+      promptSubmitRegistered =
+        userPromptSubmit?.some((entry) => {
           const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
-          return entryHooks?.some((h) => h.command === hookCommand);
+          return entryHooks?.some(
+            (h) => h.command === 'bash ".claude/hooks/on-prompt-submit.sh"'
+          );
+        }) ?? false;
+
+      const stopHooks = hooksMap?.Stop as Array<Record<string, unknown>> | undefined;
+      stopRegistered =
+        stopHooks?.some((entry) => {
+          const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+          return entryHooks?.some((h) => h.command === 'bash ".claude/hooks/on-stop.sh"');
         }) ?? false;
     } catch {
       // Unreadable settings.json — treat as missing
     }
   }
   checks.push({
-    name: 'agent: Claude settings.json (PostToolUse hook)',
-    pass: hookRegistered,
-    note: hookRegistered ? undefined : "Run 'oprim update' to register the hook",
+    name: 'agent: Claude settings.json (UserPromptSubmit hook)',
+    pass: promptSubmitRegistered,
+    note: promptSubmitRegistered ? undefined : "Run 'oprim update' to register",
+    required: false,
+  });
+  checks.push({
+    name: 'agent: Claude settings.json (Stop hook)',
+    pass: stopRegistered,
+    note: stopRegistered ? undefined : "Run 'oprim update' to register",
     required: false,
   });
 }

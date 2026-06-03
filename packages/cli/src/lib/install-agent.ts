@@ -7,6 +7,29 @@ import { detectAvailableAgents } from './detect';
 export type Agent = 'claude' | 'cursor';
 export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor'];
 
+export async function promptFrameworkSelection(projectRoot: string): Promise<string> {
+  const configPath = path.join(projectRoot, '.claude', 'hooks', 'config.json');
+  if (fs.existsSync(configPath)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as Record<string, unknown>;
+      if (typeof existing.framework === 'string') {
+        console.log(chalk.dim(`  Speccing framework: ${existing.framework} (from config)`));
+        return existing.framework;
+      }
+    } catch {
+      // fallthrough to prompt
+    }
+  }
+  const { select } = await import('@inquirer/prompts');
+  return select({
+    message: 'Which speccing framework does this project use?',
+    choices: [
+      { name: 'OpenSpec (recommended)', value: 'openspec' },
+      { name: 'None', value: 'none' },
+    ],
+  });
+}
+
 export async function promptAgentSelection(projectRoot: string): Promise<string[]> {
   const detected = detectAvailableAgents(projectRoot);
   if (detected.length > 0) {
@@ -23,7 +46,7 @@ export async function promptAgentSelection(projectRoot: string): Promise<string[
   });
 }
 
-export function installAgentSkills(agent: Agent, projectRoot: string): void {
+export function installAgentSkills(agent: Agent, projectRoot: string, framework = 'openspec'): void {
   if (agent === 'claude') {
     const claudeDir = path.join(projectRoot, '.claude');
     const dirCreated = !fs.existsSync(claudeDir);
@@ -51,13 +74,29 @@ export function installAgentSkills(agent: Agent, projectRoot: string): void {
       }
     }
 
-    // Hook: co-archival coordination between opsx:archive and oprim:archive
-    const hookPath = path.join(claudeDir, 'hooks', 'on-skill-archive.sh');
-    writeFile(hookPath, ON_SKILL_ARCHIVE_HOOK);
-    fs.chmodSync(hookPath, 0o755);
-    console.log(chalk.green('✓') + ' .claude/hooks/on-skill-archive.sh');
+    // Tombstone: remove legacy on-skill-archive.sh (replaced by on-prompt-submit + on-stop in v0.x)
+    const legacyHookPath = path.join(claudeDir, 'hooks', 'on-skill-archive.sh');
+    if (fs.existsSync(legacyHookPath)) {
+      fs.unlinkSync(legacyHookPath);
+      console.log(chalk.dim('  removed legacy hook .claude/hooks/on-skill-archive.sh'));
+    }
 
-    mergeClaudeSettingsHook(claudeDir);
+    // Hooks: UserPromptSubmit + Stop for co-archival coordination
+    const hooksDir = path.join(claudeDir, 'hooks');
+    writeFile(path.join(hooksDir, 'config.json'), hooksConfig(framework));
+    console.log(chalk.green('✓') + ' .claude/hooks/config.json');
+
+    const promptSubmitPath = path.join(hooksDir, 'on-prompt-submit.sh');
+    writeFile(promptSubmitPath, ON_PROMPT_SUBMIT_HOOK);
+    fs.chmodSync(promptSubmitPath, 0o755);
+    console.log(chalk.green('✓') + ' .claude/hooks/on-prompt-submit.sh');
+
+    const stopHookPath = path.join(hooksDir, 'on-stop.sh');
+    writeFile(stopHookPath, ON_STOP_HOOK);
+    fs.chmodSync(stopHookPath, 0o755);
+    console.log(chalk.green('✓') + ' .claude/hooks/on-stop.sh');
+
+    mergeClaudeSettingsHooks(claudeDir);
 
     if (dirCreated) {
       console.log(chalk.dim('  .claude/ created — Claude Code will discover these files automatically.'));
@@ -507,36 +546,77 @@ function reviewInlineContent(): string {
   return `Create KPI review in \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`. Read \`criteria.yaml\` for pre-fill (baseline/target). Check \`oprim/bets/BET-NNN/measurements/\` for \`run-*.yaml\` files — if found, use the most recent to pre-populate actuals and status (include "Actuals from run: YYYY-MM-DD" note). If no run result, ask for each metric's actual value. Status: actual >= target → hit, actual < target → missed, not provided → pending. Ask reviewer name and decision quality notes. Write review with metric table and Actions checklist. Report what was created.`;
 }
 
-// ─── Hook script: co-archival coordination ───────────────────────────────────
+// ─── Hook scripts: co-archival coordination ──────────────────────────────────
 
-const ON_SKILL_ARCHIVE_HOOK = `#!/usr/bin/env bash
-# PostToolUse hook: fires after every Skill tool call.
-# If the skill matches opsx:archive or openspec-archive-change, prompts
-# Claude to co-archive the linked bet from the change's proposal.md.
+function hooksConfig(framework: string): string {
+  return (
+    JSON.stringify(
+      {
+        framework,
+        archive_commands:
+          framework === 'openspec' ? ['/opsx:archive', '/openspec-archive-change'] : [],
+      },
+      null,
+      2
+    ) + '\n'
+  );
+}
 
-set -euo pipefail
+const ON_PROMPT_SUBMIT_HOOK = `#!/usr/bin/env bash
+# UserPromptSubmit hook: detects archive slash commands and sets a pending flag.
 
-input=$(cat)
+config_file=".claude/hooks/config.json"
+flag_file=".claude/hooks/.archive-pending"
 
-tool_name=$(echo "$input" | python3 -c "import sys, json; d=json.load(sys.stdin); print(d.get('tool_name', ''))" 2>/dev/null || true)
-
-if [ "$tool_name" != "Skill" ]; then
-  exit 0
+framework="openspec"
+if [ -f "$config_file" ]; then
+  framework=$(python3 -c "import sys,json; print(json.load(open('$config_file')).get('framework','openspec'))" 2>/dev/null || echo "openspec")
 fi
 
-skill_name=$(echo "$input" | python3 -c "import sys, json; d=json.load(sys.stdin); print(d.get('tool_input', {}).get('skill', ''))" 2>/dev/null || true)
+prompt=$(cat | python3 -c "import sys,json; print(json.load(sys.stdin).get('prompt',''))" 2>/dev/null || true)
 
-if [ "$skill_name" != "opsx:archive" ] && [ "$skill_name" != "openspec-archive-change" ]; then
-  exit 0
+[ -z "$prompt" ] && exit 0
+
+if [ "$framework" = "openspec" ]; then
+  if echo "$prompt" | grep -qE '^[[:space:]]*/(opsx:archive|openspec-archive-change)([[:space:]]|$)'; then
+    arg=$(echo "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
+    echo "$arg" > "$flag_file"
+  fi
 fi
-
-cat <<'PROMPT'
-A change was just archived using an openspec archive skill. Please check the archived change's proposal.md \`## Context\` section for a line matching \`- Bet: BET-NNN\`. If a Bet ID is found, invoke \`/oprim:archive\` for that bet ID. If no Bet ID is found, take no action.
-PROMPT
 `;
 
-// Merge the PostToolUse/Skill hook into .claude/settings.json without clobbering existing entries.
-function mergeClaudeSettingsHook(claudeDir: string): void {
+const ON_STOP_HOOK = `#!/usr/bin/env bash
+# Stop hook: if an archive command was detected, find the linked bet and prompt co-archival.
+
+flag_file=".claude/hooks/.archive-pending"
+[ -f "$flag_file" ] || exit 0
+
+change=$(tr -d '[:space:]' < "$flag_file")
+rm -f "$flag_file"
+
+if [ -z "$change" ]; then
+  latest=$(ls openspec/changes/archive/ 2>/dev/null | sort -r | head -1)
+  [ -z "$latest" ] && exit 0
+  change=$(echo "$latest" | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
+fi
+
+[ -z "$change" ] && exit 0
+
+archive_dir=$(ls openspec/changes/archive/ 2>/dev/null | grep -F "$change" | sort -r | head -1)
+[ -z "$archive_dir" ] && exit 0
+
+proposal="openspec/changes/archive/$archive_dir/proposal.md"
+[ -f "$proposal" ] || exit 0
+
+bet_id=$(grep -oE 'BET-[0-9]+' "$proposal" | head -1)
+[ -z "$bet_id" ] && exit 0
+
+printf '{"decision":"block","reason":"The openspec change '\''%s'\'' was just archived. Its proposal.md references %s. Please invoke \`/oprim:archive %s\` to co-archive the linked bet."}\\n' "$change" "$bet_id" "$bet_id"
+`;
+
+// Merge UserPromptSubmit + Stop hooks into .claude/settings.json without clobbering existing entries.
+// Also removes the legacy PostToolUse/Skill hook from on-skill-archive.sh if present.
+function mergeClaudeSettingsHooks(claudeDir: string): void {
   const settingsPath = path.join(claudeDir, 'settings.json');
   let settings: Record<string, unknown> = {};
 
@@ -550,24 +630,48 @@ function mergeClaudeSettingsHook(claudeDir: string): void {
 
   if (!settings.hooks) settings.hooks = {};
   const hooks = settings.hooks as Record<string, unknown>;
-  if (!hooks.PostToolUse) hooks.PostToolUse = [];
-  const postToolUse = hooks.PostToolUse as Array<Record<string, unknown>>;
 
-  const hookCommand = 'bash ".claude/hooks/on-skill-archive.sh"';
-  const alreadyPresent = postToolUse.some((entry) => {
-    const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
-    return entryHooks?.some((h) => h.command === hookCommand);
-  });
-
-  if (!alreadyPresent) {
-    postToolUse.push({
-      matcher: 'Skill',
-      hooks: [{ type: 'command', command: hookCommand }],
+  // Tombstone: remove legacy PostToolUse/Skill entry from on-skill-archive.sh
+  const legacyCommand = 'bash ".claude/hooks/on-skill-archive.sh"';
+  if (hooks.PostToolUse) {
+    const postToolUse = hooks.PostToolUse as Array<Record<string, unknown>>;
+    const filtered = postToolUse.filter((entry) => {
+      const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+      return !entryHooks?.some((h) => h.command === legacyCommand);
     });
+    if (filtered.length === 0) {
+      delete hooks.PostToolUse;
+    } else {
+      hooks.PostToolUse = filtered;
+    }
+  }
+
+  // Register UserPromptSubmit hook
+  const promptSubmitCommand = 'bash ".claude/hooks/on-prompt-submit.sh"';
+  if (!hooks.UserPromptSubmit) hooks.UserPromptSubmit = [];
+  const userPromptSubmit = hooks.UserPromptSubmit as Array<Record<string, unknown>>;
+  const promptSubmitPresent = userPromptSubmit.some((entry) => {
+    const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+    return entryHooks?.some((h) => h.command === promptSubmitCommand);
+  });
+  if (!promptSubmitPresent) {
+    userPromptSubmit.push({ hooks: [{ type: 'command', command: promptSubmitCommand }] });
+  }
+
+  // Register Stop hook
+  const stopCommand = 'bash ".claude/hooks/on-stop.sh"';
+  if (!hooks.Stop) hooks.Stop = [];
+  const stopHooks = hooks.Stop as Array<Record<string, unknown>>;
+  const stopPresent = stopHooks.some((entry) => {
+    const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+    return entryHooks?.some((h) => h.command === stopCommand);
+  });
+  if (!stopPresent) {
+    stopHooks.push({ hooks: [{ type: 'command', command: stopCommand }] });
   }
 
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
-  console.log(chalk.green('✓') + ' .claude/settings.json (PostToolUse hook registered)');
+  console.log(chalk.green('✓') + ' .claude/settings.json (UserPromptSubmit + Stop hooks registered)');
 }
 
 // ─── Legacy content (promote / sequence remain inline) ───────────────────────
