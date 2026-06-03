@@ -5,6 +5,14 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-06-03
+
+### Fixed
+
+- `oprim-bet` next ID detection now works with slug-suffixed bet directories (e.g. `BET-010-improve-bet-naming`) — the regex `BET-(\d+)$` was updated to `BET-(\d+)`, removing the end-anchor that prevented matches when a slug followed the number
+
+[0.4.1]: https://github.com/eshraw/open-product-primer/releases/tag/v0.4.1
+
 ## [0.4.0] - 2026-06-03
 
 ### Added
