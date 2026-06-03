@@ -24,7 +24,7 @@ After receiving the title, validate: if fewer than 4 words OR fewer than 25 char
   - If "y": proceed with the original title
 
 ### 2. Assign the next BET ID
-Scan `oprim/bets/` for directories matching `BET-(\d+)$`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default `001` if none.
+Scan `oprim/bets/` for directories matching `BET-(\d+)`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default `001` if none.
 
 ### 3. Check sequence.yaml exists
 If `oprim/sequence.yaml` not found: report and stop — advise `oprim init`.

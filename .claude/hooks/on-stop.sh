@@ -24,4 +24,4 @@ proposal="openspec/changes/archive/$archive_dir/proposal.md"
 bet_id=$(grep -oE 'BET-[0-9]+' "$proposal" | head -1)
 [ -z "$bet_id" ] && exit 0
 
-printf '{"decision":"block","reason":"The openspec change '\''%s'\'' was just archived. Its proposal.md references %s. Please invoke `/oprim:archive %s` to co-archive the linked bet."}\n' "$change" "$bet_id" "$bet_id"
+printf '{"decision":"block","reason":"The openspec change '''%s''' was just archived. Its proposal.md references %s. Please invoke `/oprim:archive %s` to co-archive the linked bet."}\n' "$change" "$bet_id" "$bet_id"
