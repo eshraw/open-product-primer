@@ -8,7 +8,20 @@ Create a new bet in `oprim/bets/` and register it on the sequencing board.
 ## Steps
 
 ### 1. Get the bet title
+Display the naming convention before asking:
+
+> **Naming tip:** Use "verb + object [for context]"
+> - Good: "Improve bet naming for scannability"
+> - Bad: "Naming"
+
 If not provided, ask: "What is the title of this bet?"
+
+After receiving the title, validate: if fewer than 4 words OR fewer than 25 characters:
+- Show: "Warning: this title may be too vague to scan at a glance."
+- Suggest a reformulation, e.g. "Consider: 'Improve <what> for <why>'"
+- Ask: "Proceed with this title anyway? (y/N)"
+  - If "n" or Enter: ask for a revised title and re-validate
+  - If "y": proceed with the original title
 
 ### 2. Assign the next BET ID
 Scan `oprim/bets/` for directories matching `BET-(\d+)$`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default `001` if none.
@@ -22,6 +35,7 @@ Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date 
 ### 5. Write oprim/bets/BET-NNN/bet-decision.md
 ```
 # Decision: BET-NNN <title>
+<!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
 - Decision: <decision>

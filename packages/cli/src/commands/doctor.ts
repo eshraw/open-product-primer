@@ -17,6 +17,70 @@ const AGENT_DIRS: Record<string, string> = {
   cursor: '.cursor',
 };
 
+function checkClaudeHooks(projectRoot: string, checks: Check[]): void {
+  const hooksDir = path.join(projectRoot, '.claude', 'hooks');
+
+  const promptSubmitPath = path.join(hooksDir, 'on-prompt-submit.sh');
+  const promptSubmitExists = fs.existsSync(promptSubmitPath);
+  checks.push({
+    name: 'agent: Claude hook (on-prompt-submit.sh)',
+    pass: promptSubmitExists,
+    note: promptSubmitExists ? undefined : "Run 'oprim update' to install",
+    required: false,
+  });
+
+  const stopHookPath = path.join(hooksDir, 'on-stop.sh');
+  const stopHookExists = fs.existsSync(stopHookPath);
+  checks.push({
+    name: 'agent: Claude hook (on-stop.sh)',
+    pass: stopHookExists,
+    note: stopHookExists ? undefined : "Run 'oprim update' to install",
+    required: false,
+  });
+
+  const settingsPath = path.join(projectRoot, '.claude', 'settings.json');
+  let promptSubmitRegistered = false;
+  let stopRegistered = false;
+  if (fs.existsSync(settingsPath)) {
+    try {
+      const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8')) as Record<string, unknown>;
+      const hooksMap = settings.hooks as Record<string, unknown> | undefined;
+
+      const userPromptSubmit = hooksMap?.UserPromptSubmit as
+        | Array<Record<string, unknown>>
+        | undefined;
+      promptSubmitRegistered =
+        userPromptSubmit?.some((entry) => {
+          const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+          return entryHooks?.some(
+            (h) => h.command === 'bash ".claude/hooks/on-prompt-submit.sh"'
+          );
+        }) ?? false;
+
+      const stopHooks = hooksMap?.Stop as Array<Record<string, unknown>> | undefined;
+      stopRegistered =
+        stopHooks?.some((entry) => {
+          const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+          return entryHooks?.some((h) => h.command === 'bash ".claude/hooks/on-stop.sh"');
+        }) ?? false;
+    } catch {
+      // Unreadable settings.json — treat as missing
+    }
+  }
+  checks.push({
+    name: 'agent: Claude settings.json (UserPromptSubmit hook)',
+    pass: promptSubmitRegistered,
+    note: promptSubmitRegistered ? undefined : "Run 'oprim update' to register",
+    required: false,
+  });
+  checks.push({
+    name: 'agent: Claude settings.json (Stop hook)',
+    pass: stopRegistered,
+    note: stopRegistered ? undefined : "Run 'oprim update' to register",
+    required: false,
+  });
+}
+
 export function doctorCommand(): Command {
   return new Command('doctor')
     .description('Check oprim install health and integration readiness')
@@ -147,6 +211,10 @@ export function doctorCommand(): Command {
             required: false,
           });
         }
+
+        if (configAgents.includes('claude')) {
+          checkClaudeHooks(projectRoot, checks);
+        }
       } else {
         // Legacy: check for installed commands by directory presence
         const claudeInstalled = fs.existsSync(path.join(projectRoot, '.claude', 'commands', 'oprim'));
@@ -166,6 +234,11 @@ export function doctorCommand(): Command {
           note: cursorInstalled ? undefined : "Run 'oprim update' to install",
           required: false,
         });
+
+        // Legacy: also check hooks if .claude/ is present
+        if (claudeInstalled) {
+          checkClaudeHooks(projectRoot, checks);
+        }
       }
 
       console.log(chalk.bold('oprim') + ' — health check\n');

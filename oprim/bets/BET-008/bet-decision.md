@@ -26,4 +26,4 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: openspec/changes/bet-008-improve-bet-naming

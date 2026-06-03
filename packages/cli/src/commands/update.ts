@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
-import { installAgentSkills, promptAgentSelection, Agent } from '../lib/install-agent';
+import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, Agent } from '../lib/install-agent';
 import { readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 
 export function updateCommand(): Command {
@@ -14,8 +14,12 @@ export function updateCommand(): Command {
       const configAgents = readAgentsFromConfig(projectRoot);
 
       if (configAgents !== null && configAgents.length > 0) {
+        let specFramework = 'openspec';
+        if (configAgents.includes('claude')) {
+          specFramework = await promptFrameworkSelection(projectRoot);
+        }
         for (const agent of configAgents) {
-          installAgentSkills(agent as Agent, projectRoot);
+          installAgentSkills(agent as Agent, projectRoot, specFramework);
         }
         console.log(`\nAgent skills updated: ${configAgents.join(', ')}`);
       } else {
@@ -23,7 +27,8 @@ export function updateCommand(): Command {
         const legacyAgents: string[] = [];
 
         if (fs.existsSync(path.join(projectRoot, '.claude'))) {
-          installAgentSkills('claude', projectRoot);
+          const specFramework = await promptFrameworkSelection(projectRoot);
+          installAgentSkills('claude', projectRoot, specFramework);
           legacyAgents.push('claude');
         }
 
@@ -63,9 +68,13 @@ export function updateCommand(): Command {
         return;
       }
 
+      let addSpecFramework = 'openspec';
+      if (selected.includes('claude')) {
+        addSpecFramework = await promptFrameworkSelection(projectRoot);
+      }
       console.log('\n' + chalk.bold('Installing agent skills...'));
       for (const agent of selected) {
-        installAgentSkills(agent as Agent, projectRoot);
+        installAgentSkills(agent as Agent, projectRoot, addSpecFramework);
       }
 
       const merged = Array.from(new Set([...currentAgents, ...selected]));

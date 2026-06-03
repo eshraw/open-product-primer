@@ -50,8 +50,12 @@ function updateCommand() {
         const projectRoot = process.cwd();
         const configAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
         if (configAgents !== null && configAgents.length > 0) {
+            let specFramework = 'openspec';
+            if (configAgents.includes('claude')) {
+                specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
+            }
             for (const agent of configAgents) {
-                (0, install_agent_1.installAgentSkills)(agent, projectRoot);
+                (0, install_agent_1.installAgentSkills)(agent, projectRoot, specFramework);
             }
             console.log(`\nAgent skills updated: ${configAgents.join(', ')}`);
         }
@@ -59,7 +63,8 @@ function updateCommand() {
             // Legacy: fall back to directory detection
             const legacyAgents = [];
             if (fs.existsSync(path.join(projectRoot, '.claude'))) {
-                (0, install_agent_1.installAgentSkills)('claude', projectRoot);
+                const specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
+                (0, install_agent_1.installAgentSkills)('claude', projectRoot, specFramework);
                 legacyAgents.push('claude');
             }
             if (fs.existsSync(path.join(projectRoot, '.cursor'))) {
@@ -92,9 +97,13 @@ function updateCommand() {
             console.log('\nRun ' + chalk_1.default.cyan('oprim doctor') + ' to verify your setup.');
             return;
         }
+        let addSpecFramework = 'openspec';
+        if (selected.includes('claude')) {
+            addSpecFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
+        }
         console.log('\n' + chalk_1.default.bold('Installing agent skills...'));
         for (const agent of selected) {
-            (0, install_agent_1.installAgentSkills)(agent, projectRoot);
+            (0, install_agent_1.installAgentSkills)(agent, projectRoot, addSpecFramework);
         }
         const merged = Array.from(new Set([...currentAgents, ...selected]));
         (0, detect_1.writeAgentsToConfig)(merged, projectRoot);
