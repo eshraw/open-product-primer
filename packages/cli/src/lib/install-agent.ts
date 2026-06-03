@@ -212,7 +212,20 @@ Create a new bet in \`oprim/bets/\` and register it on the sequencing board.
 ## Steps
 
 ### 1. Get the bet title
+Display the naming convention before asking:
+
+> **Naming tip:** Use "verb + object [for context]"
+> - Good: "Improve bet naming for scannability"
+> - Bad: "Naming"
+
 If not provided, ask: "What is the title of this bet?"
+
+After receiving the title, validate: if fewer than 4 words OR fewer than 25 characters:
+- Show: "Warning: this title may be too vague to scan at a glance."
+- Suggest a reformulation, e.g. "Consider: 'Improve <what> for <why>'"
+- Ask: "Proceed with this title anyway? (y/N)"
+  - If "n" or Enter: ask for a revised title and re-validate
+  - If "y": proceed with the original title
 
 ### 2. Assign the next BET ID
 Scan \`oprim/bets/\` for directories matching \`BET-(\\d+)$\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none.
@@ -226,6 +239,7 @@ Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date 
 ### 5. Write oprim/bets/BET-NNN/bet-decision.md
 \`\`\`
 # Decision: BET-NNN <title>
+<!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
 - Decision: <decision>
@@ -393,7 +407,7 @@ function pdrInlineContent(): string {
 }
 
 function betInlineContent(): string {
-  return `Create a new bet in \`oprim/bets/\`. Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Gather: title, decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\`. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
+  return `Create a new bet in \`oprim/bets/\`. Before asking for the title, show: "Naming tip: verb + object [for context] — Good: 'Improve bet naming for scannability' / Bad: 'Naming'". Scan \`BET-(\\d+)$\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). After receiving the title, validate: if fewer than 4 words OR fewer than 25 characters, warn "this title may be too vague", suggest a reformulation, and ask "Proceed anyway? (y/N)" — if "n", prompt for a revised title. Gather: decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\` with an inline naming tip comment in the header. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
 }
 
 function criteriaInlineContent(): string {

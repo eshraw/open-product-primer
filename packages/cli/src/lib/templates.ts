@@ -62,6 +62,7 @@ Proposed | Accepted | Deprecated | Superseded by PDR-YYY
 `;
 
 export const betDecisionTemplate = `# Decision: BET-XXX <Bet title>
+<!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
 - Decision: Build now | Defer | Kill
