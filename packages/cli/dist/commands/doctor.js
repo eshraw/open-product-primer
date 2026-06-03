@@ -47,6 +47,39 @@ const AGENT_DIRS = {
     claude: '.claude',
     cursor: '.cursor',
 };
+function checkClaudeHooks(projectRoot, checks) {
+    const hookPath = path.join(projectRoot, '.claude', 'hooks', 'on-skill-archive.sh');
+    const hookExists = fs.existsSync(hookPath);
+    checks.push({
+        name: 'agent: Claude hook (on-skill-archive.sh)',
+        pass: hookExists,
+        note: hookExists ? undefined : "Run 'oprim update' to install",
+        required: false,
+    });
+    const settingsPath = path.join(projectRoot, '.claude', 'settings.json');
+    let hookRegistered = false;
+    if (fs.existsSync(settingsPath)) {
+        try {
+            const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+            const postToolUse = settings.hooks?.PostToolUse;
+            const hookCommand = 'bash ".claude/hooks/on-skill-archive.sh"';
+            hookRegistered =
+                postToolUse?.some((entry) => {
+                    const entryHooks = entry.hooks;
+                    return entryHooks?.some((h) => h.command === hookCommand);
+                }) ?? false;
+        }
+        catch {
+            // Unreadable settings.json — treat as missing
+        }
+    }
+    checks.push({
+        name: 'agent: Claude settings.json (PostToolUse hook)',
+        pass: hookRegistered,
+        note: hookRegistered ? undefined : "Run 'oprim update' to register the hook",
+        required: false,
+    });
+}
 function doctorCommand() {
     return new commander_1.Command('doctor')
         .description('Check oprim install health and integration readiness')
@@ -165,6 +198,9 @@ function doctorCommand() {
                     required: false,
                 });
             }
+            if (configAgents.includes('claude')) {
+                checkClaudeHooks(projectRoot, checks);
+            }
         }
         else {
             // Legacy: check for installed commands by directory presence
@@ -183,6 +219,10 @@ function doctorCommand() {
                 note: cursorInstalled ? undefined : "Run 'oprim update' to install",
                 required: false,
             });
+            // Legacy: also check hooks if .claude/ is present
+            if (claudeInstalled) {
+                checkClaudeHooks(projectRoot, checks);
+            }
         }
         console.log(chalk_1.default.bold('oprim') + ' — health check\n');
         for (const check of checks) {

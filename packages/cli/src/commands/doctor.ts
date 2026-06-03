@@ -17,6 +17,42 @@ const AGENT_DIRS: Record<string, string> = {
   cursor: '.cursor',
 };
 
+function checkClaudeHooks(projectRoot: string, checks: Check[]): void {
+  const hookPath = path.join(projectRoot, '.claude', 'hooks', 'on-skill-archive.sh');
+  const hookExists = fs.existsSync(hookPath);
+  checks.push({
+    name: 'agent: Claude hook (on-skill-archive.sh)',
+    pass: hookExists,
+    note: hookExists ? undefined : "Run 'oprim update' to install",
+    required: false,
+  });
+
+  const settingsPath = path.join(projectRoot, '.claude', 'settings.json');
+  let hookRegistered = false;
+  if (fs.existsSync(settingsPath)) {
+    try {
+      const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8')) as Record<string, unknown>;
+      const postToolUse = (settings.hooks as Record<string, unknown> | undefined)?.PostToolUse as
+        | Array<Record<string, unknown>>
+        | undefined;
+      const hookCommand = 'bash ".claude/hooks/on-skill-archive.sh"';
+      hookRegistered =
+        postToolUse?.some((entry) => {
+          const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
+          return entryHooks?.some((h) => h.command === hookCommand);
+        }) ?? false;
+    } catch {
+      // Unreadable settings.json — treat as missing
+    }
+  }
+  checks.push({
+    name: 'agent: Claude settings.json (PostToolUse hook)',
+    pass: hookRegistered,
+    note: hookRegistered ? undefined : "Run 'oprim update' to register the hook",
+    required: false,
+  });
+}
+
 export function doctorCommand(): Command {
   return new Command('doctor')
     .description('Check oprim install health and integration readiness')
@@ -147,6 +183,10 @@ export function doctorCommand(): Command {
             required: false,
           });
         }
+
+        if (configAgents.includes('claude')) {
+          checkClaudeHooks(projectRoot, checks);
+        }
       } else {
         // Legacy: check for installed commands by directory presence
         const claudeInstalled = fs.existsSync(path.join(projectRoot, '.claude', 'commands', 'oprim'));
@@ -166,6 +206,11 @@ export function doctorCommand(): Command {
           note: cursorInstalled ? undefined : "Run 'oprim update' to install",
           required: false,
         });
+
+        // Legacy: also check hooks if .claude/ is present
+        if (claudeInstalled) {
+          checkClaudeHooks(projectRoot, checks);
+        }
       }
 
       console.log(chalk.bold('oprim') + ' — health check\n');

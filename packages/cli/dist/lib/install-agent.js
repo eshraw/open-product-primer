@@ -84,6 +84,12 @@ function installAgentSkills(agent, projectRoot) {
                 console.log(chalk_1.default.dim(`  removed legacy command .claude/commands/oprim/${filename}`));
             }
         }
+        // Hook: co-archival coordination between opsx:archive and oprim:archive
+        const hookPath = path.join(claudeDir, 'hooks', 'on-skill-archive.sh');
+        (0, scaffold_1.writeFile)(hookPath, ON_SKILL_ARCHIVE_HOOK);
+        fs.chmodSync(hookPath, 0o755);
+        console.log(chalk_1.default.green('✓') + ' .claude/hooks/on-skill-archive.sh');
+        mergeClaudeSettingsHook(claudeDir);
         if (dirCreated) {
             console.log(chalk_1.default.dim('  .claude/ created — Claude Code will discover these files automatically.'));
         }
@@ -112,11 +118,13 @@ exports.CLAUDE_SKILLS = {
     'oprim-bet': betSkill(),
     'oprim-criteria': criteriaSkill(),
     'oprim-review': reviewSkill(),
+    'oprim-archive': archiveSkill(),
 };
 // ─── Claude command wrappers (thin, invoke skill) ────────────────────────────
 exports.CLAUDE_COMMANDS = {
     'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
     'sequence.md': claudeWrapper('OPRIM: Sequence', 'Validate and update the primer sequencing board', sequenceContent()),
+    'archive.md': claudeWrapper('OPRIM: Archive', 'Archive a completed bet — move it out of the active board', archiveCommandContent()),
 };
 // ─── Cursor skill playbooks ───────────────────────────────────────────────────
 exports.CURSOR_SKILLS = {
@@ -352,6 +360,83 @@ If not: create with \`metrics:\` list.
 ### 7. Report what was created
 `;
 }
+function archiveSkill() {
+    return `---
+name: oprim-archive
+description: Archive a completed bet — moves it to oprim/bets/archived/BET-NNN/ and removes its sequence.yaml entry
+---
+
+Archive a completed bet by moving it to \`oprim/bets/archived/\` and removing it from \`sequence.yaml\`.
+
+## Steps
+
+### 1. Get the bet ID
+
+If provided as an argument (e.g., \`/oprim:archive BET-005\`), use it directly.
+
+If not provided, ask: "Which bet ID would you like to archive? (e.g., BET-005)"
+
+Normalize the input: accept \`bet-005\`, \`005\`, \`5\`, or \`BET-005\` — always treat as \`BET-NNN\` zero-padded to 3 digits.
+
+### 2. Check the bet directory exists
+
+Check whether \`oprim/bets/BET-NNN/\` exists.
+
+If not found:
+- Report: "Bet BET-NNN was not found in oprim/bets/. Nothing was changed."
+- Stop.
+
+### 3. Check for active dependencies in sequence.yaml
+
+Read \`oprim/sequence.yaml\`. Scan every entry across all buckets (now, next, later, backlog) for any entry whose \`blocked_by\` or \`unlocks\` list contains the target bet ID.
+
+If dependents are found:
+- Show a warning listing each dependent entry and which field references the target bet.
+
+  Example:
+  \`\`\`
+  ⚠ Warning: BET-005 is referenced by active bets:
+    - BET-007 (blocked_by: [BET-005])
+    - BET-008 (unlocks: [BET-005])
+  \`\`\`
+- Ask: "Archive BET-NNN anyway? These references will become stale. (y/N)"
+  - If "n" or Enter: stop, no changes made.
+  - If "y": proceed.
+
+If no dependents found: proceed without warning.
+
+### 4. Move the bet directory to archive
+
+Create the archive subfolder if it doesn't exist:
+\`\`\`bash
+mkdir -p oprim/bets/archived
+\`\`\`
+
+Move the directory:
+\`\`\`bash
+mv oprim/bets/BET-NNN oprim/bets/archived/BET-NNN
+\`\`\`
+
+### 5. Remove the bet entry from sequence.yaml
+
+Read \`oprim/sequence.yaml\`, parse it, and remove the entry with \`id: BET-NNN\` from whichever bucket it appears in (now, next, later, or backlog). Write the updated YAML back using 2-space indentation. Do not modify any other entries.
+
+### 6. Report what was done
+
+\`\`\`
+## Bet Archived
+
+**Bet:** BET-NNN
+**Archived to:** oprim/bets/archived/BET-NNN/
+**Removed from sequence.yaml:** ✓
+
+The bet is preserved in full at the archive location.
+\`\`\`
+`;
+}
+function archiveCommandContent() {
+    return `Use the Skill tool to invoke the \`oprim-archive\` skill.`;
+}
 function reviewSkill() {
     return `---
 name: oprim-review
@@ -426,6 +511,64 @@ function criteriaInlineContent() {
 }
 function reviewInlineContent() {
     return `Create KPI review in \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`. Read \`criteria.yaml\` for pre-fill (baseline/target). Check \`oprim/bets/BET-NNN/measurements/\` for \`run-*.yaml\` files — if found, use the most recent to pre-populate actuals and status (include "Actuals from run: YYYY-MM-DD" note). If no run result, ask for each metric's actual value. Status: actual >= target → hit, actual < target → missed, not provided → pending. Ask reviewer name and decision quality notes. Write review with metric table and Actions checklist. Report what was created.`;
+}
+// ─── Hook script: co-archival coordination ───────────────────────────────────
+const ON_SKILL_ARCHIVE_HOOK = `#!/usr/bin/env bash
+# PostToolUse hook: fires after every Skill tool call.
+# If the skill matches opsx:archive or openspec-archive-change, prompts
+# Claude to co-archive the linked bet from the change's proposal.md.
+
+set -euo pipefail
+
+input=$(cat)
+
+tool_name=$(echo "$input" | python3 -c "import sys, json; d=json.load(sys.stdin); print(d.get('tool_name', ''))" 2>/dev/null || true)
+
+if [ "$tool_name" != "Skill" ]; then
+  exit 0
+fi
+
+skill_name=$(echo "$input" | python3 -c "import sys, json; d=json.load(sys.stdin); print(d.get('tool_input', {}).get('skill', ''))" 2>/dev/null || true)
+
+if [ "$skill_name" != "opsx:archive" ] && [ "$skill_name" != "openspec-archive-change" ]; then
+  exit 0
+fi
+
+cat <<'PROMPT'
+A change was just archived using an openspec archive skill. Please check the archived change's proposal.md \`## Context\` section for a line matching \`- Bet: BET-NNN\`. If a Bet ID is found, invoke \`/oprim:archive\` for that bet ID. If no Bet ID is found, take no action.
+PROMPT
+`;
+// Merge the PostToolUse/Skill hook into .claude/settings.json without clobbering existing entries.
+function mergeClaudeSettingsHook(claudeDir) {
+    const settingsPath = path.join(claudeDir, 'settings.json');
+    let settings = {};
+    if (fs.existsSync(settingsPath)) {
+        try {
+            settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+        }
+        catch {
+            // Unreadable settings — start from scratch
+        }
+    }
+    if (!settings.hooks)
+        settings.hooks = {};
+    const hooks = settings.hooks;
+    if (!hooks.PostToolUse)
+        hooks.PostToolUse = [];
+    const postToolUse = hooks.PostToolUse;
+    const hookCommand = 'bash ".claude/hooks/on-skill-archive.sh"';
+    const alreadyPresent = postToolUse.some((entry) => {
+        const entryHooks = entry.hooks;
+        return entryHooks?.some((h) => h.command === hookCommand);
+    });
+    if (!alreadyPresent) {
+        postToolUse.push({
+            matcher: 'Skill',
+            hooks: [{ type: 'command', command: hookCommand }],
+        });
+    }
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
+    console.log(chalk_1.default.green('✓') + ' .claude/settings.json (PostToolUse hook registered)');
 }
 // ─── Legacy content (promote / sequence remain inline) ───────────────────────
 function promoteContent() {
