@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
-import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, Agent } from '../lib/install-agent';
+import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, promptPdrSurfacing, Agent } from '../lib/install-agent';
 import { readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 
 export function updateCommand(): Command {
@@ -15,11 +15,13 @@ export function updateCommand(): Command {
 
       if (configAgents !== null && configAgents.length > 0) {
         let specFramework = 'openspec';
+        let pdrSurfacing = false;
         if (configAgents.includes('claude')) {
           specFramework = await promptFrameworkSelection(projectRoot);
+          pdrSurfacing = await promptPdrSurfacing();
         }
         for (const agent of configAgents) {
-          installAgentSkills(agent as Agent, projectRoot, specFramework);
+          installAgentSkills(agent as Agent, projectRoot, specFramework, pdrSurfacing);
         }
         console.log(`\nAgent skills updated: ${configAgents.join(', ')}`);
       } else {
@@ -28,7 +30,8 @@ export function updateCommand(): Command {
 
         if (fs.existsSync(path.join(projectRoot, '.claude'))) {
           const specFramework = await promptFrameworkSelection(projectRoot);
-          installAgentSkills('claude', projectRoot, specFramework);
+          const pdrSurfacing = await promptPdrSurfacing();
+          installAgentSkills('claude', projectRoot, specFramework, pdrSurfacing);
           legacyAgents.push('claude');
         }
 
@@ -69,12 +72,14 @@ export function updateCommand(): Command {
       }
 
       let addSpecFramework = 'openspec';
+      let addPdrSurfacing = false;
       if (selected.includes('claude')) {
         addSpecFramework = await promptFrameworkSelection(projectRoot);
+        addPdrSurfacing = await promptPdrSurfacing();
       }
       console.log('\n' + chalk.bold('Installing agent skills...'));
       for (const agent of selected) {
-        installAgentSkills(agent as Agent, projectRoot, addSpecFramework);
+        installAgentSkills(agent as Agent, projectRoot, addSpecFramework, addPdrSurfacing);
       }
 
       const merged = Array.from(new Set([...currentAgents, ...selected]));

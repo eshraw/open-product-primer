@@ -113,12 +113,14 @@ function initCommand() {
         }
         else {
             let specFramework = 'openspec';
+            let pdrSurfacing = false;
             if (selectedAgents.includes('claude')) {
                 specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
+                pdrSurfacing = await (0, install_agent_1.promptPdrSurfacing)();
             }
             console.log('\n' + chalk_1.default.bold('Installing agent skills...'));
             for (const agent of selectedAgents) {
-                (0, install_agent_1.installAgentSkills)(agent, projectRoot, specFramework);
+                (0, install_agent_1.installAgentSkills)(agent, projectRoot, specFramework, pdrSurfacing);
             }
             console.log('\n' + chalk_1.default.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
         }

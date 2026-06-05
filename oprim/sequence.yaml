@@ -3,12 +3,7 @@ wip_limits:
 
 now: []
 
-next:
-  - id: BET-007
-    title: "Surface relevant product decisions proactively during agent sessions"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+next: []
 
 later:
   - id: BET-005
