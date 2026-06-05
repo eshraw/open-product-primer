@@ -3,7 +3,7 @@ import * as path from 'path';
 import chalk from 'chalk';
 import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
-import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
+import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, promptPdrSurfacing, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
 import {
   configTemplate,
   sequenceTemplate,
@@ -101,12 +101,14 @@ export function initCommand(): Command {
         );
       } else {
         let specFramework = 'openspec';
+        let pdrSurfacing = false;
         if (selectedAgents.includes('claude')) {
           specFramework = await promptFrameworkSelection(projectRoot);
+          pdrSurfacing = await promptPdrSurfacing();
         }
         console.log('\n' + chalk.bold('Installing agent skills...'));
         for (const agent of selectedAgents) {
-          installAgentSkills(agent as Agent, projectRoot, specFramework);
+          installAgentSkills(agent as Agent, projectRoot, specFramework, pdrSurfacing);
         }
         console.log('\n' + chalk.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
       }

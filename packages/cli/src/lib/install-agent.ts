@@ -48,15 +48,55 @@ export async function promptAgentSelection(projectRoot: string): Promise<string[
   });
 }
 
-export function installAgentSkills(agent: Agent, projectRoot: string, framework = 'openspec'): void {
+export async function promptPdrSurfacing(): Promise<boolean> {
+  const { confirm } = await import('@inquirer/prompts');
+  return confirm({ message: 'Enable proactive PDR surfacing in skills? (y/N)', default: false });
+}
+
+export function installAgentSkills(
+  agent: Agent,
+  projectRoot: string,
+  framework = 'openspec',
+  pdrSurfacing = false
+): void {
   if (agent === 'claude') {
     const claudeDir = path.join(projectRoot, '.claude');
     const dirCreated = !fs.existsSync(claudeDir);
 
     const skillsBase = path.join(claudeDir, 'skills');
+
+    // oprim:context skill — install when opted in, remove when opted out
+    const contextSkillPath = path.join(skillsBase, 'oprim:context', 'SKILL.md');
+    if (pdrSurfacing) {
+      writeFile(contextSkillPath, oprimContextSkill());
+      console.log(chalk.green('✓') + ' .claude/skills/oprim:context/SKILL.md');
+    } else if (fs.existsSync(contextSkillPath)) {
+      fs.unlinkSync(contextSkillPath);
+      try { fs.rmdirSync(path.dirname(contextSkillPath)); } catch { /* not empty or already gone */ }
+      console.log(chalk.dim('  removed .claude/skills/oprim:context/SKILL.md'));
+    }
+
+    // oprim skills — prepend Step 0 when opted in
     for (const [name, content] of Object.entries(CLAUDE_SKILLS)) {
-      writeFile(path.join(skillsBase, name, 'SKILL.md'), content);
+      const skillContent = pdrSurfacing ? withContextStep(content) : content;
+      writeFile(path.join(skillsBase, name, 'SKILL.md'), skillContent);
       console.log(chalk.green('✓') + ` .claude/skills/${name}/SKILL.md`);
+    }
+
+    // openspec skills — add/remove Step 0 in-place when they exist
+    for (const name of OPENSPEC_SKILL_NAMES) {
+      const skillFilePath = path.join(skillsBase, name, 'SKILL.md');
+      if (fs.existsSync(skillFilePath)) {
+        const current = fs.readFileSync(skillFilePath, 'utf-8');
+        const updated = pdrSurfacing ? addContextStepToFile(current) : removeContextStepFromFile(current);
+        if (updated !== current) {
+          fs.writeFileSync(skillFilePath, updated, 'utf-8');
+          console.log(
+            chalk.green('✓') +
+              ` .claude/skills/${name}/SKILL.md (PDR surfacing ${pdrSurfacing ? 'enabled' : 'disabled'})`
+          );
+        }
+      }
     }
 
     const cmdsDir = path.join(claudeDir, 'commands', 'oprim');
@@ -131,6 +171,69 @@ export function installAgentSkills(agent: Agent, projectRoot: string, framework 
       console.log(chalk.dim('  .cursor/ created — Cursor will discover these files automatically.'));
     }
   }
+}
+
+// ─── PDR context surfacing ────────────────────────────────────────────────────
+
+const CTX_STEP_START = '<!-- oprim:context:start -->';
+const CTX_STEP_END = '<!-- oprim:context:end -->';
+
+export const OPRIM_CONTEXT_SKILL_STEP = `## Step 0: Check relevant product decisions
+Invoke the \`oprim:context\` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or \`oprim/decisions/\` is empty, the skill exits silently — continue to Step 1 immediately.`;
+
+// Openspec skill names whose files are managed by the openspec CLI and modified in-place by oprim
+const OPENSPEC_SKILL_NAMES = [
+  'openspec-propose',
+  'openspec-apply-change',
+  'openspec-explore',
+  'openspec-archive-change',
+] as const;
+
+// Insert Step 0 into an oprim skill string (written fresh each time — no markers needed)
+function withContextStep(content: string): string {
+  const lines = content.split('\n');
+  let closingDash = -1;
+  let dashCount = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      dashCount++;
+      if (dashCount === 2) { closingDash = i; break; }
+    }
+  }
+  if (closingDash === -1) return OPRIM_CONTEXT_SKILL_STEP + '\n\n' + content;
+  const front = lines.slice(0, closingDash + 1).join('\n');
+  const body = lines.slice(closingDash + 1).join('\n').trimStart();
+  return `${front}\n\n${OPRIM_CONTEXT_SKILL_STEP}\n\n${body}`;
+}
+
+// Idempotently add Step 0 to an openspec skill file (read-modify-write)
+function addContextStepToFile(content: string): string {
+  if (content.includes(CTX_STEP_START)) return content; // already present
+  const lines = content.split('\n');
+  let closingDash = -1;
+  let dashCount = 0;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === '---') {
+      dashCount++;
+      if (dashCount === 2) { closingDash = i; break; }
+    }
+  }
+  const block = `${CTX_STEP_START}\n${OPRIM_CONTEXT_SKILL_STEP}\n${CTX_STEP_END}`;
+  if (closingDash === -1) return block + '\n\n' + content;
+  const front = lines.slice(0, closingDash + 1).join('\n');
+  const body = lines.slice(closingDash + 1).join('\n').trimStart();
+  return `${front}\n\n${block}\n\n${body}`;
+}
+
+// Remove Step 0 block from an openspec skill file (read-modify-write)
+function removeContextStepFromFile(content: string): string {
+  const s = content.indexOf(CTX_STEP_START);
+  if (s === -1) return content;
+  const e = content.indexOf(CTX_STEP_END, s);
+  if (e === -1) return content;
+  const before = content.slice(0, s).trimEnd();
+  const after = content.slice(e + CTX_STEP_END.length).replace(/^\n+/, '\n');
+  return before + after;
 }
 
 // ─── Claude skill playbooks ───────────────────────────────────────────────────
@@ -468,6 +571,37 @@ Read \`oprim/sequence.yaml\`, parse it, and remove the entry with \`id: BET-NNN\
 
 The bet is preserved in full at the archive location.
 \`\`\`
+`;
+}
+
+function oprimContextSkill(): string {
+  return `---
+name: oprim:context
+description: Surface relevant product decisions from oprim/decisions/ by keyword-matching against the current conversation — invoke at the start of any oprim or openspec workflow when PDR surfacing is enabled
+---
+
+Scan \`oprim/decisions/\` and surface PDRs that match keywords from the current conversation.
+
+## Steps
+
+### 1. Check for decisions
+Scan \`oprim/decisions/\` for files matching \`PDR-*.md\`. If the directory is empty or contains no PDR files, exit silently — produce no output and return immediately.
+
+### 2. Extract keywords
+From the current conversation context, extract 3–10 topic keywords: bet IDs referenced (e.g. \`BET-007\`), capability names, filenames mentioned, subject-area nouns. Focus on the most specific and distinctive terms.
+
+### 3. Match PDRs
+For each PDR file: read the filename and the first 25 lines (to capture title, status, and context). A PDR is relevant if any keyword appears in the filename, title (\`# PDR-NNN: ...\`), or body text (case-insensitive).
+
+### 4. Report or exit silently
+If one or more PDRs match:
+
+**Relevant product decisions:**
+- PDR-NNN: <title> — <Status> (\`oprim/decisions/PDR-NNN-<slug>.md\`)
+
+List each match on its own line, then return — the invoking skill continues to its next step.
+
+If no PDRs match: exit silently — produce no output.
 `;
 }
 
