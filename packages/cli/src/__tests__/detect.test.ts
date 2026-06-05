@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
+import { detectAvailableAgents, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 
 let tmpDir: string;
 
@@ -12,6 +12,54 @@ beforeEach(() => {
 
 afterEach(() => {
   fs.rmSync(tmpDir, { recursive: true, force: true });
+});
+
+// detectAvailableAgents ───────────────────────────────────────────────────────
+
+describe('detectAvailableAgents', () => {
+  it('returns empty array when no agent indicators are present', () => {
+    expect(detectAvailableAgents(tmpDir)).toEqual([]);
+  });
+
+  it('detects claude when .claude/ directory exists', () => {
+    fs.mkdirSync(path.join(tmpDir, '.claude'));
+    expect(detectAvailableAgents(tmpDir)).toContain('claude');
+  });
+
+  it('detects cursor when .cursor/ directory exists', () => {
+    fs.mkdirSync(path.join(tmpDir, '.cursor'));
+    expect(detectAvailableAgents(tmpDir)).toContain('cursor');
+  });
+
+  it('detects codex when AGENTS.md exists', () => {
+    fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '# Agents\n');
+    expect(detectAvailableAgents(tmpDir)).toContain('codex');
+  });
+
+  it('does not detect codex when AGENTS.md is absent', () => {
+    expect(detectAvailableAgents(tmpDir)).not.toContain('codex');
+  });
+
+  it('detects gemini when GEMINI.md exists', () => {
+    fs.writeFileSync(path.join(tmpDir, 'GEMINI.md'), '# Gemini\n');
+    expect(detectAvailableAgents(tmpDir)).toContain('gemini');
+  });
+
+  it('does not detect gemini when GEMINI.md is absent', () => {
+    expect(detectAvailableAgents(tmpDir)).not.toContain('gemini');
+  });
+
+  it('detects all four agents when all indicators are present', () => {
+    fs.mkdirSync(path.join(tmpDir, '.claude'));
+    fs.mkdirSync(path.join(tmpDir, '.cursor'));
+    fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '');
+    fs.writeFileSync(path.join(tmpDir, 'GEMINI.md'), '');
+    const result = detectAvailableAgents(tmpDir);
+    expect(result).toContain('claude');
+    expect(result).toContain('cursor');
+    expect(result).toContain('codex');
+    expect(result).toContain('gemini');
+  });
 });
 
 // 7.1 ─────────────────────────────────────────────────────────────────────────

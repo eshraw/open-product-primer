@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: oprim init SHALL prompt the user to select which AI agents to install skills for
 During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL present an interactive multi-select prompt listing supported AI tools (Claude Code, Cursor, Codex, Gemini CLI) and install `/oprim:*` skills and instructions for each selected tool.
@@ -54,13 +54,6 @@ The system SHALL accept one or more `--agent <name>` flags on `oprim init` to sp
 - **WHEN** the user runs `oprim init --agent unknown-tool`
 - **THEN** the command exits with a non-zero code and reports the supported agent names: `claude`, `cursor`, `codex`, `gemini`
 
-### Requirement: oprim init SHALL create agent config directories if they do not exist
-When installing skills for a selected agent whose config directory (`.claude/` or `.cursor/`) does not yet exist, the system SHALL create the necessary directories before writing skill files and SHALL emit a notice that the directory was created.
-
-#### Scenario: Install Claude skills when .claude/ does not exist
-- **WHEN** the user selects Claude Code but `.claude/` is absent
-- **THEN** the command creates `.claude/skills/` and `.claude/commands/oprim/`, writes the skill files, and prints a notice that `.claude/` was created
-
 ### Requirement: oprim init SHALL auto-detect and pre-check Codex and Gemini CLI environments
 During `oprim init`, when `AGENTS.md` is present the Codex option SHALL be pre-checked; when `GEMINI.md` is present the Gemini CLI option SHALL be pre-checked.
 
@@ -73,14 +66,3 @@ During `oprim init`, when `AGENTS.md` is present the Codex option SHALL be pre-c
 - **WHEN** `GEMINI.md` exists and the user runs `oprim init`
 - **THEN** the multi-select prompt shows Gemini CLI pre-checked
 - **AND** the CLI prints a dim message that includes `gemini` in the detected list
-
-### Requirement: The agents selection SHALL be persisted to oprim/config.yaml
-The system SHALL write the selected agents as a YAML list under the `agents:` key in `oprim/config.yaml` so that subsequent `oprim update` and `oprim doctor` runs can use the declared selection.
-
-#### Scenario: agents field written on first init
-- **WHEN** `oprim init` completes with one or more agents selected
-- **THEN** `oprim/config.yaml` contains `agents:` with the selected agent identifiers
-
-#### Scenario: agents field preserved on re-init when unchanged
-- **WHEN** `oprim init` is re-run on a project with an existing `agents:` list
-- **THEN** the `agents:` value in config is not cleared or overwritten beyond what the re-install requires
