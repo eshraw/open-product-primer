@@ -17,9 +17,4 @@ later:
     unlocks: []
     requires_pdrs: []
 
-backlog:
-  - id: BET-011
-    title: "Remove checks on archived bets in oprim doctor"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+backlog: []

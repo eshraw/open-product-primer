@@ -8,6 +8,7 @@ import {
   generateAmplitudeDefinition,
   generateBigQuerySQL,
   classifyStatus,
+  scanCriteriaForSourceType,
   CriteriaMetric,
 } from '../lib/measure';
 import { measureCommand } from '../commands/measure';
@@ -225,6 +226,55 @@ describe('classifyStatus', () => {
 
   it('returns pending when actual is null', () => {
     expect(classifyStatus(null, 5)).toBe('pending');
+  });
+});
+
+// ─── 8.4b scanCriteriaForSourceType ──────────────────────────────────────────
+
+const amplitudeCriteria = `
+metrics:
+  - id: activation_rate
+    name: Activation Rate
+    baseline: 0.20
+    target: 0.30
+    timeframe: "30 days post-launch"
+    launch_date: null
+    source:
+      type: amplitude
+      definition:
+        event: user_activated
+        aggregation: unique_users
+        denominator_event: null
+    segment: null
+`.trim();
+
+describe('scanCriteriaForSourceType', () => {
+  it('returns true when an active bet has a matching source type', () => {
+    const betDir = path.join(tmpDir, 'oprim', 'bets', 'BET-007');
+    fs.mkdirSync(betDir, { recursive: true });
+    fs.writeFileSync(path.join(betDir, 'criteria.yaml'), amplitudeCriteria);
+
+    expect(scanCriteriaForSourceType(tmpDir, 'amplitude')).toBe(true);
+  });
+
+  it('returns false when no active bet has a matching source type', () => {
+    const betDir = path.join(tmpDir, 'oprim', 'bets', 'BET-007');
+    fs.mkdirSync(betDir, { recursive: true });
+    fs.writeFileSync(path.join(betDir, 'criteria.yaml'), amplitudeCriteria);
+
+    expect(scanCriteriaForSourceType(tmpDir, 'bigquery')).toBe(false);
+  });
+
+  it('returns false when the only matching criteria.yaml is in an archived bet', () => {
+    const archivedBetDir = path.join(tmpDir, 'oprim', 'bets', 'archived', 'BET-002');
+    fs.mkdirSync(archivedBetDir, { recursive: true });
+    fs.writeFileSync(path.join(archivedBetDir, 'criteria.yaml'), amplitudeCriteria);
+
+    expect(scanCriteriaForSourceType(tmpDir, 'amplitude')).toBe(false);
+  });
+
+  it('returns false when oprim/bets/ does not exist', () => {
+    expect(scanCriteriaForSourceType(tmpDir, 'amplitude')).toBe(false);
   });
 });
 
