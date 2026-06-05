@@ -5,6 +5,23 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-06-05
+
+### Added
+
+- **Codex support** — `oprim init` and `oprim update` now install oprim workflow instructions for OpenAI Codex by appending a delimited `## oprim workflows` section to `AGENTS.md` (created if absent); all five workflows inlined: bet, criteria, pdr, review, archive
+- **Gemini CLI support** — same installation mechanism for Gemini CLI, targeting `GEMINI.md`
+- `detectAvailableAgents()` now detects Codex (`AGENTS.md` present) and Gemini CLI (`GEMINI.md` present) and auto-checks them in the `oprim init` agent selection prompt
+- `writeAgentInstructionFile()` helper — idempotent section writer using `<!-- oprim:start -->`/`<!-- oprim:end -->` delimiters; appends on first install, replaces on re-run without touching surrounding content
+- `--agent codex` and `--agent gemini` are now valid values for the `oprim init --agent` flag
+
+### Changed
+
+- Agent selection prompt now lists four options: Claude Code, Cursor, Codex, Gemini CLI
+- `SUPPORTED_AGENTS` expanded from `['claude', 'cursor']` to `['claude', 'cursor', 'codex', 'gemini']`
+
+[0.5.0]: https://github.com/eshraw/open-product-primer/releases/tag/v0.5.0
+
 ## [0.4.1] - 2026-06-03
 
 ### Fixed
