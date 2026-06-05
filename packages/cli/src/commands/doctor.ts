@@ -180,6 +180,7 @@ export function doctorCommand(): Command {
         const betEntries = fs.readdirSync(betsDir, { withFileTypes: true });
         for (const entry of betEntries) {
           if (!entry.isDirectory()) continue;
+          if (entry.name === 'archived') continue;
           const betDir = path.join(betsDir, entry.name);
           const hasDecision = fs.existsSync(path.join(betDir, 'bet-decision.md'));
           if (!hasDecision) continue;
