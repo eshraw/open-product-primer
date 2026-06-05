@@ -1,12 +1,7 @@
 wip_limits:
   now: 2
 
-now:
-  - id: BET-006
-    title: "Add multi-tool agentic support (Codex, Gemini CLI, Copilot CLI, and beyond)"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+now: []
 
 next:
   - id: BET-007

@@ -68,6 +68,10 @@ function detectAvailableAgents(projectRoot) {
         detected.push('claude');
     if (fs.existsSync(path.join(projectRoot, '.cursor')))
         detected.push('cursor');
+    if (fs.existsSync(path.join(projectRoot, 'AGENTS.md')))
+        detected.push('codex');
+    if (fs.existsSync(path.join(projectRoot, 'GEMINI.md')))
+        detected.push('gemini');
     return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {
