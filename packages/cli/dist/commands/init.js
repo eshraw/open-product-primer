@@ -64,6 +64,7 @@ function initCommand() {
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'reviews'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'templates'));
+        (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
         const configWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'config.yaml'), (0, templates_1.configTemplate)(projectName, openspec.detected, graphify.detected));
         const sequenceWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'sequence.yaml'), templates_1.sequenceTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'pdr.md'), templates_1.pdrTemplate);
@@ -71,6 +72,7 @@ function initCommand() {
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'criteria.yaml'), templates_1.criteriaTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'kpi-review.md'), templates_1.kpiReviewTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'discovery.md'), templates_1.discoveryTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'decisions', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'reviews', '.gitkeep'), '');
@@ -80,6 +82,7 @@ function initCommand() {
         console.log('  ' + chalk_1.default.gray('oprim/config.yaml') + ' — ' + configStatus);
         console.log('  ' + chalk_1.default.gray('oprim/sequence.yaml') + ' — ' + sequenceStatus);
         console.log('  ' + chalk_1.default.gray('oprim/templates/') + ' — refreshed');
+        console.log('  ' + chalk_1.default.gray('oprim/scripts/') + ' — refreshed');
         // ── Agent selection ───────────────────────────────────────────────────────
         let selectedAgents;
         const flaggedAgents = opts.agent;

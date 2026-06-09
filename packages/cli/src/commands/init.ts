@@ -12,6 +12,7 @@ import {
   criteriaTemplate,
   kpiReviewTemplate,
   discoveryTemplate,
+  sequenceViewScriptTemplate,
 } from '../lib/templates';
 
 export function initCommand(): Command {
@@ -41,6 +42,7 @@ export function initCommand(): Command {
       ensureDir(path.join(primerDir, 'bets'));
       ensureDir(path.join(primerDir, 'reviews'));
       ensureDir(path.join(primerDir, 'templates'));
+      ensureDir(path.join(primerDir, 'scripts'));
 
       const configWritten = writeFileIfAbsent(
         path.join(primerDir, 'config.yaml'),
@@ -53,6 +55,7 @@ export function initCommand(): Command {
       writeFile(path.join(primerDir, 'templates', 'criteria.yaml'), criteriaTemplate);
       writeFile(path.join(primerDir, 'templates', 'kpi-review.md'), kpiReviewTemplate);
       writeFile(path.join(primerDir, 'templates', 'discovery.md'), discoveryTemplate);
+      writeFile(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), sequenceViewScriptTemplate);
 
       writeFileIfAbsent(path.join(primerDir, 'decisions', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'bets', '.gitkeep'), '');
@@ -64,6 +67,7 @@ export function initCommand(): Command {
       console.log('  ' + chalk.gray('oprim/config.yaml') + ' — ' + configStatus);
       console.log('  ' + chalk.gray('oprim/sequence.yaml') + ' — ' + sequenceStatus);
       console.log('  ' + chalk.gray('oprim/templates/') + ' — refreshed');
+      console.log('  ' + chalk.gray('oprim/scripts/') + ' — refreshed');
 
       // ── Agent selection ───────────────────────────────────────────────────────
 

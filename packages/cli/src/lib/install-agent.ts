@@ -861,6 +861,7 @@ Validate the primer sequencing board and suggest rebalancing if needed.
 4. **Validate PDR preconditions** — confirm all \`requires_pdrs\` entries exist in \`oprim/decisions/\`
 5. **Report violations** — list any WIP excess, unresolved blockers, or missing PDRs
 6. **Suggest moves** — recommend bets to defer to \`next\` or \`later\` to resolve violations
+7. **Regenerate view** — run \`node oprim/scripts/generate-sequence-view.js\` from the project root to update \`oprim/sequence-view.md\`
 `;
 }
 
@@ -947,6 +948,17 @@ Archive a completed bet.
 4. Move directory: \`oprim/bets/BET-NNN → oprim/bets/archived/BET-NNN\`.
 5. Remove the bet entry from \`oprim/sequence.yaml\`.
 6. Report what was done.
+
+### Sequencing board (oprim-sequence)
+Validate the primer sequencing board and regenerate the visual view.
+
+1. **Read board** — load \`oprim/sequence.yaml\`
+2. **Check WIP limits** — compare \`now\` count against \`wip_limits.now\`
+3. **Validate blockers** — for each bet in \`now\`, confirm all \`blocked_by\` entries are complete or absent
+4. **Validate PDR preconditions** — confirm all \`requires_pdrs\` entries exist in \`oprim/decisions/\`
+5. **Report violations** — list any WIP excess, unresolved blockers, or missing PDRs
+6. **Suggest moves** — recommend bets to defer to \`next\` or \`later\` to resolve violations
+7. **Regenerate view** — run \`node oprim/scripts/generate-sequence-view.js\` from the project root to update \`oprim/sequence-view.md\`
 `;
 }
 
