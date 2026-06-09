@@ -4,6 +4,8 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, promptPdrSurfacing, Agent } from '../lib/install-agent';
 import { readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
+import { ensureDir, writeFile } from '../lib/scaffold';
+import { sequenceViewScriptTemplate } from '../lib/templates';
 
 export function updateCommand(): Command {
   return new Command('update')
@@ -12,6 +14,10 @@ export function updateCommand(): Command {
       const projectRoot = process.cwd();
 
       const configAgents = readAgentsFromConfig(projectRoot);
+
+      const primerDir = path.join(projectRoot, 'oprim');
+      ensureDir(path.join(primerDir, 'scripts'));
+      writeFile(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), sequenceViewScriptTemplate);
 
       if (configAgents !== null && configAgents.length > 0) {
         let specFramework = 'openspec';

@@ -43,12 +43,17 @@ const fs = __importStar(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 const install_agent_1 = require("../lib/install-agent");
 const detect_1 = require("../lib/detect");
+const scaffold_1 = require("../lib/scaffold");
+const templates_1 = require("../lib/templates");
 function updateCommand() {
     return new commander_1.Command('update')
         .description('Refresh /oprim:* assistant commands and skills from package templates')
         .action(async () => {
         const projectRoot = process.cwd();
         const configAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
+        const primerDir = path.join(projectRoot, 'oprim');
+        (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
         if (configAgents !== null && configAgents.length > 0) {
             let specFramework = 'openspec';
             let pdrSurfacing = false;
