@@ -723,7 +723,7 @@ prompt=$(cat | python3 -c "import sys,json; print(json.load(sys.stdin).get('prom
 
 if [ "$framework" = "openspec" ]; then
   if echo "$prompt" | grep -qE '^[[:space:]]*/(opsx:archive|openspec-archive-change)([[:space:]]|$)'; then
-    arg=$(echo "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
+    arg=$(echo "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | awk '{print $1}' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
     echo "$arg" > "$flag_file"
   fi
 fi
