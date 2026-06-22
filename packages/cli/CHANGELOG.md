@@ -5,6 +5,14 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.7.2...cli-v0.8.0) (2026-06-22)
+
+
+### Features
+
+* replace python3 subprocess calls in on-prompt-submit hook with … ([6514253](https://github.com/eshraw/open-product-primer/commit/6514253e2b9ac2cc2d069f8ed9ac7b9f6643c026))
+* replace python3 subprocess calls in on-prompt-submit hook with pure grep/bash ([fa0564d](https://github.com/eshraw/open-product-primer/commit/fa0564df69de5de2403f466637d93f10af8428be))
+
 ## [0.7.2](https://github.com/eshraw/open-product-primer/compare/cli-v0.7.1...cli-v0.7.2) (2026-06-22)
 
 
