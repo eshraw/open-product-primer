@@ -16,8 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
+      cli_release_created: ${{ steps.release.outputs['packages/cli--release_created'] }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           config-file: release-please-config.json
@@ -25,7 +26,7 @@ jobs:
 
   publish:
     needs: release-please
-    if: ${{ needs.release-please.outputs['packages/cli--release_created'] || github.event_name == 'workflow_dispatch' }}
+    if: ${{ needs.release-please.outputs.cli_release_created || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     defaults:
       run:
