@@ -1,8 +1,9 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { execSync } from 'child_process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions } from '../lib/install-agent';
+import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, CLAUDE_COMMANDS } from '../lib/install-agent';
 
 let tmpDir: string;
 
@@ -235,5 +236,130 @@ describe('installAgentSkills', () => {
       installAgentSkills('cursor', tmpDir);
       expect(fs.existsSync(path.join(tmpDir, '.cursor'))).toBe(true);
     });
+  });
+});
+
+// 6.1 — oprim-sequence skill file ─────────────────────────────────────────────
+
+describe('oprim-sequence skill installation', () => {
+  it('oprim update writes oprim-sequence skill file', () => {
+    installAgentSkills('claude', tmpDir);
+    const skillPath = path.join(tmpDir, '.claude', 'skills', 'oprim-sequence', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('name: oprim-sequence');
+    expect(content).toContain('Triage mode');
+    expect(content).toContain('Seeded mode');
+  });
+});
+
+// 6.2 — sequence.md command is a skill wrapper ────────────────────────────────
+
+describe('sequence.md command', () => {
+  it('oprim update writes sequence.md containing skill invocation, not inline steps', () => {
+    installAgentSkills('claude', tmpDir);
+    const cmdPath = path.join(tmpDir, '.claude', 'commands', 'oprim', 'sequence.md');
+    const content = fs.readFileSync(cmdPath, 'utf-8');
+    expect(content).toContain('oprim-sequence');
+    expect(content).not.toContain('Read board');
+    expect(content).not.toContain('Check WIP limits');
+  });
+
+  it('CLAUDE_COMMANDS sequence.md contains skill invocation', () => {
+    const content = CLAUDE_COMMANDS['sequence.md'];
+    expect(content).toContain('oprim-sequence');
+    expect(content).not.toContain('Read board');
+  });
+});
+
+// 6.3 — on-prompt-submit.sh detects /oprim:bet ────────────────────────────────
+
+describe('on-prompt-submit.sh hook', () => {
+  function writeAndChmodHook(hookPath: string, content: string): void {
+    fs.writeFileSync(hookPath, content, 'utf-8');
+    fs.chmodSync(hookPath, 0o755);
+  }
+
+  function runPromptSubmitHook(input: string): void {
+    installAgentSkills('claude', tmpDir);
+    const hookPath = path.join(tmpDir, '.claude', 'hooks', 'on-prompt-submit.sh');
+    execSync(`bash "${hookPath}"`, {
+      input,
+      cwd: tmpDir,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+  }
+
+  it('detects /oprim:bet and writes .sequence-nudge with bet-created', () => {
+    const input = JSON.stringify({ prompt: '/oprim:bet My new bet' });
+    runPromptSubmitHook(input);
+    const nudgePath = path.join(tmpDir, '.claude', 'hooks', '.sequence-nudge');
+    expect(fs.existsSync(nudgePath)).toBe(true);
+    expect(fs.readFileSync(nudgePath, 'utf-8')).toBe('bet-created');
+  });
+
+  it('detects /oprim:promote and writes .sequence-nudge with bet-promoted', () => {
+    const input = JSON.stringify({ prompt: '/oprim:promote BET-042' });
+    runPromptSubmitHook(input);
+    const nudgePath = path.join(tmpDir, '.claude', 'hooks', '.sequence-nudge');
+    expect(fs.existsSync(nudgePath)).toBe(true);
+    expect(fs.readFileSync(nudgePath, 'utf-8')).toBe('bet-promoted');
+  });
+
+  it('does not write .sequence-nudge for unrelated prompts', () => {
+    const input = JSON.stringify({ prompt: 'just chatting' });
+    runPromptSubmitHook(input);
+    const nudgePath = path.join(tmpDir, '.claude', 'hooks', '.sequence-nudge');
+    expect(fs.existsSync(nudgePath)).toBe(false);
+  });
+
+  it('does not interfere with archive detection when both present', () => {
+    const input = JSON.stringify({ prompt: '/opsx:archive my-change' });
+    runPromptSubmitHook(input);
+    const archivePath = path.join(tmpDir, '.claude', 'hooks', '.archive-pending');
+    expect(fs.existsSync(archivePath)).toBe(true);
+    const nudgePath = path.join(tmpDir, '.claude', 'hooks', '.sequence-nudge');
+    expect(fs.existsSync(nudgePath)).toBe(false);
+  });
+});
+
+// 6.5 — on-stop.sh reads .sequence-nudge, outputs nudge, deletes flag ─────────
+
+describe('on-stop.sh hook', () => {
+  function runStopHook(): string {
+    installAgentSkills('claude', tmpDir);
+    const hookPath = path.join(tmpDir, '.claude', 'hooks', 'on-stop.sh');
+    try {
+      return execSync(`bash "${hookPath}"`, {
+        cwd: tmpDir,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      }).toString();
+    } catch (e: unknown) {
+      return (e as { stdout: Buffer }).stdout?.toString() ?? '';
+    }
+  }
+
+  it('reads bet-created nudge, outputs message, and deletes flag', () => {
+    installAgentSkills('claude', tmpDir);
+    const nudgePath = path.join(tmpDir, '.claude', 'hooks', '.sequence-nudge');
+    fs.writeFileSync(nudgePath, 'bet-created', 'utf-8');
+
+    const output = runStopHook();
+
+    expect(output).toContain('oprim:sequence');
+    expect(output).toContain('backlog');
+    expect(fs.existsSync(nudgePath)).toBe(false);
+  });
+
+  it('reads bet-promoted nudge, outputs message, and deletes flag', () => {
+    installAgentSkills('claude', tmpDir);
+    const nudgePath = path.join(tmpDir, '.claude', 'hooks', '.sequence-nudge');
+    fs.writeFileSync(nudgePath, 'bet-promoted', 'utf-8');
+
+    const output = runStopHook();
+
+    expect(output).toContain('oprim:sequence');
+    expect(output).toContain('promoted');
+    expect(fs.existsSync(nudgePath)).toBe(false);
   });
 });
