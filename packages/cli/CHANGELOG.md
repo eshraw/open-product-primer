@@ -5,6 +5,13 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.8.0...cli-v0.9.0) (2026-06-24)
+
+
+### Features
+
+* improve sequencing ([c7a4d84](https://github.com/eshraw/open-product-primer/commit/c7a4d84cbdcc63abc6245777c4cd59b55f94d6ed))
+
 ## [0.8.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.7.2...cli-v0.8.0) (2026-06-22)
 
 

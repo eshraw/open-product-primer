@@ -1,6 +1,6 @@
 {
   "name": "@open-product-primer/cli",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Open Product Primer CLI — product decisions, sequencing, and KPI tracking for repositories",
   "keywords": [
     "product",
