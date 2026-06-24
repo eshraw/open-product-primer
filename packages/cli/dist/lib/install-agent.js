@@ -272,6 +272,7 @@ exports.CLAUDE_SKILLS = {
     'oprim-criteria': criteriaSkill(),
     'oprim-review': reviewSkill(),
     'oprim-archive': archiveSkill(),
+    'oprim-sequence': oprimSequenceSkill(),
 };
 // ─── Claude command wrappers (thin, invoke skill) ────────────────────────────
 exports.CLAUDE_COMMANDS = {
@@ -289,7 +290,7 @@ exports.CURSOR_SKILLS = {
 // ─── Cursor command files (full inline — no Skill tool in Cursor) ────────────
 exports.CURSOR_COMMANDS = {
     'oprim-promote.md': cursorWrapper('oprim-promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
-    'oprim-sequence.md': cursorWrapper('oprim-sequence', 'Validate and update the primer sequencing board', sequenceContent()),
+    'oprim-sequence.md': cursorWrapper('oprim-sequence', 'Validate and update the primer sequencing board', sequenceInlineContent()),
     'oprim-pdr.md': cursorWrapper('oprim-pdr', 'Create a new Product Decision Record with auto-assigned ID', pdrInlineContent()),
     'oprim-bet.md': cursorWrapper('oprim-bet', 'Create a new bet decision and register it on the sequencing board', betInlineContent()),
     'oprim-criteria.md': cursorWrapper('oprim-criteria', 'Create or append to a criteria.yaml contract for a bet', criteriaInlineContent()),
@@ -617,6 +618,95 @@ List each match on its own line, then return — the invoking skill continues to
 If no PDRs match: exit silently — produce no output.
 `;
 }
+function oprimSequenceSkill() {
+    return `---
+name: oprim-sequence
+description: Validate and update the primer sequencing board — triage mode computes board health and surfaces specific suggestions; seeded mode targets a specific context
+---
+
+Manage the primer sequencing board in \`oprim/sequence.yaml\`.
+
+## Entry modes
+
+**Triage mode** — no intention provided: reads board state, computes health, surfaces specific actionable suggestions.
+**Seeded mode** — context pre-provided (e.g. from a lifecycle hook): skips full triage and targets the most relevant move for that context.
+
+## Steps
+
+### 1. Determine mode
+
+If lifecycle context was provided as an argument or pre-seeded in the conversation (e.g. \`bet-created\`, \`bet-promoted\`, or a specific bet ID was just archived), enter **Seeded mode** — go to Step 2B.
+
+Otherwise, enter **Triage mode** — go to Step 2A.
+
+### 2A. Triage mode — compute board health
+
+Read \`oprim/sequence.yaml\`. Compute:
+
+- **WIP utilization**: count entries in \`now\` vs \`wip_limits.now\`
+- **WIP violations**: entries in \`now\` that exceed the WIP limit
+- **Blocked Now bets**: entries in \`now\` whose \`blocked_by\` list contains a bet ID still present in any active lane (now/next/later/backlog)
+- **Ready-to-pull bets**: entries in \`next\` whose \`blocked_by\` list is empty or all resolved (each blocked_by ID is absent from all active lanes)
+- **PDR gaps**: entries in any lane whose \`requires_pdrs\` list contains a PDR ID not found in \`oprim/decisions/\`
+
+Surface **ranked suggestions**, most urgent first:
+1. WIP violations → name each excess bet, suggest deferring to \`next\` or \`later\`
+2. Blocked Now bets → name the bet and its unresolved blocker, suggest deferring until blocker resolves
+3. Open Now slot (count < \`wip_limits.now\`) with a ready Next bet → name a specific bet to pull into \`now\`
+4. PDR gaps → name the bet and missing PDR, suggest creating it first
+
+Each suggestion must name the exact bet ID, current lane, target lane, and reason.
+
+If the board is healthy (no violations, no ready moves): report current WIP utilization and state the board is healthy. Offer to move something anyway if the user wants.
+
+After surfacing suggestions, ask: "Which move would you like to make?"
+
+### 2B. Seeded mode — target specific context
+
+Use the provided context to jump to the most relevant suggestion:
+
+- \`bet-created\`: A new bet just landed in backlog. Check if \`now\` has an open slot and \`next\` has a ready bet to pull. If so, suggest the specific bet to pull. Otherwise, confirm the new bet is in backlog and the board looks healthy.
+- \`bet-promoted\`: A bet was just promoted to an OpenSpec change. Verify the bet is still correctly sequenced and surface any resequencing action the promotion warrants.
+- Bet archived (e.g. "BET-011 was archived"): Check if \`now\` dropped below \`wip_limits.now\`. If so, find the most ready bet in \`next\` and suggest pulling it.
+
+If no relevant move is found for the provided context, fall back to Triage mode (Step 2A).
+
+### 3. Validate the requested move
+
+Before executing any move, verify all three constraints:
+
+**WIP limit**: Moving a bet to \`now\` must not push the count above \`wip_limits.now\`. If it would, explain the violation and suggest deferring an existing \`now\` bet first.
+
+**Blocker resolution**: Moving a bet to \`now\` requires its \`blocked_by\` list to be empty or all resolved (IDs absent from all active lanes). If unresolved, name each unresolved blocker.
+
+**PDR preconditions**: Moving a bet to \`now\` requires all \`requires_pdrs\` entries to exist as files in \`oprim/decisions/\`. If any are missing, name them and suggest creating them first.
+
+If the move is invalid: explain which constraint failed and suggest the nearest valid alternative. Do not proceed to Step 4.
+
+### 4. Preview and confirm
+
+Show the exact YAML change before writing. Name the entry that will move: its \`id\`, \`title\`, source lane, and target lane.
+
+\`\`\`
+Before:  BET-005 is in next  (now: 1/2 slots filled)
+After:   BET-005 moves to now (now: 2/2 slots filled)
+\`\`\`
+
+Ask: "Apply this change? (y/N)"
+- If "n" or Enter: stop, no changes made.
+- If "y": proceed to Step 5.
+
+### 5. Write sequence.yaml
+
+Read \`oprim/sequence.yaml\`. Remove the bet entry from its current lane. Insert it into the target lane. Write back with 2-space indentation. Do not modify any other entries.
+
+### 6. Regenerate view
+
+Run \`node oprim/scripts/generate-sequence-view.js\` from the project root to update \`oprim/sequence-view.md\`.
+
+### 7. Report what was done
+`;
+}
 function archiveCommandContent() {
     return `Use the Skill tool to invoke the \`oprim-archive\` skill.`;
 }
@@ -703,54 +793,88 @@ function hooksConfig(framework) {
     }, null, 2) + '\n');
 }
 const ON_PROMPT_SUBMIT_HOOK = `#!/usr/bin/env bash
-# UserPromptSubmit hook: detects archive slash commands and sets a pending flag.
+# UserPromptSubmit hook: detects lifecycle slash commands and sets pending flags.
 
-config_file=".claude/hooks/config.json"
-flag_file=".claude/hooks/.archive-pending"
+archive_flag=".claude/hooks/.archive-pending"
+nudge_flag=".claude/hooks/.sequence-nudge"
 
-framework="openspec"
-if [ -f "$config_file" ]; then
-  framework=$(python3 -c "import sys,json; print(json.load(open('$config_file')).get('framework','openspec'))" 2>/dev/null || echo "openspec")
+input=$(cat)
+
+# Archive co-archival detection
+if printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*(opsx:archive|openspec-archive-change)'; then
+  prompt=$(printf '%s' "$input" | grep -oE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"prompt"[[:space:]]*:[[:space:]]*"//;s/"$//')
+  arg=$(printf '%s' "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | awk '{print $1}' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
+  printf '%s' "$arg" > "$archive_flag"
 fi
 
-prompt=$(cat | python3 -c "import sys,json; print(json.load(sys.stdin).get('prompt',''))" 2>/dev/null || true)
+# Bet creation detection
+if printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*oprim:bet'; then
+  printf 'bet-created' > "$nudge_flag"
+fi
 
-[ -z "$prompt" ] && exit 0
-
-if [ "$framework" = "openspec" ]; then
-  if echo "$prompt" | grep -qE '^[[:space:]]*/(opsx:archive|openspec-archive-change)([[:space:]]|$)'; then
-    arg=$(echo "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
-    echo "$arg" > "$flag_file"
-  fi
+# Bet promotion detection
+if printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*oprim:promote'; then
+  printf 'bet-promoted' > "$nudge_flag"
 fi
 `;
 const ON_STOP_HOOK = `#!/usr/bin/env bash
-# Stop hook: if an archive command was detected, find the linked bet and prompt co-archival.
+# Stop hook: archive co-archival coordination and sequencing nudges.
 
-flag_file=".claude/hooks/.archive-pending"
-[ -f "$flag_file" ] || exit 0
+archive_flag=".claude/hooks/.archive-pending"
+nudge_flag=".claude/hooks/.sequence-nudge"
 
-change=$(tr -d '[:space:]' < "$flag_file")
-rm -f "$flag_file"
+# --- Archive co-archival block ---
+if [ -f "$archive_flag" ]; then
+  change=$(tr -d '[:space:]' < "$archive_flag")
+  rm -f "$archive_flag"
 
-if [ -z "$change" ]; then
-  latest=$(ls openspec/changes/archive/ 2>/dev/null | sort -r | head -1)
-  [ -z "$latest" ] && exit 0
-  change=$(echo "$latest" | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
+  if [ -z "$change" ]; then
+    latest=$(ls openspec/changes/archive/ 2>/dev/null | sort -r | head -1)
+    [ -n "$latest" ] && change=$(echo "$latest" | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//')
+  fi
+
+  if [ -n "$change" ]; then
+    archive_dir=$(ls openspec/changes/archive/ 2>/dev/null | grep -F "$change" | sort -r | head -1)
+    if [ -n "$archive_dir" ]; then
+      proposal="openspec/changes/archive/$archive_dir/proposal.md"
+      if [ -f "$proposal" ]; then
+        bet_id=$(grep -oE 'BET-[0-9]+' "$proposal" | head -1)
+        if [ -n "$bet_id" ]; then
+          printf '{"decision":"block","reason":"The openspec change '''%s''' was just archived. Its proposal.md references %s. Please invoke \`/oprim:archive %s\` to co-archive the linked bet."}\\n' "$change" "$bet_id" "$bet_id"
+          exit 0
+        fi
+      fi
+    fi
+  fi
 fi
 
-[ -z "$change" ] && exit 0
+# --- Sequencing nudge from lifecycle event ---
+if [ -f "$nudge_flag" ]; then
+  context=$(cat "$nudge_flag")
+  rm -f "$nudge_flag"
 
-archive_dir=$(ls openspec/changes/archive/ 2>/dev/null | grep -F "$change" | sort -r | head -1)
-[ -z "$archive_dir" ] && exit 0
+  case "$context" in
+    bet-created)
+      printf '\\n💡 A new bet was added to your backlog. Run \`/oprim:sequence\` to check if it should be pulled into Now or Next.\\n'
+      ;;
+    bet-promoted)
+      printf '\\n💡 A bet was promoted to an OpenSpec change. Run \`/oprim:sequence\` to verify the board reflects this.\\n'
+      ;;
+  esac
+fi
 
-proposal="openspec/changes/archive/$archive_dir/proposal.md"
-[ -f "$proposal" ] || exit 0
+# --- Open Now slot check ---
+if [ -f "oprim/sequence.yaml" ]; then
+  wip_limit=$(awk '/^wip_limits:/{in_wip=1} in_wip && /^  now:/{print $2; exit} /^[^ ]/{in_wip=0}' oprim/sequence.yaml 2>/dev/null)
+  now_count=$(awk '/^now:/{in_now=1; next} in_now && /^[^ ]/{in_now=0} in_now && /^  - id:/{count++} END{print count+0}' oprim/sequence.yaml 2>/dev/null)
+  next_count=$(awk '/^next:/{in_next=1; next} in_next && /^[^ ]/{in_next=0} in_next && /^  - id:/{count++} END{print count+0}' oprim/sequence.yaml 2>/dev/null)
 
-bet_id=$(grep -oE 'BET-[0-9]+' "$proposal" | head -1)
-[ -z "$bet_id" ] && exit 0
-
-printf '{"decision":"block","reason":"The openspec change '\''%s'\'' was just archived. Its proposal.md references %s. Please invoke \`/oprim:archive %s\` to co-archive the linked bet."}\\n' "$change" "$bet_id" "$bet_id"
+  if [ -n "$wip_limit" ] && [ -n "$now_count" ] && [ -n "$next_count" ]; then
+    if [ "$now_count" -lt "$wip_limit" ] 2>/dev/null && [ "$next_count" -gt 0 ] 2>/dev/null; then
+      printf '\\n💡 Now lane has capacity (%s/%s). Run \`/oprim:sequence\` to pull something from Next.\\n' "$now_count" "$wip_limit"
+    fi
+  fi
+fi
 `;
 // Merge UserPromptSubmit + Stop hooks into .claude/settings.json without clobbering existing entries.
 // Also removes the legacy PostToolUse/Skill hook from on-skill-archive.sh if present.
@@ -810,7 +934,7 @@ function mergeClaudeSettingsHooks(claudeDir) {
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
     console.log(chalk_1.default.green('✓') + ' .claude/settings.json (UserPromptSubmit + Stop hooks registered)');
 }
-// ─── Legacy content (promote / sequence remain inline) ───────────────────────
+// ─── Legacy content (promote remains inline; sequence now delegates to skill) ─
 function promoteContent() {
     return `
 Promote a prioritized bet to an OpenSpec change and link criteria contracts.
@@ -840,6 +964,9 @@ Promote a prioritized bet to an OpenSpec change and link criteria contracts.
 `;
 }
 function sequenceContent() {
+    return `Use the Skill tool to invoke the \`oprim-sequence\` skill.`;
+}
+function sequenceInlineContent() {
     return `
 Validate the primer sequencing board and suggest rebalancing if needed.
 
