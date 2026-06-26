@@ -1,4 +1,4 @@
-# Decision: BET-006 Add title slugs to bet directories for scannability
+# Decision: BET-012 Add title slugs to bet directories for scannability
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
@@ -17,7 +17,7 @@
 - Do nothing — accept opaque dirs and rely on opening files
 
 ## Expected outcomes
-- Bet dirs are self-explanatory on the filesystem (e.g. BET-006-add-title-slugs-to-bet-dirs — no need to open the file)
+- Bet dirs are self-explanatory on the filesystem (e.g. BET-012-add-title-slugs-to-bet-dirs — no need to open the file)
 - Consistent naming across all oprim artifacts (bets, PDRs, and OpenSpec changes all use NNN-slug)
 - Faster sequencing reviews — reviewers can scan the board without opening individual files
 
@@ -27,4 +27,4 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: openspec/changes/bet-012-add-title-slugs-to-bet-dirs

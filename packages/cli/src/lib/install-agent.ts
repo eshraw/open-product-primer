@@ -311,6 +311,8 @@ description: Create a new Product Decision Record in oprim/decisions/ with auto-
 
 Create a new Product Decision Record (PDR) in \`oprim/decisions/\`.
 
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
 ## Steps
 
 ### 1. Get the decision title
@@ -372,6 +374,8 @@ description: Create a new bet directory and bet-decision artifact in oprim/bets/
 
 Create a new bet in \`oprim/bets/\` and register it on the sequencing board.
 
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
 ## Steps
 
 ### 1. Get the bet title
@@ -391,7 +395,10 @@ After receiving the title, validate: if fewer than 4 words OR fewer than 25 char
   - If "y": proceed with the original title
 
 ### 2. Assign the next BET ID
-Scan \`oprim/bets/\` for directories matching \`BET-(\\d+)\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none.
+Scan both \`oprim/bets/\` and \`oprim/bets/archived/\` for directories whose names match \`BET-(\\d+)(-[^/]*)?\` (handles both \`BET-NNN/\` and \`BET-NNN-<slug>/\`). Extract the numeric part from each match. Assign max+1, zero-padded to 3 digits. Default \`001\` if none found in either location.
+
+### 2b. Derive the slug
+From the bet title: lowercase all characters, replace any character that is not a letter or digit with a hyphen, collapse consecutive hyphens to one, strip leading/trailing hyphens, truncate to 40 characters at the last hyphen boundary. This becomes \`<slug>\`. Example: "Add title slugs to bet directories for scannability" → \`add-title-slugs-to-bet-dirs-for\`.
 
 ### 3. Check sequence.yaml exists
 If \`oprim/sequence.yaml\` not found: report and stop — advise \`oprim init\`.
@@ -399,7 +406,7 @@ If \`oprim/sequence.yaml\` not found: report and stop — advise \`oprim init\`.
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 
-### 5. Write oprim/bets/BET-NNN/bet-decision.md
+### 5. Write oprim/bets/BET-NNN-<slug>/bet-decision.md
 \`\`\`
 # Decision: BET-NNN <title>
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
@@ -439,7 +446,7 @@ Read → parse YAML → append → write back (2-space indentation):
 
 ### 7. Prompt for optional discovery scaffolding
 Ask: "Do you want to scaffold a discovery.md now? (y/N)"
-- If "y": write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (same structure as \`oprim/templates/discovery.md\`).
+- If "y": write \`oprim/bets/BET-NNN-<slug>/discovery.md\` from the discovery template (same structure as \`oprim/templates/discovery.md\`).
 - If "n" or Enter: skip silently.
 
 ### 8. Report what was created
@@ -453,6 +460,8 @@ description: Create or append to a criteria.yaml contract for a bet, with struct
 ---
 
 Create or append to \`oprim/bets/BET-NNN/criteria.yaml\`.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
 
 ## Steps
 
@@ -503,10 +512,12 @@ If not: create with \`metrics:\` list.
 function archiveSkill(): string {
   return `---
 name: oprim-archive
-description: Archive a completed bet — moves it to oprim/bets/archived/BET-NNN/ and removes its sequence.yaml entry
+description: Archive a completed bet — moves it to oprim/bets/archived/ and removes its sequence.yaml entry
 ---
 
 Archive a completed bet by moving it to \`oprim/bets/archived/\` and removing it from \`sequence.yaml\`.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
 
 ## Steps
 
@@ -518,11 +529,19 @@ If not provided, ask: "Which bet ID would you like to archive? (e.g., BET-005)"
 
 Normalize the input: accept \`bet-005\`, \`005\`, \`5\`, or \`BET-005\` — always treat as \`BET-NNN\` zero-padded to 3 digits.
 
-### 2. Check the bet directory exists
+### 2. Resolve the bet directory
 
-Check whether \`oprim/bets/BET-NNN/\` exists.
+Look for the bet directory in \`oprim/bets/\` using two patterns:
+1. Exact match: \`oprim/bets/BET-NNN/\` (legacy non-slug format)
+2. Slug variant: any directory starting with \`BET-NNN-\` (e.g., \`BET-NNN-<slug>/\`)
 
-If not found:
+Use whichever pattern matches. Call this the **resolved directory name**.
+
+If multiple directories match (e.g., both \`BET-NNN/\` and \`BET-NNN-slug/\` exist):
+- Report: "Ambiguous: found multiple directories for BET-NNN: [list them]. Please archive manually."
+- Stop.
+
+If neither pattern matches:
 - Report: "Bet BET-NNN was not found in oprim/bets/. Nothing was changed."
 - Stop.
 
@@ -552,9 +571,9 @@ Create the archive subfolder if it doesn't exist:
 mkdir -p oprim/bets/archived
 \`\`\`
 
-Move the directory:
+Move the resolved directory:
 \`\`\`bash
-mv oprim/bets/BET-NNN oprim/bets/archived/BET-NNN
+mv oprim/bets/<resolved-dir> oprim/bets/archived/<resolved-dir>
 \`\`\`
 
 ### 5. Remove the bet entry from sequence.yaml
@@ -567,7 +586,7 @@ Read \`oprim/sequence.yaml\`, parse it, and remove the entry with \`id: BET-NNN\
 ## Bet Archived
 
 **Bet:** BET-NNN
-**Archived to:** oprim/bets/archived/BET-NNN/
+**Archived to:** oprim/bets/archived/<resolved-dir>/
 **Removed from sequence.yaml:** ✓
 
 The bet is preserved in full at the archive location.
@@ -613,6 +632,8 @@ description: Validate and update the primer sequencing board — triage mode com
 ---
 
 Manage the primer sequencing board in \`oprim/sequence.yaml\`.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
 
 ## Entry modes
 
@@ -707,6 +728,8 @@ description: Create a KPI review artifact for a completed bet, pre-filled from c
 ---
 
 Create a KPI review in \`oprim/reviews/\`.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
 
 ## Steps
 
@@ -832,7 +855,6 @@ nudge_flag=".claude/hooks/.sequence-nudge"
 # --- Archive co-archival block ---
 if [ -f "$archive_flag" ]; then
   change=$(tr -d '[:space:]' < "$archive_flag")
-  rm -f "$archive_flag"
 
   if [ -z "$change" ]; then
     latest=$(ls openspec/changes/archive/ 2>/dev/null | sort -r | head -1)
@@ -842,6 +864,7 @@ if [ -f "$archive_flag" ]; then
   if [ -n "$change" ]; then
     archive_dir=$(ls openspec/changes/archive/ 2>/dev/null | grep -F "$change" | sort -r | head -1)
     if [ -n "$archive_dir" ]; then
+      rm -f "$archive_flag"
       proposal="openspec/changes/archive/$archive_dir/proposal.md"
       if [ -f "$proposal" ]; then
         bet_id=$(grep -oE 'BET-[0-9]+' "$proposal" | head -1)

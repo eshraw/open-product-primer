@@ -5,6 +5,8 @@ description: Create a new Product Decision Record in oprim/decisions/ with auto-
 
 Create a new Product Decision Record (PDR) in `oprim/decisions/`.
 
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
 ## Steps
 
 ### 1. Get the decision title
