@@ -12,4 +12,9 @@ later:
     unlocks: []
     requires_pdrs: []
 
-backlog: []
+backlog:
+  - id: BET-006
+    title: "Add title slugs to bet directories for scannability"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
