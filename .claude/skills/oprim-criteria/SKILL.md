@@ -5,6 +5,8 @@ description: Create or append to a criteria.yaml contract for a bet, with struct
 
 Create or append to `oprim/bets/BET-NNN/criteria.yaml`.
 
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
 ## Steps
 
 ### 1. Identify the bet

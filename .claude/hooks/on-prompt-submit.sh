@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
-# UserPromptSubmit hook: detects archive slash commands and sets a pending flag.
+# UserPromptSubmit hook: detects lifecycle slash commands and sets pending flags.
 
-flag_file=".claude/hooks/.archive-pending"
+archive_flag=".claude/hooks/.archive-pending"
+nudge_flag=".claude/hooks/.sequence-nudge"
 
 input=$(cat)
 
-printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*(opsx:archive|openspec-archive-change)' || exit 0
+# Archive co-archival detection
+if printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*(opsx:archive|openspec-archive-change)'; then
+  prompt=$(printf '%s' "$input" | grep -oE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"prompt"[[:space:]]*:[[:space:]]*"//;s/"$//')
+  arg=$(printf '%s' "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | awk '{print $1}' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
+  printf '%s' "$arg" > "$archive_flag"
+fi
 
-prompt=$(printf '%s' "$input" | grep -oE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*"prompt"[[:space:]]*:[[:space:]]*"//;s/"$//')
+# Bet creation detection
+if printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*oprim:bet'; then
+  printf 'bet-created' > "$nudge_flag"
+fi
 
-arg=$(printf '%s' "$prompt" | sed 's|^[[:space:]]*/[^[:space:]]* *||' | awk '{print $1}' | sed 's|^@||' | sed 's|.*/changes/||' | sed 's|/$||' | xargs 2>/dev/null || true)
-printf '%s' "$arg" > "$flag_file"
+# Bet promotion detection
+if printf '%s' "$input" | grep -qE '"prompt"[[:space:]]*:[[:space:]]*"[^"]*oprim:promote'; then
+  printf 'bet-promoted' > "$nudge_flag"
+fi

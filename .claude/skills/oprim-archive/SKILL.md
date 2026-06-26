@@ -1,9 +1,11 @@
 ---
 name: oprim-archive
-description: Archive a completed bet — moves it to oprim/bets/archived/BET-NNN/ and removes its sequence.yaml entry
+description: Archive a completed bet — moves it to oprim/bets/archived/ and removes its sequence.yaml entry
 ---
 
 Archive a completed bet by moving it to `oprim/bets/archived/` and removing it from `sequence.yaml`.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
 
 ## Steps
 
@@ -15,11 +17,19 @@ If not provided, ask: "Which bet ID would you like to archive? (e.g., BET-005)"
 
 Normalize the input: accept `bet-005`, `005`, `5`, or `BET-005` — always treat as `BET-NNN` zero-padded to 3 digits.
 
-### 2. Check the bet directory exists
+### 2. Resolve the bet directory
 
-Check whether `oprim/bets/BET-NNN/` exists.
+Look for the bet directory in `oprim/bets/` using two patterns:
+1. Exact match: `oprim/bets/BET-NNN/` (legacy non-slug format)
+2. Slug variant: any directory starting with `BET-NNN-` (e.g., `BET-NNN-<slug>/`)
 
-If not found:
+Use whichever pattern matches. Call this the **resolved directory name**.
+
+If multiple directories match (e.g., both `BET-NNN/` and `BET-NNN-slug/` exist):
+- Report: "Ambiguous: found multiple directories for BET-NNN: [list them]. Please archive manually."
+- Stop.
+
+If neither pattern matches:
 - Report: "Bet BET-NNN was not found in oprim/bets/. Nothing was changed."
 - Stop.
 
@@ -49,9 +59,9 @@ Create the archive subfolder if it doesn't exist:
 mkdir -p oprim/bets/archived
 ```
 
-Move the directory:
+Move the resolved directory:
 ```bash
-mv oprim/bets/BET-NNN oprim/bets/archived/BET-NNN
+mv oprim/bets/<resolved-dir> oprim/bets/archived/<resolved-dir>
 ```
 
 ### 5. Remove the bet entry from sequence.yaml
@@ -64,7 +74,7 @@ Read `oprim/sequence.yaml`, parse it, and remove the entry with `id: BET-NNN` fr
 ## Bet Archived
 
 **Bet:** BET-NNN
-**Archived to:** oprim/bets/archived/BET-NNN/
+**Archived to:** oprim/bets/archived/<resolved-dir>/
 **Removed from sequence.yaml:** ✓
 
 The bet is preserved in full at the archive location.

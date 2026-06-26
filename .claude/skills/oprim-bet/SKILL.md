@@ -5,6 +5,8 @@ description: Create a new bet directory and bet-decision artifact in oprim/bets/
 
 Create a new bet in `oprim/bets/` and register it on the sequencing board.
 
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
 ## Steps
 
 ### 1. Get the bet title
@@ -24,7 +26,10 @@ After receiving the title, validate: if fewer than 4 words OR fewer than 25 char
   - If "y": proceed with the original title
 
 ### 2. Assign the next BET ID
-Scan `oprim/bets/` for directories matching `BET-(\d+)`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default `001` if none.
+Scan both `oprim/bets/` and `oprim/bets/archived/` for directories whose names match `BET-(\d+)(-[^/]*)?` (handles both `BET-NNN/` and `BET-NNN-<slug>/`). Extract the numeric part from each match. Assign max+1, zero-padded to 3 digits. Default `001` if none found in either location.
+
+### 2b. Derive the slug
+From the bet title: lowercase all characters, replace any character that is not a letter or digit with a hyphen, collapse consecutive hyphens to one, strip leading/trailing hyphens, truncate to 40 characters at the last hyphen boundary. This becomes `<slug>`. Example: "Add title slugs to bet directories for scannability" → `add-title-slugs-to-bet-dirs-for`.
 
 ### 3. Check sequence.yaml exists
 If `oprim/sequence.yaml` not found: report and stop — advise `oprim init`.
@@ -32,7 +37,7 @@ If `oprim/sequence.yaml` not found: report and stop — advise `oprim init`.
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 
-### 5. Write oprim/bets/BET-NNN/bet-decision.md
+### 5. Write oprim/bets/BET-NNN-<slug>/bet-decision.md
 ```
 # Decision: BET-NNN <title>
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
@@ -72,7 +77,7 @@ Read → parse YAML → append → write back (2-space indentation):
 
 ### 7. Prompt for optional discovery scaffolding
 Ask: "Do you want to scaffold a discovery.md now? (y/N)"
-- If "y": write `oprim/bets/BET-NNN/discovery.md` from the discovery template (same structure as `oprim/templates/discovery.md`).
+- If "y": write `oprim/bets/BET-NNN-<slug>/discovery.md` from the discovery template (same structure as `oprim/templates/discovery.md`).
 - If "n" or Enter: skip silently.
 
 ### 8. Report what was created

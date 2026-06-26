@@ -5,6 +5,8 @@ description: Create a KPI review artifact for a completed bet, pre-filled from c
 
 Create a KPI review in `oprim/reviews/`.
 
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
 ## Steps
 
 ### 1. Identify the bet
