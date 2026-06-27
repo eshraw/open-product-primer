@@ -7,11 +7,6 @@ now:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-018
-    title: "Improve new user onboarding from first contact to first bet"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
 
 next:
   - id: BET-016

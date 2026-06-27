@@ -118,5 +118,13 @@ export function initCommand(): Command {
       }
 
       console.log('\nRun ' + chalk.cyan('oprim doctor') + ' to verify your setup.');
+      console.log(
+        '\n' +
+          chalk.bold('Next:') +
+          ' capture your first product decision. A bet is a time-bound commitment — what you\'re building, why now, and what would make you stop.' +
+          '\nOpen your AI agent and run ' +
+          chalk.cyan('/oprim:bet') +
+          ' to create one.'
+      );
     });
 }
