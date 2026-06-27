@@ -8,7 +8,7 @@ now:
     unlocks: []
     requires_pdrs: []
   - id: BET-018
-    title: "Add empty-state guidance to init and doctor for new user onboarding"
+    title: "Improve new user onboarding from first contact to first bet"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
