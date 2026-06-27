@@ -1,12 +1,12 @@
 # Open Product Primer
 
-**`oprim`** stores product decisions, sequencing, and KPI outcomes under **`oprim/`** in the repo — the foundation layer before OpenSpec.
+Every developer hits the same moment: you're about to build something and haven't written down why — what problem it solves, why now, and what would make you stop. **`oprim`** gives that decision a home in your repo.
 
-> Legacy names: `open-rmp` tool, `roadmap/` artifact root (see `openspec/changes/add-open-product-primer-decision-and-kpi-layer`).
+Install `oprim`, run `oprim init` to set up your workspace, then use `/oprim:bet` in your AI coding agent to capture your first decision. That's the core loop.
 
 ## What it does
 
-Open Product Primer answers **why / order / outcomes** before OpenSpec answers **what / how**:
+oprim stores the decisions that precede implementation — why you're building something, in what order, and whether it worked. It sits alongside your implementation planning tool (OpenSpec) and traceability tool (Graphify) as the layer that answers **why / order / outcomes**:
 
 | Layer | Tool | Artifacts |
 |-------|------|-----------|
@@ -82,7 +82,7 @@ Durable product policy decisions stored at `oprim/decisions/PDR-XXX-name.md`. Se
 
 ### Bet decisions
 
-Time-bound prioritization decisions at `oprim/bets/BET-XXX/bet-decision.md`. Reference PDRs by ID instead of restating policy — a bet links to the relevant PDRs.
+Say you're deciding whether to rewrite a legacy service, cut a feature that isn't landing, or invest in a new capability. Before you build, you write a *bet*: what's the problem, why tackle it now, and what outcome would tell you it worked. That artifact lives at `oprim/bets/BET-XXX/bet-decision.md` and links to relevant policy decisions (PDRs) so you're not restating policy each time.
 
 ### Sequencing board
 

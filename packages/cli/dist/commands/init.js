@@ -128,5 +128,11 @@ function initCommand() {
             console.log('\n' + chalk_1.default.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
         }
         console.log('\nRun ' + chalk_1.default.cyan('oprim doctor') + ' to verify your setup.');
+        console.log('\n' +
+            chalk_1.default.bold('Next:') +
+            ' capture your first product decision. A bet is a time-bound commitment — what you\'re building, why now, and what would make you stop.' +
+            '\nOpen your AI agent and run ' +
+            chalk_1.default.cyan('/oprim:bet') +
+            ' to create one.');
     });
 }
