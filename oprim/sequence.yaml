@@ -1,9 +1,29 @@
 wip_limits:
   now: 2
 
-now: []
+now:
+  - id: BET-015
+    title: "Add oprim status CLI command for terminal board visibility"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-018
+    title: "Add empty-state guidance to init and doctor for new user onboarding"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
-next: []
+next:
+  - id: BET-016
+    title: "Extend oprim doctor with integrity checks for sequence and skills"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-017
+    title: "Nudge KPI review creation after bet archival to close the outcome loop"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
 later:
   - id: BET-005
@@ -11,5 +31,30 @@ later:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+  - id: BET-020
+    title: "Enable PDR surfacing by default in oprim init"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-021
+    title: "Add public README quickstart and CHANGELOG for 1.0.0 external readiness"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
-backlog: []
+backlog:
+  - id: BET-013
+    title: "Introduce atomic notes in oprim for lightweight thinking capture"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-014
+    title: "Improve agent focus during bet discovery"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-019
+    title: "Add quick-capture mode to bet creation to reduce idea abandonment"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
