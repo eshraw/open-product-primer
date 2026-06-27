@@ -12,4 +12,9 @@ later:
     unlocks: []
     requires_pdrs: []
 
-backlog: []
+backlog:
+  - id: BET-013
+    title: "Introduce atomic notes in oprim for lightweight thinking capture"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
