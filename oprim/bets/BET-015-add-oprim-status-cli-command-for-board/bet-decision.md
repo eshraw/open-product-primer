@@ -8,13 +8,16 @@
 - Review date: 2026-07-27
 
 ## Why now
+- Viewing board state via an agent skill consumes tokens for a read-only, zero-reasoning operation
+- Board status and sequencing recommendations are product decisions rooted in the owner's vision — a CLI command renders them deterministically, while an agent response introduces variability that undermines that intent
+- The "opinion" on board state belongs to the product owner, not the agent; the CLI is the right vehicle for expressing that
 - No way to see board state without an LLM call or manually opening sequence.yaml
 - PM and UX analysis both flagged this as the #1 gap for 1.0.0
 - Developers need a fast "what's happening" command at the terminal
 - The CLI has 5 commands; none of them surfaces the current state of work
 
 ## Alternatives considered
-- Agent skill only (current) — requires an LLM call just to answer "what are my bets?"
+- Agent skill only (current) — wastes tokens on a display task that needs no reasoning; wrong tool for the job
 - `oprim doctor` extension — doctor validates health, not board state; conflates two concerns
 - Read sequence.yaml directly — works but requires knowing the file format and location
 
