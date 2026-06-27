@@ -33,4 +33,4 @@ Both losses happen in the same session and share the same root cause: oprim intr
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: `openspec/changes/bet-018-improve-new-user-onboarding-from-first-contact-to-first-bet/`
