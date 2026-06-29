@@ -5,6 +5,13 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.11.0...cli-v0.12.0) (2026-06-29)
+
+
+### Features
+
+* add oprim ovw and more contexts to bets ([51c5888](https://github.com/eshraw/open-product-primer/commit/51c58884f587d5dcd569b8fbed82ee09dee2afb5))
+
 ## [0.11.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.10.0...cli-v0.11.0) (2026-06-27)
 
 
