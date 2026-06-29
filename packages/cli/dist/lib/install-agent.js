@@ -426,6 +426,15 @@ If \`oprim/sequence.yaml\` not found: report and stop — advise \`oprim init\`.
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 
+Then ask about reversibility:
+- "Is this a **2-way door** (reversible — easy to undo, safe to try) or a **1-way door** (hard to reverse — requires high confidence)?"
+
+Then ask about each of the four risk dimensions (Low / Medium / High + short rationale):
+- "**Value risk**: Will users/customers actually use or buy this? (Low / Medium / High — and why?)"
+- "**Usability risk**: Can users figure out how to use it without help? (Low / Medium / High — and why?)"
+- "**Feasibility risk**: Can we build this with our current skills, time, and technology? (Low / Medium / High — and why?)"
+- "**Business viability risk**: Does this solution work for the business (revenue, legal, ops)? (Low / Medium / High — and why?)"
+
 ### 5. Write oprim/bets/BET-NNN-<slug>/bet-decision.md
 \`\`\`
 # Decision: BET-NNN <title>
@@ -436,6 +445,16 @@ Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date 
 - Date: <today YYYY-MM-DD>
 - Owner: <owner>
 - Review date: <review date>
+
+## Door type
+- [<x if 2-way>] 2-way door (reversible — safe to try, easy to undo)
+- [<x if 1-way>] 1-way door (hard to reverse — requires higher confidence before committing)
+
+## Risk profile
+- **Value risk**: <Low / Medium / High> — <rationale>
+- **Usability risk**: <Low / Medium / High> — <rationale>
+- **Feasibility risk**: <Low / Medium / High> — <rationale>
+- **Business viability risk**: <Low / Medium / High> — <rationale>
 
 ## Why now
 <why-now as bullet list>
