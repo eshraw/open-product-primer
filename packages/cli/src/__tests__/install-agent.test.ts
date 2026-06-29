@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, CLAUDE_COMMANDS } from '../lib/install-agent';
+import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, POOLSIDE_SKILLS } from '../lib/install-agent';
 
 let tmpDir: string;
 
@@ -69,6 +69,17 @@ describe('writeAgentInstructionFile', () => {
 describe('codexInstructions', () => {
   it('contains all five workflow sections', () => {
     const content = codexInstructions();
+    expect(content).toContain('oprim-bet');
+    expect(content).toContain('oprim-criteria');
+    expect(content).toContain('oprim-pdr');
+    expect(content).toContain('oprim-review');
+    expect(content).toContain('oprim-archive');
+  });
+});
+
+describe('poolsideInstructions', () => {
+  it('contains all five workflow sections', () => {
+    const content = poolsideInstructions();
     expect(content).toContain('oprim-bet');
     expect(content).toContain('oprim-criteria');
     expect(content).toContain('oprim-pdr');
@@ -235,6 +246,64 @@ describe('installAgentSkills', () => {
       expect(fs.existsSync(path.join(tmpDir, '.cursor'))).toBe(false);
       installAgentSkills('cursor', tmpDir);
       expect(fs.existsSync(path.join(tmpDir, '.cursor'))).toBe(true);
+    });
+  });
+
+  describe('poolside', () => {
+    it('creates .poolside/skills/ with all six SKILL.md files', () => {
+      installAgentSkills('poolside', tmpDir);
+      for (const skill of Object.keys(POOLSIDE_SKILLS)) {
+        const skillPath = path.join(tmpDir, '.poolside', 'skills', skill, 'SKILL.md');
+        expect(fs.existsSync(skillPath)).toBe(true);
+      }
+    });
+
+    it('creates .poolside/ when it does not exist', () => {
+      expect(fs.existsSync(path.join(tmpDir, '.poolside'))).toBe(false);
+      installAgentSkills('poolside', tmpDir);
+      expect(fs.existsSync(path.join(tmpDir, '.poolside'))).toBe(true);
+    });
+
+    it('emits a notice when .poolside/ was created', () => {
+      const logSpy = vi.spyOn(console, 'log');
+      installAgentSkills('poolside', tmpDir);
+      const notices = logSpy.mock.calls.map((c) => String(c[0]));
+      expect(notices.some((n) => n.includes('.poolside/'))).toBe(true);
+    });
+
+    it('does not emit a directory-created notice when .poolside/ already exists', () => {
+      fs.mkdirSync(path.join(tmpDir, '.poolside'));
+      const logSpy = vi.spyOn(console, 'log');
+      installAgentSkills('poolside', tmpDir);
+      const notices = logSpy.mock.calls.map((c) => String(c[0]));
+      expect(notices.some((n) => n.includes('.poolside/ created'))).toBe(false);
+    });
+
+    it('writes AGENTS.md with oprim section', () => {
+      installAgentSkills('poolside', tmpDir);
+      const agentsPath = path.join(tmpDir, 'AGENTS.md');
+      expect(fs.existsSync(agentsPath)).toBe(true);
+      const content = fs.readFileSync(agentsPath, 'utf-8');
+      expect(content).toContain('<!-- oprim:start -->');
+      expect(content).toContain('<!-- oprim:end -->');
+    });
+
+    it('replaces existing oprim section in AGENTS.md on re-run', () => {
+      const agentsPath = path.join(tmpDir, 'AGENTS.md');
+      fs.writeFileSync(agentsPath, '# Agents\n<!-- oprim:start -->\nOLD CONTENT\n<!-- oprim:end -->\n');
+      installAgentSkills('poolside', tmpDir);
+      const content = fs.readFileSync(agentsPath, 'utf-8');
+      expect(content).not.toContain('OLD CONTENT');
+      expect(content.split('<!-- oprim:start -->').length).toBe(2);
+    });
+
+    it('re-run is idempotent for skill files', () => {
+      installAgentSkills('poolside', tmpDir);
+      installAgentSkills('poolside', tmpDir);
+      for (const skill of Object.keys(POOLSIDE_SKILLS)) {
+        const skillPath = path.join(tmpDir, '.poolside', 'skills', skill, 'SKILL.md');
+        expect(fs.existsSync(skillPath)).toBe(true);
+      }
     });
   });
 });

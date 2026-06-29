@@ -1,0 +1,10 @@
+tools:
+    shell:
+        allow:
+            - Check recent git *
+            - git log *
+            - git show *
+            - ls *
+            - git branch *
+            - git rev-parse *
+            - git reset *
