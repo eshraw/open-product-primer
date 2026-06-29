@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: oprim init SHALL prompt the user to select which AI agents to install skills for
-During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL present an interactive multi-select prompt listing supported AI tools (Claude Code, Cursor, Codex, Gemini CLI) and install `/oprim:*` skills and instructions for each selected tool.
+During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL present an interactive multi-select prompt listing supported AI tools (Claude Code, Cursor, Codex, Gemini CLI, Poolside) and install `/oprim:*` skills and instructions for each selected tool.
 
 #### Scenario: User selects Claude Code only
 - **WHEN** the user runs `oprim init` interactively and selects only Claude Code
@@ -19,9 +19,13 @@ During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL 
 - **WHEN** the user selects Gemini CLI during `oprim init`
 - **THEN** the command installs oprim workflow instructions into `GEMINI.md` and writes `agents: [gemini]` (or appends `gemini` to existing agent list) to `oprim/config.yaml`
 
-#### Scenario: User selects all four agents
-- **WHEN** the user selects Claude Code, Cursor, Codex, and Gemini CLI during `oprim init`
-- **THEN** the command installs for all four agents and writes `agents: [claude, cursor, codex, gemini]` to `oprim/config.yaml`
+#### Scenario: User selects Poolside
+- **WHEN** the user selects Poolside during `oprim init`
+- **THEN** the command creates `.poolside/` if absent, writes six skill files to `.poolside/skills/`, writes an oprim section to `AGENTS.md`, and writes `agents: [poolside]` (or appends `poolside` to existing agent list) to `oprim/config.yaml`
+
+#### Scenario: User selects all five agents
+- **WHEN** the user selects Claude Code, Cursor, Codex, Gemini CLI, and Poolside during `oprim init`
+- **THEN** the command installs for all five agents and writes `agents: [claude, cursor, codex, gemini, poolside]` to `oprim/config.yaml`
 
 #### Scenario: User selects none
 - **WHEN** the user deselects all options during `oprim init`
@@ -32,7 +36,7 @@ During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL 
 - **THEN** the command re-installs skills for the already-configured agents without re-prompting, preserving the existing selection
 
 ### Requirement: oprim init SHALL support a --agent flag for non-interactive agent selection
-The system SHALL accept one or more `--agent <name>` flags on `oprim init` to specify agent targets without an interactive prompt, enabling use in CI and scripting contexts. Valid agent names are: `claude`, `cursor`, `codex`, `gemini`.
+The system SHALL accept one or more `--agent <name>` flags on `oprim init` to specify agent targets without an interactive prompt, enabling use in CI and scripting contexts. Valid agent names are: `claude`, `cursor`, `codex`, `gemini`, `poolside`.
 
 #### Scenario: Non-interactive init with --agent flag for Claude
 - **WHEN** the user runs `oprim init --agent claude`
@@ -46,13 +50,17 @@ The system SHALL accept one or more `--agent <name>` flags on `oprim init` to sp
 - **WHEN** the user runs `oprim init --agent gemini`
 - **THEN** the command scaffolds `oprim/`, writes `agents: [gemini]` to config, installs Gemini CLI instructions into `GEMINI.md`, and exits without displaying a prompt
 
+#### Scenario: Non-interactive init with --agent flag for Poolside
+- **WHEN** the user runs `oprim init --agent poolside`
+- **THEN** the command scaffolds `oprim/`, writes `agents: [poolside]` to config, creates `.poolside/` if absent, installs Poolside skills into `.poolside/skills/` and instructions into `AGENTS.md`, and exits without displaying a prompt
+
 #### Scenario: Multiple --agent flags
 - **WHEN** the user runs `oprim init --agent claude --agent codex`
 - **THEN** both agents are installed and written to config
 
 #### Scenario: Unknown agent name in --agent flag
 - **WHEN** the user runs `oprim init --agent unknown-tool`
-- **THEN** the command exits with a non-zero code and reports the supported agent names: `claude`, `cursor`, `codex`, `gemini`
+- **THEN** the command exits with a non-zero code and reports the supported agent names: `claude`, `cursor`, `codex`, `gemini`, `poolside`
 
 ### Requirement: oprim init SHALL create agent config directories if they do not exist
 When installing skills for a selected agent whose config directory (`.claude/` or `.cursor/`) does not yet exist, the system SHALL create the necessary directories before writing skill files and SHALL emit a notice that the directory was created.
@@ -61,8 +69,8 @@ When installing skills for a selected agent whose config directory (`.claude/` o
 - **WHEN** the user selects Claude Code but `.claude/` is absent
 - **THEN** the command creates `.claude/skills/` and `.claude/commands/oprim/`, writes the skill files, and prints a notice that `.claude/` was created
 
-### Requirement: oprim init SHALL auto-detect and pre-check Codex and Gemini CLI environments
-During `oprim init`, when `AGENTS.md` is present the Codex option SHALL be pre-checked; when `GEMINI.md` is present the Gemini CLI option SHALL be pre-checked.
+### Requirement: oprim init SHALL auto-detect and pre-check known AI agent environments
+During `oprim init`, when `AGENTS.md` is present the Codex option SHALL be pre-checked; when `GEMINI.md` is present the Gemini CLI option SHALL be pre-checked; when `.poolside/` is present the Poolside option SHALL be pre-checked.
 
 #### Scenario: AGENTS.md detected at project root
 - **WHEN** `AGENTS.md` exists and the user runs `oprim init`
@@ -73,6 +81,11 @@ During `oprim init`, when `AGENTS.md` is present the Codex option SHALL be pre-c
 - **WHEN** `GEMINI.md` exists and the user runs `oprim init`
 - **THEN** the multi-select prompt shows Gemini CLI pre-checked
 - **AND** the CLI prints a dim message that includes `gemini` in the detected list
+
+#### Scenario: .poolside/ directory detected at project root
+- **WHEN** `.poolside/` exists and the user runs `oprim init`
+- **THEN** the multi-select prompt shows Poolside pre-checked
+- **AND** the CLI prints a dim message that includes `poolside` in the detected list
 
 ### Requirement: The agents selection SHALL be persisted to oprim/config.yaml
 The system SHALL write the selected agents as a YAML list under the `agents:` key in `oprim/config.yaml` so that subsequent `oprim update` and `oprim doctor` runs can use the declared selection.
