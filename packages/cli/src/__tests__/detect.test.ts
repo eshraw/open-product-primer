@@ -49,9 +49,19 @@ describe('detectAvailableAgents', () => {
     expect(detectAvailableAgents(tmpDir)).not.toContain('gemini');
   });
 
-  it('detects all four agents when all indicators are present', () => {
+  it('detects poolside when .poolside/ directory exists', () => {
+    fs.mkdirSync(path.join(tmpDir, '.poolside'));
+    expect(detectAvailableAgents(tmpDir)).toContain('poolside');
+  });
+
+  it('does not detect poolside when .poolside/ is absent', () => {
+    expect(detectAvailableAgents(tmpDir)).not.toContain('poolside');
+  });
+
+  it('detects all five agents when all indicators are present', () => {
     fs.mkdirSync(path.join(tmpDir, '.claude'));
     fs.mkdirSync(path.join(tmpDir, '.cursor'));
+    fs.mkdirSync(path.join(tmpDir, '.poolside'));
     fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '');
     fs.writeFileSync(path.join(tmpDir, 'GEMINI.md'), '');
     const result = detectAvailableAgents(tmpDir);
@@ -59,6 +69,7 @@ describe('detectAvailableAgents', () => {
     expect(result).toContain('cursor');
     expect(result).toContain('codex');
     expect(result).toContain('gemini');
+    expect(result).toContain('poolside');
   });
 });
 

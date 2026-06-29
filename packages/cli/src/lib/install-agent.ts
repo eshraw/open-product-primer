@@ -4,8 +4,8 @@ import chalk from 'chalk';
 import { writeFile } from './scaffold';
 import { detectAvailableAgents } from './detect';
 
-export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini';
-export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor', 'codex', 'gemini'];
+export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside';
+export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor', 'codex', 'gemini', 'poolside'];
 
 export async function promptFrameworkSelection(projectRoot: string): Promise<string> {
   const configPath = path.join(projectRoot, '.claude', 'hooks', 'config.json');
@@ -44,6 +44,7 @@ export async function promptAgentSelection(projectRoot: string): Promise<string[
       { name: 'Cursor', value: 'cursor', checked: detected.includes('cursor') },
       { name: 'Codex', value: 'codex', checked: detected.includes('codex') },
       { name: 'Gemini CLI', value: 'gemini', checked: detected.includes('gemini') },
+      { name: 'Poolside', value: 'poolside', checked: detected.includes('poolside') },
     ],
   });
 }
@@ -142,6 +143,23 @@ export function installAgentSkills(
 
     if (dirCreated) {
       console.log(chalk.dim('  .claude/ created — Claude Code will discover these files automatically.'));
+    }
+  } else if (agent === 'poolside') {
+    const poolsideDir = path.join(projectRoot, '.poolside');
+    const dirCreated = !fs.existsSync(poolsideDir);
+
+    const skillsBase = path.join(poolsideDir, 'skills');
+    for (const [name, content] of Object.entries(POOLSIDE_SKILLS)) {
+      writeFile(path.join(skillsBase, name, 'SKILL.md'), content);
+      console.log(chalk.green('✓') + ` .poolside/skills/${name}/SKILL.md`);
+    }
+
+    const agentsFile = path.join(projectRoot, 'AGENTS.md');
+    writeAgentInstructionFile(agentsFile, poolsideInstructions());
+    console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
+
+    if (dirCreated) {
+      console.log(chalk.dim('  .poolside/ created — Poolside will discover these files automatically.'));
     }
   } else if (agent === 'codex') {
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
@@ -253,6 +271,17 @@ export const CLAUDE_COMMANDS: Record<string, string> = {
   'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
   'sequence.md': claudeWrapper('OPRIM: Sequence', 'Validate and update the primer sequencing board', sequenceContent()),
   'archive.md': claudeWrapper('OPRIM: Archive', 'Archive a completed bet — move it out of the active board', archiveCommandContent()),
+};
+
+// ─── Poolside skill playbooks ─────────────────────────────────────────────────
+
+export const POOLSIDE_SKILLS: Record<string, string> = {
+  'oprim-pdr': pdrSkill(),
+  'oprim-bet': betSkill(),
+  'oprim-criteria': criteriaSkill(),
+  'oprim-review': reviewSkill(),
+  'oprim-archive': archiveSkill(),
+  'oprim-sequence': oprimSequenceSkill(),
 };
 
 // ─── Cursor skill playbooks ───────────────────────────────────────────────────
@@ -1142,5 +1171,9 @@ export function codexInstructions(): string {
 }
 
 export function geminiInstructions(): string {
+  return oprimWorkflowsInline();
+}
+
+export function poolsideInstructions(): string {
   return oprimWorkflowsInline();
 }

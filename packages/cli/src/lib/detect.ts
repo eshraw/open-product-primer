@@ -29,6 +29,7 @@ export function detectAvailableAgents(projectRoot: string): string[] {
   if (fs.existsSync(path.join(projectRoot, '.cursor'))) detected.push('cursor');
   if (fs.existsSync(path.join(projectRoot, 'AGENTS.md'))) detected.push('codex');
   if (fs.existsSync(path.join(projectRoot, 'GEMINI.md'))) detected.push('gemini');
+  if (fs.existsSync(path.join(projectRoot, '.poolside'))) detected.push('poolside');
   return detected;
 }
 
