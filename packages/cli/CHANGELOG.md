@@ -5,6 +5,13 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.13.0...cli-v0.14.0) (2026-06-30)
+
+
+### Features
+
+* extend oprim doctor ([89e4895](https://github.com/eshraw/open-product-primer/commit/89e48955b070f441bb9f6e3f528bd055fa678d65))
+
 ## [0.13.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.12.0...cli-v0.13.0) (2026-06-29)
 
 
