@@ -43,6 +43,7 @@ const fs = __importStar(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 const detect_1 = require("../lib/detect");
 const measure_1 = require("../lib/measure");
+const integrity_1 = require("../lib/integrity");
 const AGENT_DIRS = {
     claude: '.claude',
     cursor: '.cursor',
@@ -204,6 +205,10 @@ function doctorCommand() {
                 });
             }
         }
+        // ── Sequence integrity checks ─────────────────────────────────────────────
+        (0, integrity_1.checkSequenceIntegrity)(projectRoot, checks);
+        // ── Skill version drift checks ────────────────────────────────────────────
+        (0, integrity_1.checkSkillVersionDrift)(projectRoot, checks);
         // ── Agent environment checks ──────────────────────────────────────────────
         const configAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
         if (configAgents !== null) {

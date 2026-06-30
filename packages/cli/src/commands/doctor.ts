@@ -4,13 +4,7 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import { readAgentsFromConfig } from '../lib/detect';
 import { scanCriteriaForSourceType } from '../lib/measure';
-
-interface Check {
-  name: string;
-  pass: boolean;
-  note?: string;
-  required: boolean;
-}
+import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
 
 const AGENT_DIRS: Record<string, string> = {
   claude: '.claude',
@@ -193,6 +187,12 @@ export function doctorCommand(): Command {
           });
         }
       }
+
+      // ── Sequence integrity checks ─────────────────────────────────────────────
+      checkSequenceIntegrity(projectRoot, checks);
+
+      // ── Skill version drift checks ────────────────────────────────────────────
+      checkSkillVersionDrift(projectRoot, checks);
 
       // ── Agent environment checks ──────────────────────────────────────────────
       const configAgents = readAgentsFromConfig(projectRoot);

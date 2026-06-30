@@ -1,4 +1,4 @@
-export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini';
+export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside';
 export declare const SUPPORTED_AGENTS: readonly Agent[];
 export declare function promptFrameworkSelection(projectRoot: string): Promise<string>;
 export declare function promptAgentSelection(projectRoot: string): Promise<string[]>;
@@ -7,8 +7,10 @@ export declare function installAgentSkills(agent: Agent, projectRoot: string, fr
 export declare const OPRIM_CONTEXT_SKILL_STEP = "## Step 0: Check relevant product decisions\nInvoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently \u2014 continue to Step 1 immediately.";
 export declare const CLAUDE_SKILLS: Record<string, string>;
 export declare const CLAUDE_COMMANDS: Record<string, string>;
+export declare const POOLSIDE_SKILLS: Record<string, string>;
 export declare const CURSOR_SKILLS: Record<string, string>;
 export declare const CURSOR_COMMANDS: Record<string, string>;
 export declare function writeAgentInstructionFile(filePath: string, section: string): void;
 export declare function codexInstructions(): string;
 export declare function geminiInstructions(): string;
+export declare function poolsideInstructions(): string;

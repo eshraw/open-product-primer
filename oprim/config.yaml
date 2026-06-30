@@ -20,3 +20,4 @@ sequencing:
 agents:
   - claude
   - cursor
+  - poolside

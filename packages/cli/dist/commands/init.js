@@ -48,7 +48,7 @@ function initCommand() {
     return new commander_1.Command('init')
         .description('Initialize oprim in the current repository')
         .option('--name <name>', 'project name (defaults to directory name)')
-        .option('--agent <name>', 'AI agent to install skills for (repeatable; supported: claude, cursor)', (val, prev) => [...prev, val], [])
+        .option('--agent <name>', 'AI agent to install skills for (repeatable; supported: claude, cursor, codex, gemini, poolside)', (val, prev) => [...prev, val], [])
         .action(async (opts) => {
         const projectRoot = process.cwd();
         const projectName = opts.name ?? path.basename(projectRoot);

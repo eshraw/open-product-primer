@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.CLAUDE_COMMANDS = exports.CLAUDE_SKILLS = exports.OPRIM_CONTEXT_SKILL_STEP = exports.SUPPORTED_AGENTS = void 0;
+exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.POOLSIDE_SKILLS = exports.CLAUDE_COMMANDS = exports.CLAUDE_SKILLS = exports.OPRIM_CONTEXT_SKILL_STEP = exports.SUPPORTED_AGENTS = void 0;
 exports.promptFrameworkSelection = promptFrameworkSelection;
 exports.promptAgentSelection = promptAgentSelection;
 exports.promptPdrSurfacing = promptPdrSurfacing;
@@ -44,12 +44,13 @@ exports.installAgentSkills = installAgentSkills;
 exports.writeAgentInstructionFile = writeAgentInstructionFile;
 exports.codexInstructions = codexInstructions;
 exports.geminiInstructions = geminiInstructions;
+exports.poolsideInstructions = poolsideInstructions;
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 const scaffold_1 = require("./scaffold");
 const detect_1 = require("./detect");
-exports.SUPPORTED_AGENTS = ['claude', 'cursor', 'codex', 'gemini'];
+exports.SUPPORTED_AGENTS = ['claude', 'cursor', 'codex', 'gemini', 'poolside'];
 async function promptFrameworkSelection(projectRoot) {
     const configPath = path.join(projectRoot, '.claude', 'hooks', 'config.json');
     if (fs.existsSync(configPath)) {
@@ -87,6 +88,7 @@ async function promptAgentSelection(projectRoot) {
             { name: 'Cursor', value: 'cursor', checked: detected.includes('cursor') },
             { name: 'Codex', value: 'codex', checked: detected.includes('codex') },
             { name: 'Gemini CLI', value: 'gemini', checked: detected.includes('gemini') },
+            { name: 'Poolside', value: 'poolside', checked: detected.includes('poolside') },
         ],
     });
 }
@@ -168,6 +170,21 @@ function installAgentSkills(agent, projectRoot, framework = 'openspec', pdrSurfa
         mergeClaudeSettingsHooks(claudeDir);
         if (dirCreated) {
             console.log(chalk_1.default.dim('  .claude/ created — Claude Code will discover these files automatically.'));
+        }
+    }
+    else if (agent === 'poolside') {
+        const poolsideDir = path.join(projectRoot, '.poolside');
+        const dirCreated = !fs.existsSync(poolsideDir);
+        const skillsBase = path.join(poolsideDir, 'skills');
+        for (const [name, content] of Object.entries(exports.POOLSIDE_SKILLS)) {
+            (0, scaffold_1.writeFile)(path.join(skillsBase, name, 'SKILL.md'), content);
+            console.log(chalk_1.default.green('✓') + ` .poolside/skills/${name}/SKILL.md`);
+        }
+        const agentsFile = path.join(projectRoot, 'AGENTS.md');
+        writeAgentInstructionFile(agentsFile, poolsideInstructions());
+        console.log(chalk_1.default.green('✓') + ' AGENTS.md (oprim section written)');
+        if (dirCreated) {
+            console.log(chalk_1.default.dim('  .poolside/ created — Poolside will discover these files automatically.'));
         }
     }
     else if (agent === 'codex') {
@@ -279,6 +296,15 @@ exports.CLAUDE_COMMANDS = {
     'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
     'sequence.md': claudeWrapper('OPRIM: Sequence', 'Validate and update the primer sequencing board', sequenceContent()),
     'archive.md': claudeWrapper('OPRIM: Archive', 'Archive a completed bet — move it out of the active board', archiveCommandContent()),
+};
+// ─── Poolside skill playbooks ─────────────────────────────────────────────────
+exports.POOLSIDE_SKILLS = {
+    'oprim-pdr': pdrSkill(),
+    'oprim-bet': betSkill(),
+    'oprim-criteria': criteriaSkill(),
+    'oprim-review': reviewSkill(),
+    'oprim-archive': archiveSkill(),
+    'oprim-sequence': oprimSequenceSkill(),
 };
 // ─── Cursor skill playbooks ───────────────────────────────────────────────────
 exports.CURSOR_SKILLS = {
@@ -1125,5 +1151,8 @@ function codexInstructions() {
     return oprimWorkflowsInline();
 }
 function geminiInstructions() {
+    return oprimWorkflowsInline();
+}
+function poolsideInstructions() {
     return oprimWorkflowsInline();
 }
