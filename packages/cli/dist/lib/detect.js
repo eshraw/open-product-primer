@@ -72,6 +72,8 @@ function detectAvailableAgents(projectRoot) {
         detected.push('codex');
     if (fs.existsSync(path.join(projectRoot, 'GEMINI.md')))
         detected.push('gemini');
+    if (fs.existsSync(path.join(projectRoot, '.poolside')))
+        detected.push('poolside');
     return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {
