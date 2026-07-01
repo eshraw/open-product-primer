@@ -17,3 +17,17 @@ The README SHALL introduce the concept of a bet using a relatable, concrete scen
 #### Scenario: Bet concept introduced via example
 - **WHEN** a developer reads the section describing what a bet is
 - **THEN** they encounter a concrete scenario illustrating the concept before reading a definition or structural description
+
+### Requirement: README SHALL use the correct package name in all install commands
+Every install command in the README SHALL reference `@open-product-primer/cli` (not `@open-product-oprim/cli`). No variant of the package name appearing in the README SHALL contain a typo.
+
+#### Scenario: Developer copies the install command
+- **WHEN** a developer copies the npm install command from the README
+- **THEN** the command installs the correct package without a 404 or "package not found" error
+
+### Requirement: README SHALL use `oprim` as the primary command alias
+All CLI usage examples in the README SHALL use `oprim` as the canonical command. The long-form alias `open-product-primer` MAY be mentioned once in the npm package section as a secondary alias but SHALL NOT appear in quickstart or usage examples.
+
+#### Scenario: Developer follows the quickstart
+- **WHEN** a developer follows the README quickstart step by step
+- **THEN** every command they run uses the `oprim` alias and succeeds without alias-not-found errors

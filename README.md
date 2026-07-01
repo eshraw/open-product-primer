@@ -17,24 +17,16 @@ oprim stores the decisions that precede implementation — why you're building s
 ## Installation
 
 ```bash
-npm install -g @open-product-oprim/cli@latest
+npm install -g @open-product-primer/cli@latest
 ```
 
 ## Quick start
 
 ```bash
 cd your-project
-open-product-primer init   # scaffold oprim/ workspace
-open-product-primer doctor # verify setup
-open-product-primer update # install /oprim:* assistant commands
-```
-
-Short alias works everywhere:
-
-```bash
-oprim init
-oprim doctor
-oprim update
+oprim init    # scaffold oprim/ workspace
+oprim doctor  # verify setup
+oprim update  # install /oprim:* assistant commands
 ```
 
 ## CLI reference
@@ -116,8 +108,8 @@ The link between the layers is the promotion contract (`/oprim:promote`).
 
 ## npm package
 
-Package: `@open-product-oprim/cli`
-Bin aliases: `open-product-primer`, `oprim`
+Package: `@open-product-primer/cli`
+Bin aliases: `oprim`, `open-product-primer`
 Source: `packages/cli/`
 
 Releases are published via GitHub Actions on `v*` tags using [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (see `.github/workflows/release.yml`).
