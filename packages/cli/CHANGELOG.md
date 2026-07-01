@@ -17,6 +17,17 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [1.0.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.14.0...cli-v1.0.0) (2026-07-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* external readiness for v1
+
+### Features
+
+* external readiness for v1 ([f903507](https://github.com/eshraw/open-product-primer/commit/f903507346ba1b7b39cd83018614e4994b139659))
+
 ## [0.14.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.13.0...cli-v0.14.0) (2026-06-30)
 
 
