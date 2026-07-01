@@ -1,33 +1,14 @@
 wip_limits:
   now: 2
 
-now: []
-
-next:
-  - id: BET-017
-    title: "Nudge KPI review creation after bet archival to close the outcome loop"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-
-later:
-  - id: BET-005
-    title: "Unify oprim, openspec, and grafiphy under a single context folder"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-020
-    title: "Enable PDR surfacing by default in oprim init"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+now:
   - id: BET-021
     title: "Add public README quickstart and CHANGELOG for 1.0.0 external readiness"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
 
-backlog:
+next:
   - id: BET-022
     title: "Align oprim workspace structure with Open Knowledge Format"
     blocked_by: []
@@ -38,6 +19,8 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+
+later:
   - id: BET-014
     title: "Improve agent focus during bet discovery"
     blocked_by: []
@@ -45,6 +28,18 @@ backlog:
     requires_pdrs: []
   - id: BET-019
     title: "Add quick-capture mode to bet creation to reduce idea abandonment"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+
+backlog:
+  - id: BET-005
+    title: "Unify oprim, openspec, and grafiphy under a single context folder"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-020
+    title: "Enable PDR surfacing by default in oprim init"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
