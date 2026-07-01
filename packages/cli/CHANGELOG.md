@@ -5,6 +5,18 @@ All notable changes to `@open-product-primer/cli` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Development arc (0.x)
+
+oprim started in May 2026 as a minimal CLI to give product decisions a home in a repo. The 0.1.x releases established the core commands (`init`, `update`, `doctor`, `measure`), agent skill installation for Claude Code and Cursor, and settled on `oprim` as the canonical alias. The workspace directory was initially named `primer/`; 0.2.0 renamed it to `oprim/` in a deliberate breaking change to unify the branding, and shipped `oprim migrate` for existing repos alongside a `discovery.md` template for problem-framing before a bet is written.
+
+The 0.3.x–0.4.x cycle added the sequencing lifecycle. `oprim sequence` produced a Markdown board view from `sequence.yaml`. The bet archival workflow arrived in 0.4.0 — the `oprim:archive` skill, coordinated `UserPromptSubmit` and `Stop` hooks that bridge oprim archival with OpenSpec change archival, and doctor checks to verify the hooks are installed correctly.
+
+Multi-agent support expanded through 0.5.x–0.6.x. Codex (via `AGENTS.md`) and Gemini CLI (via `GEMINI.md`) joined Claude Code and Cursor as supported agents, with oprim workflow instructions written inline between delimiters so `oprim update` can refresh them without touching surrounding content. Poolside AI support followed in 0.13.0. The KPI measurement pipeline (`oprim measure`) reached a stable form, integrating Amplitude and BigQuery for criteria-contract evaluation.
+
+The 0.7.x–0.14.x releases focused on reliability and first-run experience. The `on-prompt-submit.sh` and `on-stop.sh` hooks were rewritten in pure bash, eliminating a python3 subprocess dependency. `oprim ovw` was added to give a live board summary without opening the YAML. Doctor gained integrity checks: sequence validity, archived-bet exclusion, and skill version verification. The onboarding flow was tightened so a developer running `oprim init` for the first time reaches their first bet in fewer steps.
+
+1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
+
 ## [0.14.0](https://github.com/eshraw/open-product-primer/compare/cli-v0.13.0...cli-v0.14.0) (2026-06-30)
 
 
