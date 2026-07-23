@@ -14,6 +14,21 @@ next:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+  - id: BET-023
+    title: "Author native oprim specs in Gherkin syntax"
+    blocked_by: []
+    unlocks: [BET-024]
+    requires_pdrs: []
+  - id: BET-024
+    title: "Adopt change and current spec dir lifecycle"
+    blocked_by: [BET-023]
+    unlocks: [BET-026, BET-028]
+    requires_pdrs: []
+  - id: BET-025
+    title: "Supercharge oprim config with merge on update"
+    blocked_by: []
+    unlocks: [BET-026]
+    requires_pdrs: []
 
 later:
   - id: BET-014
@@ -35,6 +50,31 @@ backlog:
     requires_pdrs: []
   - id: BET-020
     title: "Enable PDR surfacing by default in oprim init"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-026
+    title: "Pull team context from remote oprim stores"
+    blocked_by: [BET-024, BET-025]
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-027
+    title: "Move oprim workflows to declarative schemas"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-028
+    title: "Add oprim validate with strict CI gating"
+    blocked_by: [BET-024]
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-029
+    title: "Add explore and reconcile commands to oprim"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-030
+    title: "Add list, show, and status JSON commands"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
