@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initCommand } from '../commands/init';
 import { updateCommand } from '../commands/update';
 import { readAgentsFromConfig } from '../lib/detect';
+import { confirm } from '@inquirer/prompts';
 
 vi.mock('@inquirer/prompts', () => ({
   checkbox: vi.fn().mockResolvedValue([]),
@@ -24,6 +25,7 @@ beforeEach(() => {
 afterEach(() => {
   fs.rmSync(tmpDir, { recursive: true, force: true });
   vi.restoreAllMocks();
+  vi.mocked(confirm).mockReset().mockResolvedValue(false);
 });
 
 // 7.4 ─────────────────────────────────────────────────────────────────────────
@@ -91,5 +93,79 @@ describe('oprim update with agents: [claude] in config', () => {
 
     // Cursor commands NOT installed (even though .cursor/ exists)
     expect(fs.existsSync(path.join(tmpDir, '.cursor', 'commands', 'oprim-pdr.md'))).toBe(false);
+  });
+});
+
+// 5.1 / 5.2 — OKF frontmatter opt-in / opt-out ─────────────────────────────────
+
+describe('oprim init — OKF frontmatter opted in', () => {
+  it('writes okf.enabled: true, frontmattered templates, and index.md', async () => {
+    // 1st confirm() call = OKF opt-in prompt, 2nd = PDR-surfacing prompt
+    vi.mocked(confirm).mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    const configContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(configContent).toContain('okf:\n  enabled: true');
+
+    const pdrContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'pdr.md'), 'utf-8');
+    expect(pdrContent.startsWith('---\ntype: pdr')).toBe(true);
+
+    const betContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'bet-decision.md'), 'utf-8');
+    expect(betContent.startsWith('---\ntype: bet-decision')).toBe(true);
+
+    const kpiContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'kpi-review.md'), 'utf-8');
+    expect(kpiContent.startsWith('---\ntype: kpi-review')).toBe(true);
+
+    const criteriaContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'criteria.yaml'), 'utf-8');
+    expect(criteriaContent.startsWith('---')).toBe(false);
+
+    const indexPath = path.join(tmpDir, 'oprim', 'index.md');
+    expect(fs.existsSync(indexPath)).toBe(true);
+    expect(fs.readFileSync(indexPath, 'utf-8')).toContain('type: index');
+  });
+});
+
+describe('oprim init — OKF frontmatter declined', () => {
+  it('writes okf.enabled: false, plain templates, and no index.md', async () => {
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    const configContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(configContent).toContain('okf:\n  enabled: false');
+
+    for (const file of ['pdr.md', 'bet-decision.md', 'kpi-review.md']) {
+      const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', file), 'utf-8');
+      expect(content.startsWith('---')).toBe(false);
+    }
+
+    expect(fs.existsSync(path.join(tmpDir, 'oprim', 'index.md'))).toBe(false);
+  });
+});
+
+// 5.3 — update respects persisted flag, no re-prompt, no template rewrite ──────
+
+describe('oprim update — persisted OKF flag', () => {
+  it('reads okf.enabled without re-prompting and does not rewrite templates', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'templates'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nagents:\n  - claude\nokf:\n  enabled: true\n'
+    );
+    const untouchedPdr = '---\ntype: pdr\ntitle: "hand-edited"\n---\n\n# PDR-XXX: <Decision title>\n';
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'templates', 'pdr.md'), untouchedPdr);
+
+    const logSpy = vi.spyOn(console, 'log');
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    // Template file untouched
+    expect(fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'pdr.md'), 'utf-8')).toBe(untouchedPdr);
+
+    // Persisted flag was read and surfaced, not re-prompted
+    const notices = logSpy.mock.calls.map((c) => String(c[0]));
+    expect(notices.some((n) => n.includes('OKF frontmatter') && n.includes('enabled'))).toBe(true);
+    expect(vi.mocked(confirm).mock.calls.some((call) => String(call[0]?.message).includes('OKF'))).toBe(false);
   });
 });

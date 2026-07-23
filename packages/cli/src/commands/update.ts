@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
 import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, promptPdrSurfacing, Agent } from '../lib/install-agent';
-import { readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
+import { readAgentsFromConfig, writeAgentsToConfig, readOkfEnabledFromConfig } from '../lib/detect';
 import { ensureDir, writeFile } from '../lib/scaffold';
 import { sequenceViewScriptTemplate } from '../lib/templates';
 
@@ -14,6 +14,11 @@ export function updateCommand(): Command {
       const projectRoot = process.cwd();
 
       const configAgents = readAgentsFromConfig(projectRoot);
+
+      // okf.enabled is persisted at init time; update reads it (no re-prompt) since
+      // already-scaffolded oprim/templates/*.md files are never rewritten here.
+      const okfEnabled = readOkfEnabledFromConfig(projectRoot);
+      console.log(chalk.dim(`OKF frontmatter: ${okfEnabled ? 'enabled' : 'disabled'} (persisted from init)`));
 
       const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'scripts'));

@@ -1,4 +1,9 @@
-export function configTemplate(projectName: string, openspecEnabled: boolean, graphifyEnabled: boolean): string {
+export function configTemplate(
+  projectName: string,
+  openspecEnabled: boolean,
+  graphifyEnabled: boolean,
+  okfEnabled: boolean
+): string {
   return `version: 1
 project:
   name: "${projectName}"
@@ -10,6 +15,8 @@ integrations:
   graphify:
     enabled: ${graphifyEnabled}
     graph_dir: graphify-out
+okf:
+  enabled: ${okfEnabled}
 measurement:
   amplitude:
     enabled: false
@@ -19,6 +26,31 @@ measurement:
 sequencing:
   wip_limits:
     now: 2
+`;
+}
+
+// OKF (Open Knowledge Format) — https://github.com/GoogleCloudPlatform/okf
+export function okfFrontmatter(type: string, titleHint: string): string {
+  return `---
+type: ${type}
+title: "${titleHint}"
+description: "<one-line summary>"
+tags: []
+timestamp: YYYY-MM-DDTHH:MM:SSZ
+---
+
+`;
+}
+
+export function indexTemplate(projectName: string): string {
+  return `${okfFrontmatter('index', `${projectName} — oprim workspace`)}# ${projectName} — oprim workspace
+
+OKF (Open Knowledge Format) bundle entrypoint for this oprim workspace.
+
+## Contents
+- [Bets](./bets/) — product bet decisions
+- [Decisions](./decisions/) — Product Decision Records (PDRs)
+- [Reviews](./reviews/) — KPI reviews
 `;
 }
 

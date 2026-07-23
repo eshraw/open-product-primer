@@ -3,7 +3,15 @@ import * as path from 'path';
 import chalk from 'chalk';
 import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
-import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, promptPdrSurfacing, SUPPORTED_AGENTS, Agent } from '../lib/install-agent';
+import {
+  installAgentSkills,
+  promptAgentSelection,
+  promptFrameworkSelection,
+  promptPdrSurfacing,
+  promptOkfFrontmatter,
+  SUPPORTED_AGENTS,
+  Agent,
+} from '../lib/install-agent';
 import {
   configTemplate,
   sequenceTemplate,
@@ -13,6 +21,8 @@ import {
   kpiReviewTemplate,
   discoveryTemplate,
   sequenceViewScriptTemplate,
+  okfFrontmatter,
+  indexTemplate,
 } from '../lib/templates';
 
 export function initCommand(): Command {
@@ -37,6 +47,9 @@ export function initCommand(): Command {
       if (openspec.detected) console.log(chalk.green('✓') + ' OpenSpec detected');
       if (graphify.detected) console.log(chalk.green('✓') + ' Graphify detected');
 
+      console.log('');
+      const okfEnabled = await promptOkfFrontmatter();
+
       const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'decisions'));
       ensureDir(path.join(primerDir, 'bets'));
@@ -46,16 +59,28 @@ export function initCommand(): Command {
 
       const configWritten = writeFileIfAbsent(
         path.join(primerDir, 'config.yaml'),
-        configTemplate(projectName, openspec.detected, graphify.detected)
+        configTemplate(projectName, openspec.detected, graphify.detected, okfEnabled)
       );
       const sequenceWritten = writeFileIfAbsent(path.join(primerDir, 'sequence.yaml'), sequenceTemplate);
 
-      writeFile(path.join(primerDir, 'templates', 'pdr.md'), pdrTemplate);
-      writeFile(path.join(primerDir, 'templates', 'bet-decision.md'), betDecisionTemplate);
+      const pdrContent = okfEnabled ? okfFrontmatter('pdr', '<Decision title>') + pdrTemplate : pdrTemplate;
+      const betContent = okfEnabled
+        ? okfFrontmatter('bet-decision', '<Bet title>') + betDecisionTemplate
+        : betDecisionTemplate;
+      const kpiContent = okfEnabled
+        ? okfFrontmatter('kpi-review', 'KPI Review: BET-XXX') + kpiReviewTemplate
+        : kpiReviewTemplate;
+
+      writeFile(path.join(primerDir, 'templates', 'pdr.md'), pdrContent);
+      writeFile(path.join(primerDir, 'templates', 'bet-decision.md'), betContent);
       writeFile(path.join(primerDir, 'templates', 'criteria.yaml'), criteriaTemplate);
-      writeFile(path.join(primerDir, 'templates', 'kpi-review.md'), kpiReviewTemplate);
+      writeFile(path.join(primerDir, 'templates', 'kpi-review.md'), kpiContent);
       writeFile(path.join(primerDir, 'templates', 'discovery.md'), discoveryTemplate);
       writeFile(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), sequenceViewScriptTemplate);
+
+      if (okfEnabled) {
+        writeFile(path.join(primerDir, 'index.md'), indexTemplate(projectName));
+      }
 
       writeFileIfAbsent(path.join(primerDir, 'decisions', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'bets', '.gitkeep'), '');
@@ -68,6 +93,7 @@ export function initCommand(): Command {
       console.log('  ' + chalk.gray('oprim/sequence.yaml') + ' — ' + sequenceStatus);
       console.log('  ' + chalk.gray('oprim/templates/') + ' — refreshed');
       console.log('  ' + chalk.gray('oprim/scripts/') + ' — refreshed');
+      console.log('  ' + chalk.gray('OKF frontmatter') + ' — ' + (okfEnabled ? 'enabled' : 'disabled'));
 
       // ── Agent selection ───────────────────────────────────────────────────────
 

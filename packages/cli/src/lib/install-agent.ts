@@ -54,6 +54,14 @@ export async function promptPdrSurfacing(): Promise<boolean> {
   return confirm({ message: 'Enable proactive PDR surfacing in skills? (y/N)', default: false });
 }
 
+export async function promptOkfFrontmatter(): Promise<boolean> {
+  const { confirm } = await import('@inquirer/prompts');
+  return confirm({
+    message: 'Enable OKF (Open Knowledge Format) frontmatter on scaffolded artifacts? (y/N)',
+    default: false,
+  });
+}
+
 export function installAgentSkills(
   agent: Agent,
   projectRoot: string,
@@ -358,7 +366,12 @@ Ask: Context (what forced this decision), Decision (clear statement), Alternativ
 ### 4. Check for supersession
 Ask: "Does this supersede an existing PDR? If so, which ID? (Enter to skip)"
 
+### 4b. Check for OKF frontmatter
+Read \`oprim/templates/pdr.md\`. If it begins with a YAML frontmatter block (\`---\` ... \`---\`), this workspace has OKF frontmatter enabled. Ask for a one-line description and comma-separated tags (subject-area keywords). Prepare a frontmatter block with \`type: pdr\`, \`title: <title>\`, \`description: <description>\`, \`tags: [<tags>]\`, \`timestamp: <today's date, ISO 8601>\`, to prepend in step 5.
+If no frontmatter block is found in the template, skip this step — write the file with no frontmatter, matching current behavior.
+
 ### 5. Write the PDR file
+Prepend the frontmatter block from step 4b, if one was prepared.
 \`\`\`
 # PDR-NNN: <title>
 
@@ -448,7 +461,12 @@ Then ask about each of the four risk dimensions (Low / Medium / High + short rat
 - "**Feasibility risk**: Can we build this with our current skills, time, and technology? (Low / Medium / High — and why?)"
 - "**Business viability risk**: Does this solution work for the business (revenue, legal, ops)? (Low / Medium / High — and why?)"
 
+### 4b. Check for OKF frontmatter
+Read \`oprim/templates/bet-decision.md\`. If it begins with a YAML frontmatter block (\`---\` ... \`---\`), this workspace has OKF frontmatter enabled. Ask for a one-line description and comma-separated tags (subject-area keywords). Prepare a frontmatter block with \`type: bet-decision\`, \`title: <title>\`, \`description: <description>\`, \`tags: [<tags>]\`, \`timestamp: <today's date, ISO 8601>\`, to prepend in step 5.
+If no frontmatter block is found in the template, skip this step — write the file with no frontmatter, matching current behavior.
+
 ### 5. Write oprim/bets/BET-NNN-<slug>/bet-decision.md
+Prepend the frontmatter block from step 4b, if one was prepared.
 \`\`\`
 # Decision: BET-NNN <title>
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
@@ -813,7 +831,12 @@ Ask: reviewer name, decision quality notes.
 ### 5. Output path
 \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\` (today's date)
 
+### 5b. Check for OKF frontmatter
+Read \`oprim/templates/kpi-review.md\`. If it begins with a YAML frontmatter block (\`---\` ... \`---\`), this workspace has OKF frontmatter enabled. Ask for a one-line description and comma-separated tags (derived from the reviewed bet's subject area). Prepare a frontmatter block with \`type: kpi-review\`, \`title: <bet ID and title>\`, \`description: <description>\`, \`tags: [<tags>]\`, \`timestamp: <review date, ISO 8601>\`, to prepend in step 6.
+If no frontmatter block is found in the template, skip this step — write the file with no frontmatter, matching current behavior.
+
 ### 6. Write the review file
+Prepend the frontmatter block from step 5b, if one was prepared.
 \`\`\`markdown
 # KPI Review: BET-NNN
 

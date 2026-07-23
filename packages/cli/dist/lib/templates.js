@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.kpiReviewTemplate = exports.sequenceViewScriptTemplate = exports.discoveryTemplate = exports.criteriaTemplate = exports.betDecisionTemplate = exports.pdrTemplate = exports.sequenceTemplate = void 0;
 exports.configTemplate = configTemplate;
-function configTemplate(projectName, openspecEnabled, graphifyEnabled) {
+exports.okfFrontmatter = okfFrontmatter;
+exports.indexTemplate = indexTemplate;
+function configTemplate(projectName, openspecEnabled, graphifyEnabled, okfEnabled) {
     return `version: 1
 project:
   name: "${projectName}"
@@ -14,6 +16,8 @@ integrations:
   graphify:
     enabled: ${graphifyEnabled}
     graph_dir: graphify-out
+okf:
+  enabled: ${okfEnabled}
 measurement:
   amplitude:
     enabled: false
@@ -23,6 +27,29 @@ measurement:
 sequencing:
   wip_limits:
     now: 2
+`;
+}
+// OKF (Open Knowledge Format) — https://github.com/GoogleCloudPlatform/okf
+function okfFrontmatter(type, titleHint) {
+    return `---
+type: ${type}
+title: "${titleHint}"
+description: "<one-line summary>"
+tags: []
+timestamp: YYYY-MM-DDTHH:MM:SSZ
+---
+
+`;
+}
+function indexTemplate(projectName) {
+    return `${okfFrontmatter('index', `${projectName} — oprim workspace`)}# ${projectName} — oprim workspace
+
+OKF (Open Knowledge Format) bundle entrypoint for this oprim workspace.
+
+## Contents
+- [Bets](./bets/) — product bet decisions
+- [Decisions](./decisions/) — Product Decision Records (PDRs)
+- [Reviews](./reviews/) — KPI reviews
 `;
 }
 exports.sequenceTemplate = `wip_limits:
