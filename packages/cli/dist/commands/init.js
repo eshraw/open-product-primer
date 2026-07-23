@@ -59,20 +59,32 @@ function initCommand() {
             console.log(chalk_1.default.green('✓') + ' OpenSpec detected');
         if (graphify.detected)
             console.log(chalk_1.default.green('✓') + ' Graphify detected');
+        console.log('');
+        const okfEnabled = await (0, install_agent_1.promptOkfFrontmatter)();
         const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'decisions'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'reviews'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'templates'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
-        const configWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'config.yaml'), (0, templates_1.configTemplate)(projectName, openspec.detected, graphify.detected));
+        const configWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'config.yaml'), (0, templates_1.configTemplate)(projectName, openspec.detected, graphify.detected, okfEnabled));
         const sequenceWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'sequence.yaml'), templates_1.sequenceTemplate);
-        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'pdr.md'), templates_1.pdrTemplate);
-        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'bet-decision.md'), templates_1.betDecisionTemplate);
+        const pdrContent = okfEnabled ? (0, templates_1.okfFrontmatter)('pdr', '<Decision title>') + templates_1.pdrTemplate : templates_1.pdrTemplate;
+        const betContent = okfEnabled
+            ? (0, templates_1.okfFrontmatter)('bet-decision', '<Bet title>') + templates_1.betDecisionTemplate
+            : templates_1.betDecisionTemplate;
+        const kpiContent = okfEnabled
+            ? (0, templates_1.okfFrontmatter)('kpi-review', 'KPI Review: BET-XXX') + templates_1.kpiReviewTemplate
+            : templates_1.kpiReviewTemplate;
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'pdr.md'), pdrContent);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'bet-decision.md'), betContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'criteria.yaml'), templates_1.criteriaTemplate);
-        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'kpi-review.md'), templates_1.kpiReviewTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'kpi-review.md'), kpiContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'discovery.md'), templates_1.discoveryTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
+        if (okfEnabled) {
+            (0, scaffold_1.writeFile)(path.join(primerDir, 'index.md'), (0, templates_1.indexTemplate)(projectName));
+        }
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'decisions', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'reviews', '.gitkeep'), '');
@@ -83,6 +95,7 @@ function initCommand() {
         console.log('  ' + chalk_1.default.gray('oprim/sequence.yaml') + ' — ' + sequenceStatus);
         console.log('  ' + chalk_1.default.gray('oprim/templates/') + ' — refreshed');
         console.log('  ' + chalk_1.default.gray('oprim/scripts/') + ' — refreshed');
+        console.log('  ' + chalk_1.default.gray('OKF frontmatter') + ' — ' + (okfEnabled ? 'enabled' : 'disabled'));
         // ── Agent selection ───────────────────────────────────────────────────────
         let selectedAgents;
         const flaggedAgents = opts.agent;

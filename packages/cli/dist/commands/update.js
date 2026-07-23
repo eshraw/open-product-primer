@@ -51,6 +51,10 @@ function updateCommand() {
         .action(async () => {
         const projectRoot = process.cwd();
         const configAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
+        // okf.enabled is persisted at init time; update reads it (no re-prompt) since
+        // already-scaffolded oprim/templates/*.md files are never rewritten here.
+        const okfEnabled = (0, detect_1.readOkfEnabledFromConfig)(projectRoot);
+        console.log(chalk_1.default.dim(`OKF frontmatter: ${okfEnabled ? 'enabled' : 'disabled'} (persisted from init)`));
         const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
         (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);

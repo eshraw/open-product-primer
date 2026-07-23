@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.detectOpenSpec = detectOpenSpec;
 exports.detectGraphify = detectGraphify;
 exports.readAgentsFromConfig = readAgentsFromConfig;
+exports.readOkfEnabledFromConfig = readOkfEnabledFromConfig;
 exports.detectAvailableAgents = detectAvailableAgents;
 exports.writeAgentsToConfig = writeAgentsToConfig;
 const fs = __importStar(require("fs"));
@@ -61,6 +62,15 @@ function readAgentsFromConfig(projectRoot) {
     if (!Array.isArray(agents))
         return null;
     return agents;
+}
+function readOkfEnabledFromConfig(projectRoot) {
+    const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
+    if (!fs.existsSync(configPath))
+        return false;
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const config = yaml.load(content);
+    const okf = config?.['okf'];
+    return Boolean(okf?.['enabled']);
 }
 function detectAvailableAgents(projectRoot) {
     const detected = [];

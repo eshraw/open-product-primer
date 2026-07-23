@@ -23,6 +23,15 @@ export function readAgentsFromConfig(projectRoot: string): string[] | null {
   return agents as string[];
 }
 
+export function readOkfEnabledFromConfig(projectRoot: string): boolean {
+  const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
+  if (!fs.existsSync(configPath)) return false;
+  const content = fs.readFileSync(configPath, 'utf-8');
+  const config = yaml.load(content) as Record<string, unknown> | null;
+  const okf = config?.['okf'] as Record<string, unknown> | undefined;
+  return Boolean(okf?.['enabled']);
+}
+
 export function detectAvailableAgents(projectRoot: string): string[] {
   const detected: string[] = [];
   if (fs.existsSync(path.join(projectRoot, '.claude'))) detected.push('claude');

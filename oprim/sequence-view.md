@@ -5,22 +5,34 @@
 
 ```mermaid
 graph TD
-    subgraph Now
-        BET015["BET-015: Add oprim status CLI command for term..."]
-        BET018["BET-018: Add empty-state guidance to init and ..."]
-    end
     subgraph Next
-        BET016["BET-016: Extend oprim doctor with integrity ch..."]
-        BET017["BET-017: Nudge KPI review creation after bet a..."]
+        BET022["BET-022: Align oprim workspace structure with ..."]
+        BET013["BET-013: Introduce atomic notes in oprim for l..."]
+        BET023["BET-023: Author native oprim specs in Gherkin ..."]
+        BET024["BET-024: Adopt change and current spec dir lif..."]
+        BET025["BET-025: Supercharge oprim config with merge o..."]
     end
     subgraph Later
-        BET005["BET-005: Unify oprim, openspec, and grafiphy u..."]
-        BET020["BET-020: Enable PDR surfacing by default in op..."]
-        BET021["BET-021: Add public README quickstart and CHAN..."]
+        BET014["BET-014: Improve agent focus during bet discovery"]
+        BET019["BET-019: Add quick-capture mode to bet creatio..."]
     end
+    BET024 --> [
+    BET024 --> B
+    BET024 --> E
+    BET024 --> T
+    BET024 --> 
+    BET024 --> 0
+    BET024 --> 2
+    BET024 --> 3
+    BET024 --> ]
 ```
 
 ### Backlog
-- **BET-013**: Introduce atomic notes in oprim for lightweight thinking capture
-- **BET-014**: Improve agent focus during bet discovery
-- **BET-019**: Add quick-capture mode to bet creation to reduce idea abandonment
+- **BET-005**: Unify oprim, openspec, and grafiphy under a single context folder
+- **BET-020**: Enable PDR surfacing by default in oprim init
+- **BET-026**: Pull team context from remote oprim stores
+- **BET-027**: Move oprim workflows to declarative schemas
+- **BET-028**: Add oprim validate with strict CI gating
+- **BET-029**: Add explore and reconcile commands to oprim
+- **BET-030**: Add list, show, and status JSON commands
+- **BET-031**: Add a current decisions rollup view
