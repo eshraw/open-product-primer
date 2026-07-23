@@ -33,6 +33,12 @@
 - The promote flow produces native oprim specs instead of invoking `/opsx:propose`
 - Native spec authoring available as a selectable framework alongside the existing OpenSpec option
 
+## Design constraint: generalist-first, spec layer optional
+- oprim stays product-decision-first (PDRs, bets, sequencing, reviews); the spec layer is an optional sublayer beneath a bet, never the center of gravity
+- Spec authoring is **opt-in, chosen at `oprim init` / `oprim update`** (extend the existing framework selection: OpenSpec vs. native vs. none)
+- A generalist user who wants only PDRs, bets, and reviews never scaffolds a `specs/` directory and never sees Gherkin syntax
+- This widens the CLAUDE.md authority boundary (oprim *optionally* owns what/how) rather than replacing the product-decision layer
+
 ## Kill criteria / rollback trigger
 - Agent-authored native specs are materially lower quality than OpenSpec's output
 - Maintaining a parallel spec syntax proves too costly → revert to OpenSpec delegation

@@ -35,3 +35,4 @@ graph TD
 - **BET-028**: Add oprim validate with strict CI gating
 - **BET-029**: Add explore and reconcile commands to oprim
 - **BET-030**: Add list, show, and status JSON commands
+- **BET-031**: Add a current decisions rollup view

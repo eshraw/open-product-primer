@@ -33,6 +33,11 @@
 - Completed bets fold their spec deltas (ADDED/MODIFIED/REMOVED) into current truth automatically on archive
 - Multiple in-flight changes can proceed in parallel without colliding on the same spec files
 
+## Design constraint: generalist-first, spec layer optional
+- The change/current spec structure is only scaffolded when the user opts into the spec layer at `oprim init` / `oprim update` — same choice that gates BET-023
+- oprim remains product-decision-first; specs are an optional sublayer beneath bets, not a mandatory workspace
+- Delta-merge (ADDED/MODIFIED/REMOVED → current truth) applies to the **spec layer only** — it deliberately does NOT apply to PDRs, which evolve by supersession (`Superseded by PDR-YYY`); the two truth models stay separate by design
+
 ## Kill criteria / rollback trigger
 - Delta-merge conflicts on archive prove too error-prone without heavy tooling, eroding trust in the current spec set
 - The distinction adds ceremony without users perceiving a benefit after a trial period

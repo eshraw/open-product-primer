@@ -78,3 +78,8 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+  - id: BET-031
+    title: "Add a current decisions rollup view"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
