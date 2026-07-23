@@ -31,3 +31,14 @@ The `oprim-pdr` skill SHALL invoke `oprim:context` as its first step so that exi
 #### Scenario: Related decisions surfaced before new PDR authoring begins
 - **WHEN** a user invokes the `oprim-pdr` skill to create a new product decision
 - **THEN** `oprim:context` runs first and any PDRs matching the topic keywords are displayed before the title prompt, giving the author the opportunity to check for supersession candidates
+
+### Requirement: oprim-pdr SHALL fill in OKF frontmatter when the workspace has opted in
+When `oprim/config.yaml` has `okf.enabled: true`, the `oprim-pdr` skill SHALL populate the OKF frontmatter block already present at the top of the scaffolded PDR file (per the `oprim/templates/pdr.md` template written at `oprim init`), setting `type: pdr`, `title` from the decision title, a one-line `description`, `tags` derived from the decision's subject area, and `timestamp` to the creation date.
+
+#### Scenario: Frontmatter populated on PDR creation when opted in
+- **WHEN** a user invokes the `oprim-pdr` skill in a workspace where `oprim/config.yaml` has `okf.enabled: true`
+- **THEN** the created PDR file has its frontmatter block filled in with `type: pdr`, the decision's title, a short description, relevant tags, and the creation timestamp
+
+#### Scenario: No frontmatter handling when not opted in
+- **WHEN** a user invokes the `oprim-pdr` skill in a workspace where `oprim/config.yaml` has `okf.enabled: false` or the field is absent
+- **THEN** the created PDR file contains no frontmatter block, matching today's behavior exactly

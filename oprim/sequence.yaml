@@ -4,11 +4,6 @@ wip_limits:
 now: []
 
 next:
-  - id: BET-022
-    title: "Align oprim workspace structure with Open Knowledge Format"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-013
     title: "Introduce atomic notes in oprim for lightweight thinking capture"
     blocked_by: []
