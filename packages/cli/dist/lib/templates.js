@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.kpiReviewTemplate = exports.sequenceViewScriptTemplate = exports.discoveryTemplate = exports.criteriaTemplate = exports.betDecisionTemplate = exports.pdrTemplate = exports.sequenceTemplate = void 0;
+exports.kpiReviewTemplate = exports.sequenceViewScriptTemplate = exports.discoveryTemplate = exports.criteriaTemplate = exports.noteTemplate = exports.betDecisionTemplate = exports.pdrTemplate = exports.sequenceTemplate = void 0;
 exports.configTemplate = configTemplate;
 exports.okfFrontmatter = okfFrontmatter;
+exports.noteMinimalFrontmatter = noteMinimalFrontmatter;
 exports.indexTemplate = indexTemplate;
 function configTemplate(projectName, openspecEnabled, graphifyEnabled, okfEnabled) {
     return `version: 1
@@ -35,6 +36,18 @@ function okfFrontmatter(type, titleHint) {
 type: ${type}
 title: "${titleHint}"
 description: "<one-line summary>"
+tags: []
+timestamp: YYYY-MM-DDTHH:MM:SSZ
+---
+
+`;
+}
+// Minimal frontmatter tier for notes — always on, independent of OKF opt-in.
+// Deliberately smaller than okfFrontmatter(): no `description` field.
+function noteMinimalFrontmatter(titleHint) {
+    return `---
+type: note
+title: "${titleHint}"
 tags: []
 timestamp: YYYY-MM-DDTHH:MM:SSZ
 ---
@@ -113,6 +126,13 @@ exports.betDecisionTemplate = `# Decision: BET-XXX <Bet title>
 ## Links
 - PDRs: <PDR-IDs>
 - OpenSpec change: <path once promoted>
+`;
+exports.noteTemplate = `# Note: <Note title>
+
+<Capture the observation, idea, or connection while it's fresh.>
+
+## Bets
+- <BET-IDs this note relates to, or "None">
 `;
 exports.criteriaTemplate = `metrics:
   - id: metric_id

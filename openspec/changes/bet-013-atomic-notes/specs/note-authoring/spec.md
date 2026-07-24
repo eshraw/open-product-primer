@@ -21,12 +21,16 @@ When `okf.enabled: true`, a scaffolded note's frontmatter SHALL additionally inc
 - **WHEN** a user scaffolds a note in a project where `oprim/config.yaml` has `okf.enabled: true`
 - **THEN** the note's frontmatter contains `type: note`, `title`, `description`, `tags`, and `timestamp`
 
-### Requirement: Note tags SHALL be drawn from a controlled vocabulary
-The system SHALL define a `notes.tags` list in `oprim/config.yaml` as the controlled vocabulary for note tags, and the `oprim-note` skill SHALL validate a note's tags against that list rather than accepting freeform values.
+### Requirement: Note tags SHALL be drawn from a controlled, self-seeding vocabulary
+The system SHALL define a `notes.tags` list in `oprim/config.yaml` as the controlled vocabulary for note tags. The `oprim-note` skill SHALL write `notes.tags` to `oprim/config.yaml` lazily — the first time a note is scaffolded, if the key is absent — rather than requiring `oprim update` to pre-populate it. A tag not yet present in `notes.tags` (including when the list is empty or absent) SHALL be accepted and appended to `notes.tags`, so the vocabulary grows from usage instead of blocking note creation.
 
-#### Scenario: Tag outside the controlled vocabulary is rejected
-- **WHEN** a user scaffolds a note with a tag not present in `oprim/config.yaml`'s `notes.tags` list
-- **THEN** the skill rejects the tag and prompts for one from the controlled vocabulary, or an explicit addition to it
+#### Scenario: First note in a project seeds the vocabulary
+- **WHEN** a user scaffolds the first note in a project where `oprim/config.yaml` has no `notes.tags` key
+- **THEN** `notes.tags` is created in `oprim/config.yaml` containing the tag(s) used on that note
+
+#### Scenario: A new tag extends the existing vocabulary
+- **WHEN** a user scaffolds a note with a tag not yet present in `oprim/config.yaml`'s `notes.tags` list
+- **THEN** the note is created with that tag, and the tag is appended to `notes.tags`
 
 ### Requirement: Notes SHALL relate to bets by explicit mention, not directory nesting
 A note that relates to one or more bets SHALL record that relationship via an explicit `Bets:` reference in the note body (or a corresponding link in the bet-decision's `## Links` section), and SHALL NOT be required to live under a specific bet's directory.

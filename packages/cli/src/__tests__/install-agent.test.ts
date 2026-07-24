@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, POOLSIDE_SKILLS } from '../lib/install-agent';
+import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS } from '../lib/install-agent';
 
 let tmpDir: string;
 
@@ -67,9 +67,10 @@ describe('writeAgentInstructionFile', () => {
 // content functions ────────────────────────────────────────────────────────────
 
 describe('codexInstructions', () => {
-  it('contains all five workflow sections', () => {
+  it('contains all six workflow sections', () => {
     const content = codexInstructions();
     expect(content).toContain('oprim-bet');
+    expect(content).toContain('oprim-note');
     expect(content).toContain('oprim-criteria');
     expect(content).toContain('oprim-pdr');
     expect(content).toContain('oprim-review');
@@ -78,9 +79,10 @@ describe('codexInstructions', () => {
 });
 
 describe('poolsideInstructions', () => {
-  it('contains all five workflow sections', () => {
+  it('contains all six workflow sections', () => {
     const content = poolsideInstructions();
     expect(content).toContain('oprim-bet');
+    expect(content).toContain('oprim-note');
     expect(content).toContain('oprim-criteria');
     expect(content).toContain('oprim-pdr');
     expect(content).toContain('oprim-review');
@@ -89,9 +91,10 @@ describe('poolsideInstructions', () => {
 });
 
 describe('geminiInstructions', () => {
-  it('contains all five workflow sections', () => {
+  it('contains all six workflow sections', () => {
     const content = geminiInstructions();
     expect(content).toContain('oprim-bet');
+    expect(content).toContain('oprim-note');
     expect(content).toContain('oprim-criteria');
     expect(content).toContain('oprim-pdr');
     expect(content).toContain('oprim-review');
@@ -105,7 +108,7 @@ describe('installAgentSkills', () => {
   describe('claude', () => {
     it('creates .claude/skills/ directories and SKILL.md files', () => {
       installAgentSkills('claude', tmpDir);
-      for (const skill of ['oprim-pdr', 'oprim-bet', 'oprim-criteria', 'oprim-review']) {
+      for (const skill of ['oprim-pdr', 'oprim-bet', 'oprim-note', 'oprim-criteria', 'oprim-review']) {
         const skillPath = path.join(tmpDir, '.claude', 'skills', skill, 'SKILL.md');
         expect(fs.existsSync(skillPath)).toBe(true);
       }
@@ -228,7 +231,7 @@ describe('installAgentSkills', () => {
   describe('cursor', () => {
     it('creates .cursor/skills/ directories and SKILL.md files', () => {
       installAgentSkills('cursor', tmpDir);
-      for (const skill of ['oprim-pdr', 'oprim-bet', 'oprim-criteria', 'oprim-review']) {
+      for (const skill of ['oprim-pdr', 'oprim-bet', 'oprim-note', 'oprim-criteria', 'oprim-review']) {
         const skillPath = path.join(tmpDir, '.cursor', 'skills', skill, 'SKILL.md');
         expect(fs.existsSync(skillPath)).toBe(true);
       }
@@ -236,7 +239,7 @@ describe('installAgentSkills', () => {
 
     it('creates .cursor/commands/ and command files', () => {
       installAgentSkills('cursor', tmpDir);
-      for (const cmd of ['oprim-pdr.md', 'oprim-bet.md', 'oprim-criteria.md', 'oprim-review.md']) {
+      for (const cmd of ['oprim-pdr.md', 'oprim-bet.md', 'oprim-note.md', 'oprim-criteria.md', 'oprim-review.md']) {
         const cmdPath = path.join(tmpDir, '.cursor', 'commands', cmd);
         expect(fs.existsSync(cmdPath)).toBe(true);
       }
@@ -250,7 +253,7 @@ describe('installAgentSkills', () => {
   });
 
   describe('poolside', () => {
-    it('creates .poolside/skills/ with all six SKILL.md files', () => {
+    it('creates .poolside/skills/ with all seven SKILL.md files', () => {
       installAgentSkills('poolside', tmpDir);
       for (const skill of Object.keys(POOLSIDE_SKILLS)) {
         const skillPath = path.join(tmpDir, '.poolside', 'skills', skill, 'SKILL.md');
@@ -305,6 +308,39 @@ describe('installAgentSkills', () => {
         expect(fs.existsSync(skillPath)).toBe(true);
       }
     });
+  });
+});
+
+// oprim-note skill content ─────────────────────────────────────────────────────
+
+describe('oprim-note skill', () => {
+  it('instructs NOTE-NNN id scanning, self-seeding tags, and the OKF-tier check', () => {
+    const content = CLAUDE_SKILLS['oprim-note'];
+    expect(content).toContain('name: oprim-note');
+    expect(content).toContain('NOTE-(\\d+)-');
+    expect(content).toContain('notes.tags');
+    expect(content).toContain('accepted, never rejected');
+    expect(content).toContain('oprim/templates/note.md');
+    expect(content).toContain('description:');
+  });
+});
+
+// promoteContent ID-prefix dispatch ────────────────────────────────────────────
+
+describe('promoteContent dispatch', () => {
+  it('dispatches on BET- vs NOTE- prefix and reports unrecognized prefixes', () => {
+    const content = CLAUDE_COMMANDS['promote.md'];
+    expect(content).toContain('BET-');
+    expect(content).toContain('NOTE-');
+    expect(content).toContain('A. Bet → OpenSpec change');
+    expect(content).toContain('B. Note → Bet');
+    expect(content).toContain('Unrecognized ID prefix');
+  });
+
+  it('preserves the existing bet → OpenSpec-change steps unchanged', () => {
+    const content = CLAUDE_COMMANDS['promote.md'];
+    expect(content).toContain('openspec-propose');
+    expect(content).toContain('## Capabilities');
   });
 });
 

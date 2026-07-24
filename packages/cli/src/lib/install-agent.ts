@@ -267,6 +267,7 @@ function removeContextStepFromFile(content: string): string {
 export const CLAUDE_SKILLS: Record<string, string> = {
   'oprim-pdr': pdrSkill(),
   'oprim-bet': betSkill(),
+  'oprim-note': noteSkill(),
   'oprim-criteria': criteriaSkill(),
   'oprim-review': reviewSkill(),
   'oprim-archive': archiveSkill(),
@@ -276,7 +277,7 @@ export const CLAUDE_SKILLS: Record<string, string> = {
 // ─── Claude command wrappers (thin, invoke skill) ────────────────────────────
 
 export const CLAUDE_COMMANDS: Record<string, string> = {
-  'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
+  'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a note into a bet, or a prioritized bet into an OpenSpec change', promoteContent()),
   'sequence.md': claudeWrapper('OPRIM: Sequence', 'Validate and update the primer sequencing board', sequenceContent()),
   'archive.md': claudeWrapper('OPRIM: Archive', 'Archive a completed bet — move it out of the active board', archiveCommandContent()),
 };
@@ -286,6 +287,7 @@ export const CLAUDE_COMMANDS: Record<string, string> = {
 export const POOLSIDE_SKILLS: Record<string, string> = {
   'oprim-pdr': pdrSkill(),
   'oprim-bet': betSkill(),
+  'oprim-note': noteSkill(),
   'oprim-criteria': criteriaSkill(),
   'oprim-review': reviewSkill(),
   'oprim-archive': archiveSkill(),
@@ -297,6 +299,7 @@ export const POOLSIDE_SKILLS: Record<string, string> = {
 export const CURSOR_SKILLS: Record<string, string> = {
   'oprim-pdr': pdrSkill(),
   'oprim-bet': betSkill(),
+  'oprim-note': noteSkill(),
   'oprim-criteria': criteriaSkill(),
   'oprim-review': reviewSkill(),
 };
@@ -304,10 +307,11 @@ export const CURSOR_SKILLS: Record<string, string> = {
 // ─── Cursor command files (full inline — no Skill tool in Cursor) ────────────
 
 export const CURSOR_COMMANDS: Record<string, string> = {
-  'oprim-promote.md': cursorWrapper('oprim-promote', 'Promote a prioritized bet to an OpenSpec change', promoteContent()),
+  'oprim-promote.md': cursorWrapper('oprim-promote', 'Promote a note into a bet, or a prioritized bet into an OpenSpec change', promoteContent()),
   'oprim-sequence.md': cursorWrapper('oprim-sequence', 'Validate and update the primer sequencing board', sequenceInlineContent()),
   'oprim-pdr.md': cursorWrapper('oprim-pdr', 'Create a new Product Decision Record with auto-assigned ID', pdrInlineContent()),
   'oprim-bet.md': cursorWrapper('oprim-bet', 'Create a new bet decision and register it on the sequencing board', betInlineContent()),
+  'oprim-note.md': cursorWrapper('oprim-note', 'Create a new atomic note for lightweight thinking capture', noteInlineContent()),
   'oprim-criteria.md': cursorWrapper('oprim-criteria', 'Create or append to a criteria.yaml contract for a bet', criteriaInlineContent()),
   'oprim-review.md': cursorWrapper('oprim-review', "Create a KPI review artifact pre-filled from a bet's criteria contract", reviewInlineContent()),
 };
@@ -520,6 +524,76 @@ Ask: "Do you want to scaffold a discovery.md now? (y/N)"
 - If "n" or Enter: skip silently.
 
 ### 8. Report what was created
+`;
+}
+
+function noteSkill(): string {
+  return `---
+name: oprim-note
+description: Create a new atomic note in oprim/notes/ for lightweight thinking capture, with tiered frontmatter and optional bet links
+---
+
+Create a new note in \`oprim/notes/\` for lightweight thinking capture — an observation, idea, or connection that hasn't yet earned a place in a bet or PDR.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
+## What you're creating
+
+A note is a small, disposable unit of thinking: an observation, a stray idea, or a connection between bets, captured before it's proven enough to belong in a discovery hypothesis or bet-decision. Notes carry no owner and no kill criterion — they're not commitments. Promote a note into a bet later with \`/oprim:promote NOTE-NNN\` once it's worth committing to.
+
+## Steps
+
+### 1. Get the note title
+If not provided, ask: "What is this note about? (a short title)"
+
+### 2. Assign the next NOTE ID
+Scan \`oprim/notes/\` for files matching \`NOTE-(\\d+)-\`. Extract the numeric part from each match. Assign max+1, zero-padded to 3 digits. Default \`001\` if none found.
+
+### 2b. Derive the slug
+From the note title: lowercase all characters, replace any character that is not a letter or digit with a hyphen, collapse consecutive hyphens to one, strip leading/trailing hyphens, truncate to 40 characters at the last hyphen boundary. This becomes \`<slug>\`.
+Output path: \`oprim/notes/NOTE-NNN-<slug>.md\`
+
+### 3. Gather the note body
+Ask: "What's the observation, idea, or connection?" (free-form prose — this becomes the note body).
+
+### 4. Gather tags
+Read \`oprim/config.yaml\`. If it has a \`notes:\` section with a \`tags:\` list, show it and ask the user to pick from it or add new ones. If \`notes.tags\` is absent or empty, ask for tags directly (comma-separated) — there's no vocabulary yet to constrain against.
+A tag not already in \`notes.tags\` SHALL be accepted, never rejected, and appended to \`oprim/config.yaml\`'s \`notes.tags\` list (creating the \`notes:\` section if absent) — the vocabulary grows from usage rather than requiring upfront authoring.
+
+### 5. Gather optional bet links
+Ask: "Does this relate to any existing bets? (comma-separated BET-IDs, or Enter to skip)"
+
+### 6. Check the frontmatter tier
+Read \`oprim/templates/note.md\`.
+- If it exists and its frontmatter block contains a \`description:\` field, this workspace is on the **OKF tier** — ask for a one-line description.
+- If it exists with no \`description:\` field, use the **minimal tier** — skip the description.
+- If the file doesn't exist (project initialized before notes were introduced), read \`oprim/config.yaml\` directly: \`okf.enabled: true\` → OKF tier (ask for a description); otherwise → minimal tier.
+
+### 7. Write oprim/notes/NOTE-NNN-<slug>.md
+
+Minimal tier:
+\`\`\`
+---
+type: note
+title: "<title>"
+tags: [<tags>]
+timestamp: <today, ISO 8601>
+---
+
+# Note: <title>
+
+<body>
+
+## Bets
+- <BET-IDs from step 5, or "None">
+\`\`\`
+
+OKF tier: same as above, with \`description: "<description>"\` inserted immediately after \`title\`.
+
+### 8. Link back from referenced bets
+For each BET-ID gathered in step 5: read \`oprim/bets/BET-NNN/bet-decision.md\`, and add \`- Notes: NOTE-NNN\` under its \`## Links\` section (append to an existing \`Notes:\` line, or add a new one).
+
+### 9. Report what was created
 `;
 }
 
@@ -871,6 +945,10 @@ function betInlineContent(): string {
   return `Create a new bet in \`oprim/bets/\`. First explain: "A bet is a product decision you're committing to explore — a problem worth solving, a hypothesis worth testing, or a direction worth taking. You'll name it, explain why now, and set a kill criterion." Then show: "Naming tip: verb + object [for context] — Good: 'Improve bet naming for scannability' / Bad: 'Naming'". Scan \`BET-(\\d+)\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). After receiving the title, validate: if fewer than 4 words OR fewer than 25 characters, warn "this title may be too vague", suggest a reformulation, and ask "Proceed anyway? (y/N)" — if "n", prompt for a revised title. Gather: decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\` with an inline naming tip comment in the header. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
 }
 
+function noteInlineContent(): string {
+  return `Create a new note in \`oprim/notes/\` for lightweight thinking capture — an observation, idea, or connection that hasn't yet earned a place in a bet or PDR. Notes carry no owner or kill criterion; promote one into a bet later with \`/oprim:promote NOTE-NNN\`. Ask for a short title. Scan \`oprim/notes/NOTE-(\\d+)-\` for the next id (zero-padded, default 001). Ask for the note body (free-form), tags, and optional related BET-IDs. Tags are checked against \`oprim/config.yaml\`'s \`notes.tags\`; any new tag is accepted and appended to that list rather than rejected — the vocabulary grows from usage. Read \`oprim/templates/note.md\` — if its frontmatter has a \`description:\` field, this workspace is on the OKF tier and needs a one-line description; if it has no \`description:\` field, use the minimal tier; if the file doesn't exist, fall back to reading \`okf.enabled\` directly from \`oprim/config.yaml\`. Write \`oprim/notes/NOTE-NNN-<slug>.md\` with the correct frontmatter tier and a \`## Bets\` section listing any related BET-IDs. For each related bet, append \`- Notes: NOTE-NNN\` to that bet-decision's \`## Links\` section. Report what was created.`;
+}
+
 function criteriaInlineContent(): string {
   return `Add metrics to \`oprim/bets/BET-NNN/criteria.yaml\`. Verify bet dir exists. Gather: metric ID, name, baseline, target, timeframe, launch date, segment. Ask source type (amplitude or bigquery). Amplitude: event, aggregation, denominator_event. BigQuery: table, metric_column, filter, aggregation, denominator_query. If file exists: append to metrics list (never overwrite). If not: create. Ask if adding more metrics. Report what was created.`;
 }
@@ -1045,11 +1123,16 @@ function mergeClaudeSettingsHooks(claudeDir: string): void {
 
 function promoteContent(): string {
   return `
-Promote a prioritized bet to an OpenSpec change and link criteria contracts.
+Promote an atomic note into a bet, or a prioritized bet into an OpenSpec change. The promotion path is determined solely by the prefix of the ID argument — there is no separate command for each.
 
-**Input**: Specify a bet ID (e.g., \`/oprim:promote BET-042\`) or omit to be prompted.
+**Input**: Specify an ID (e.g., \`/oprim:promote BET-042\` or \`/oprim:promote NOTE-005\`) or omit to be prompted.
 
-**Steps**
+### 0. Determine the promotion path from the ID prefix
+- \`BET-\` → **A. Bet → OpenSpec change**
+- \`NOTE-\` → **B. Note → Bet**
+- Anything else → report "Unrecognized ID prefix — expected BET- or NOTE-" and stop. Do not silently do nothing.
+
+## A. Bet → OpenSpec change
 
 1. **Locate the bet** — read \`oprim/bets/BET-XXX/bet-decision.md\`
 2. **Validate status** — decision must be "Build now"
@@ -1069,6 +1152,16 @@ Promote a prioritized bet to an OpenSpec change and link criteria contracts.
    - \`specs/<capability>/spec.md\` for each capability in \`## Capabilities\`
    If any artifact is missing, create it before reporting done.
 8. **Report** — show what was linked and what remains for engineering
+
+## B. Note → Bet
+
+1. **Locate the note** — read \`oprim/notes/NOTE-XXX-<slug>.md\`
+2. **Assign the next BET ID** — scan both \`oprim/bets/\` and \`oprim/bets/archived/\` for directories matching \`BET-(\\d+)(-[^/]*)?\`, max+1 zero-padded to 3 digits (default 001) — same convention \`oprim-bet\` uses
+3. **Derive the slug** from the note's title (lowercase, non-alphanumeric → hyphen, collapse/trim hyphens, truncate to 40 chars at a hyphen boundary)
+4. **Draft the bet** — write \`oprim/bets/BET-NNN-<slug>/bet-decision.md\` from the standard bet-decision structure, pre-filling only \`## Why now\` from the note's body. Leave \`Alternatives considered\`, \`Expected outcomes\`, and \`Kill criteria / rollback trigger\` as template placeholders — draft from the note, don't fabricate content it doesn't support. Ask for \`Owner\` and \`Review date\`; default \`Decision: Build now\` and \`Date\` to today.
+5. **Register the new bet** — append to \`oprim/sequence.yaml\` backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`
+6. **Link back** — add \`Bets: BET-NNN\` to the note (creating or extending its \`## Bets\` section)
+7. **Report** — show the new bet's path and flag that \`Alternatives considered\`, \`Expected outcomes\`, and \`Kill criteria\` still need authoring before this bet can itself be promoted
 `;
 }
 
@@ -1132,6 +1225,18 @@ Create a new bet in \`oprim/bets/\` and register it on the sequencing board.
 7. Append to \`oprim/sequence.yaml\` backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`.
 8. Ask: "Scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\`.
 9. Report what was created.
+
+### Note authoring (oprim-note)
+Create a new note in \`oprim/notes/\` for lightweight thinking capture — not a bet, no owner or kill criterion.
+
+1. Ask for a short title.
+2. Assign next NOTE ID: scan \`oprim/notes/NOTE-(\\d+)-\`, max+1 zero-padded to 3 digits (default 001).
+3. Ask for the note body (free-form), tags, and optional related BET-IDs.
+4. Tags: check against \`oprim/config.yaml\`'s \`notes.tags\` — accept and append any new tag rather than rejecting it (the vocabulary grows from usage).
+5. Check \`oprim/templates/note.md\`: a \`description:\` field in its frontmatter means the OKF tier (gather a one-line description); no field means the minimal tier; if the file is missing, fall back to \`okf.enabled\` in \`oprim/config.yaml\`.
+6. Write \`oprim/notes/NOTE-NNN-<slug>.md\` with the correct frontmatter tier and a \`## Bets\` section.
+7. For each related bet, append \`- Notes: NOTE-NNN\` to that bet's \`## Links\` section.
+8. Report what was created.
 
 ### Criteria authoring (oprim-criteria)
 Create or append to \`oprim/bets/BET-NNN/criteria.yaml\`.

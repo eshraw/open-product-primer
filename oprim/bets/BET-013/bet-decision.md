@@ -25,3 +25,4 @@
 ## Links
 - PDRs: None
 - OpenSpec change: openspec/changes/bet-013-atomic-notes/
+- Notes: NOTE-001

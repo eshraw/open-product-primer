@@ -121,6 +121,11 @@ describe('oprim init — OKF frontmatter opted in', () => {
     const criteriaContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'criteria.yaml'), 'utf-8');
     expect(criteriaContent.startsWith('---')).toBe(false);
 
+    // Notes get the OKF tier too — frontmatter with a description field
+    const noteContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'note.md'), 'utf-8');
+    expect(noteContent.startsWith('---\ntype: note')).toBe(true);
+    expect(noteContent).toContain('description:');
+
     const indexPath = path.join(tmpDir, 'oprim', 'index.md');
     expect(fs.existsSync(indexPath)).toBe(true);
     expect(fs.readFileSync(indexPath, 'utf-8')).toContain('type: index');
@@ -140,7 +145,21 @@ describe('oprim init — OKF frontmatter declined', () => {
       expect(content.startsWith('---')).toBe(false);
     }
 
+    // Notes still get minimal frontmatter even when OKF is declined — no description field
+    const noteContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'templates', 'note.md'), 'utf-8');
+    expect(noteContent.startsWith('---\ntype: note')).toBe(true);
+    expect(noteContent).not.toContain('description:');
+
     expect(fs.existsSync(path.join(tmpDir, 'oprim', 'index.md'))).toBe(false);
+  });
+});
+
+describe('oprim init — notes directory', () => {
+  it('creates oprim/notes/ with a .gitkeep regardless of OKF opt-in', async () => {
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    expect(fs.existsSync(path.join(tmpDir, 'oprim', 'notes', '.gitkeep'))).toBe(true);
   });
 });
 

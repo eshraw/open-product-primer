@@ -48,5 +48,7 @@ Purely additive — no existing bet/PDR/KPI-review/criteria template changes sha
 
 ## Open Questions
 
-- Should `oprim update` retroactively add an empty `notes.tags: []` to `config.yaml` on existing projects, or only write it lazily on first note creation?
-- Does `oprim doctor` need a check for notes that reference a nonexistent `BET-NNN`?
+Resolved (2026-07-24):
+- `notes.tags` is written lazily — `oprim-note` adds it to `oprim/config.yaml` the first time a note is scaffolded, if absent. `oprim update` does not retroactively add it.
+- An empty/missing `notes.tags` vocabulary does not block note creation — the first tag(s) used are accepted and appended to `notes.tags`, so the vocabulary self-seeds from usage rather than requiring upfront authoring.
+- No `oprim doctor` check for dangling `Bets:` references in this change — out of scope per the Non-Goals above; a candidate for a future bet if it proves to be a real problem.
