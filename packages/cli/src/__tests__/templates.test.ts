@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { configTemplate, okfFrontmatter, indexTemplate } from '../lib/templates';
+import { configTemplate, okfFrontmatter, indexTemplate, noteMinimalFrontmatter } from '../lib/templates';
 
 describe('configTemplate', () => {
   it('renders okf.enabled: true when opted in', () => {
@@ -22,6 +22,19 @@ describe('okfFrontmatter', () => {
     expect(block).toContain('description:');
     expect(block).toContain('tags:');
     expect(block).toContain('timestamp:');
+    expect(block.trimEnd().endsWith('---')).toBe(true);
+  });
+});
+
+describe('noteMinimalFrontmatter', () => {
+  it('renders a 4-field frontmatter block with no description field', () => {
+    const block = noteMinimalFrontmatter('<Note title>');
+    expect(block.startsWith('---\n')).toBe(true);
+    expect(block).toContain('type: note');
+    expect(block).toContain('title: "<Note title>"');
+    expect(block).toContain('tags:');
+    expect(block).toContain('timestamp:');
+    expect(block).not.toContain('description:');
     expect(block.trimEnd().endsWith('---')).toBe(true);
   });
 });

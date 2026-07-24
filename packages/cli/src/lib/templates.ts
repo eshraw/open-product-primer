@@ -42,6 +42,19 @@ timestamp: YYYY-MM-DDTHH:MM:SSZ
 `;
 }
 
+// Minimal frontmatter tier for notes — always on, independent of OKF opt-in.
+// Deliberately smaller than okfFrontmatter(): no `description` field.
+export function noteMinimalFrontmatter(titleHint: string): string {
+  return `---
+type: note
+title: "${titleHint}"
+tags: []
+timestamp: YYYY-MM-DDTHH:MM:SSZ
+---
+
+`;
+}
+
 export function indexTemplate(projectName: string): string {
   return `${okfFrontmatter('index', `${projectName} — oprim workspace`)}# ${projectName} — oprim workspace
 
@@ -117,6 +130,14 @@ export const betDecisionTemplate = `# Decision: BET-XXX <Bet title>
 ## Links
 - PDRs: <PDR-IDs>
 - OpenSpec change: <path once promoted>
+`;
+
+export const noteTemplate = `# Note: <Note title>
+
+<Capture the observation, idea, or connection while it's fresh.>
+
+## Bets
+- <BET-IDs this note relates to, or "None">
 `;
 
 export const criteriaTemplate = `metrics:

@@ -65,6 +65,7 @@ function initCommand() {
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'decisions'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'reviews'));
+        (0, scaffold_1.ensureDir)(path.join(primerDir, 'notes'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'templates'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
         const configWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'config.yaml'), (0, templates_1.configTemplate)(projectName, openspec.detected, graphify.detected, okfEnabled));
@@ -76,11 +77,17 @@ function initCommand() {
         const kpiContent = okfEnabled
             ? (0, templates_1.okfFrontmatter)('kpi-review', 'KPI Review: BET-XXX') + templates_1.kpiReviewTemplate
             : templates_1.kpiReviewTemplate;
+        // Notes always carry frontmatter — minimal tier by default, OKF tier (adds `description`)
+        // when opted in — unlike the other three templates, which have no frontmatter when disabled.
+        const noteContent = okfEnabled
+            ? (0, templates_1.okfFrontmatter)('note', '<Note title>') + templates_1.noteTemplate
+            : (0, templates_1.noteMinimalFrontmatter)('<Note title>') + templates_1.noteTemplate;
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'pdr.md'), pdrContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'bet-decision.md'), betContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'criteria.yaml'), templates_1.criteriaTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'kpi-review.md'), kpiContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'discovery.md'), templates_1.discoveryTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'note.md'), noteContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
         if (okfEnabled) {
             (0, scaffold_1.writeFile)(path.join(primerDir, 'index.md'), (0, templates_1.indexTemplate)(projectName));
@@ -88,6 +95,7 @@ function initCommand() {
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'decisions', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'reviews', '.gitkeep'), '');
+        (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'notes', '.gitkeep'), '');
         console.log('\n' + chalk_1.default.green('✓') + ' oprim/ workspace created');
         const configStatus = configWritten ? 'written' : 'preserved (already exists)';
         const sequenceStatus = sequenceWritten ? 'written' : 'preserved (already exists)';

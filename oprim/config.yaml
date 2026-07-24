@@ -17,6 +17,8 @@ measurement:
 sequencing:
   wip_limits:
     now: 2
+notes:
+  tags: [okf, promotion]
 agents:
   - claude
   - cursor

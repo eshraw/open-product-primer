@@ -23,6 +23,8 @@ import {
   sequenceViewScriptTemplate,
   okfFrontmatter,
   indexTemplate,
+  noteTemplate,
+  noteMinimalFrontmatter,
 } from '../lib/templates';
 
 export function initCommand(): Command {
@@ -54,6 +56,7 @@ export function initCommand(): Command {
       ensureDir(path.join(primerDir, 'decisions'));
       ensureDir(path.join(primerDir, 'bets'));
       ensureDir(path.join(primerDir, 'reviews'));
+      ensureDir(path.join(primerDir, 'notes'));
       ensureDir(path.join(primerDir, 'templates'));
       ensureDir(path.join(primerDir, 'scripts'));
 
@@ -70,12 +73,18 @@ export function initCommand(): Command {
       const kpiContent = okfEnabled
         ? okfFrontmatter('kpi-review', 'KPI Review: BET-XXX') + kpiReviewTemplate
         : kpiReviewTemplate;
+      // Notes always carry frontmatter — minimal tier by default, OKF tier (adds `description`)
+      // when opted in — unlike the other three templates, which have no frontmatter when disabled.
+      const noteContent = okfEnabled
+        ? okfFrontmatter('note', '<Note title>') + noteTemplate
+        : noteMinimalFrontmatter('<Note title>') + noteTemplate;
 
       writeFile(path.join(primerDir, 'templates', 'pdr.md'), pdrContent);
       writeFile(path.join(primerDir, 'templates', 'bet-decision.md'), betContent);
       writeFile(path.join(primerDir, 'templates', 'criteria.yaml'), criteriaTemplate);
       writeFile(path.join(primerDir, 'templates', 'kpi-review.md'), kpiContent);
       writeFile(path.join(primerDir, 'templates', 'discovery.md'), discoveryTemplate);
+      writeFile(path.join(primerDir, 'templates', 'note.md'), noteContent);
       writeFile(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), sequenceViewScriptTemplate);
 
       if (okfEnabled) {
@@ -85,6 +94,7 @@ export function initCommand(): Command {
       writeFileIfAbsent(path.join(primerDir, 'decisions', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'bets', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'reviews', '.gitkeep'), '');
+      writeFileIfAbsent(path.join(primerDir, 'notes', '.gitkeep'), '');
 
       console.log('\n' + chalk.green('✓') + ' oprim/ workspace created');
       const configStatus = configWritten ? 'written' : 'preserved (already exists)';
