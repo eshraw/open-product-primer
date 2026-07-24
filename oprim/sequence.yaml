@@ -2,11 +2,6 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-013
-    title: "Introduce atomic notes in oprim for lightweight thinking capture"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-023
     title: "Author native oprim specs in Gherkin syntax"
     blocked_by: []

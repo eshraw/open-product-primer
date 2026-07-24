@@ -1,7 +1,7 @@
 ## 1. Config scaffolding
 
-- [ ] 1.1 ~~Add `notes.tags` to the `config.yaml` template~~ — superseded by the resolved lazy-write decision: `notes.tags` is written by the `oprim-note` skill on first use (task 3.3), not scaffolded by `init`/`update`
-- [ ] 1.2 ~~Seed this repo's own `oprim/config.yaml`~~ — superseded for the same reason; this repo's `notes.tags` will self-seed the first time a note is created here (task 6.2)
+- [x] 1.1 ~~Add `notes.tags` to the `config.yaml` template~~ — superseded by the resolved lazy-write decision: `notes.tags` is written by the `oprim-note` skill on first use (task 3.3), not scaffolded by `init`/`update`
+- [x] 1.2 ~~Seed this repo's own `oprim/config.yaml`~~ — superseded for the same reason; this repo's `notes.tags` self-seeded via NOTE-001 in task 6.2
 
 ## 2. Note templates
 
