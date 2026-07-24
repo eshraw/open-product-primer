@@ -5,10 +5,10 @@
 
 ```mermaid
 graph TD
-    subgraph Next
-        BET022["BET-022: Align oprim workspace structure with ..."]
-        BET013["BET-013: Introduce atomic notes in oprim for l..."]
+    subgraph Now
         BET023["BET-023: Author native oprim specs in Gherkin ..."]
+    end
+    subgraph Next
         BET024["BET-024: Adopt change and current spec dir lif..."]
         BET025["BET-025: Supercharge oprim config with merge o..."]
     end
