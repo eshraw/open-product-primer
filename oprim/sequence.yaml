@@ -2,19 +2,35 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-023
-    title: "Author native oprim specs in Gherkin syntax"
-    release: v2.0.0
-    blocked_by: []
-    unlocks: [BET-024]
-    requires_pdrs: []
 
 next:
-  - id: BET-025
-    title: "Supercharge oprim config with merge on update"
-    release: v2.0.0
+  - id: BET-026
+    title: "Pull team context from remote oprim stores"
+    release: v2.X.0
+    blocked_by: [BET-024, BET-025]
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-027
+    title: "Move oprim workflows to declarative schemas"
+    release: v2.X.0
     blocked_by: []
-    unlocks: [BET-026]
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-028
+    title: "Add oprim validate with strict CI gating"
+    release: v2.X.0
+    blocked_by: [BET-024]
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-029
+    title: "Add explore and reconcile commands to oprim"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-031
+    title: "Add a current decisions rollup view"
+    blocked_by: []
+    unlocks: []
     requires_pdrs: []
 
 later:
@@ -41,37 +57,9 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-026
-    title: "Pull team context from remote oprim stores"
-    release: v2.X.0
-    blocked_by: [BET-024, BET-025]
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-027
-    title: "Move oprim workflows to declarative schemas"
-    release: v2.X.0
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-028
-    title: "Add oprim validate with strict CI gating"
-    release: v2.X.0
-    blocked_by: [BET-024]
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-029
-    title: "Add explore and reconcile commands to oprim"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-030
     title: "Add list, show, and status JSON commands"
     release: v2.X.0
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-031
-    title: "Add a current decisions rollup view"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
