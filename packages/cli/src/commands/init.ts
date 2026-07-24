@@ -51,6 +51,7 @@ export function initCommand(): Command {
 
       console.log('');
       const okfEnabled = await promptOkfFrontmatter();
+      const specFramework = await promptFrameworkSelection(projectRoot);
 
       const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'decisions'));
@@ -62,7 +63,7 @@ export function initCommand(): Command {
 
       const configWritten = writeFileIfAbsent(
         path.join(primerDir, 'config.yaml'),
-        configTemplate(projectName, openspec.detected, graphify.detected, okfEnabled)
+        configTemplate(projectName, openspec.detected, graphify.detected, okfEnabled, specFramework)
       );
       const sequenceWritten = writeFileIfAbsent(path.join(primerDir, 'sequence.yaml'), sequenceTemplate);
 
@@ -140,10 +141,8 @@ export function initCommand(): Command {
             ' after configuring an AI tool to install /oprim:* skills.'
         );
       } else {
-        let specFramework = 'openspec';
         let pdrSurfacing = false;
         if (selectedAgents.includes('claude')) {
-          specFramework = await promptFrameworkSelection(projectRoot);
           pdrSurfacing = await promptPdrSurfacing();
         }
         console.log('\n' + chalk.bold('Installing agent skills...'));

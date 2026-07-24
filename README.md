@@ -53,9 +53,11 @@ oprim/
 
 Detects OpenSpec (`openspec/`) and Graphify (`graphify-out/`) and enables integration flags in `oprim/config.yaml` without requiring those tools to be present.
 
+`oprim/config.yaml` also carries a free-text `context:` block (language, tech stack, project conventions), per-artifact `rules:` (`bet`/`pdr`/`spec`/`review` — custom instructions folded into bet/PDR/spec/review generation prompts when set), and a placeholder `store:` key reserved for future remote-store support. All three default to empty/inert and don't change generation behavior until set.
+
 ### `oprim update`
 
-Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor).
+Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.
 
 ### `oprim doctor`
 

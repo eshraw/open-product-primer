@@ -3,7 +3,13 @@ import * as os from 'os';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS } from '../lib/install-agent';
+import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS, CURSOR_COMMANDS } from '../lib/install-agent';
+
+vi.mock('@inquirer/prompts', () => ({
+  checkbox: vi.fn().mockResolvedValue([]),
+  confirm: vi.fn().mockResolvedValue(false),
+  select: vi.fn().mockResolvedValue('openspec'),
+}));
 
 let tmpDir: string;
 
@@ -325,6 +331,42 @@ describe('oprim-note skill', () => {
   });
 });
 
+// bet-025 — rules.<artifact> consumption in generated content ──────────────────
+
+describe('rules.<artifact> guidance in generated skill content', () => {
+  it('oprim-bet skill reads rules.bet when non-empty, no-op when empty', () => {
+    const content = CLAUDE_SKILLS['oprim-bet'];
+    expect(content).toContain('rules.bet');
+    expect(content).toContain('behavior is unchanged');
+  });
+
+  it('oprim-pdr skill reads rules.pdr when non-empty, no-op when empty', () => {
+    const content = CLAUDE_SKILLS['oprim-pdr'];
+    expect(content).toContain('rules.pdr');
+    expect(content).toContain('behavior is unchanged');
+  });
+
+  it('oprim-review skill reads rules.review when non-empty, no-op when empty', () => {
+    const content = CLAUDE_SKILLS['oprim-review'];
+    expect(content).toContain('rules.review');
+    expect(content).toContain('behavior is unchanged');
+  });
+
+  it('Cursor command wrappers reference rules.bet / rules.pdr / rules.review', () => {
+    expect(CURSOR_COMMANDS['oprim-bet.md']).toContain('rules.bet');
+    expect(CURSOR_COMMANDS['oprim-pdr.md']).toContain('rules.pdr');
+    expect(CURSOR_COMMANDS['oprim-review.md']).toContain('rules.review');
+  });
+
+  it('Codex/Gemini/Poolside inline workflow text references rules.bet / rules.pdr / rules.review', () => {
+    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions()]) {
+      expect(instructions).toContain('rules.bet');
+      expect(instructions).toContain('rules.pdr');
+      expect(instructions).toContain('rules.review');
+    }
+  });
+});
+
 // promoteContent ID-prefix dispatch ────────────────────────────────────────────
 
 describe('promoteContent dispatch', () => {
@@ -466,5 +508,128 @@ describe('on-stop.sh hook', () => {
     expect(output).toContain('oprim:sequence');
     expect(output).toContain('promoted');
     expect(fs.existsSync(nudgePath)).toBe(false);
+  });
+});
+
+// bet-023 — native spec-authoring skill (oprim-spec) ───────────────────────────
+
+describe('oprim-spec skill installation', () => {
+  it('installs .claude/skills/oprim-spec/SKILL.md only when framework is native', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const skillPath = path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('name: oprim-spec');
+    expect(content).toContain('SHALL');
+    expect(content).toContain('SHOULD');
+    expect(content).toContain('MAY');
+    expect(content).toContain('#### Scenario:');
+    expect(content).toContain('**WHEN**');
+    expect(content).toContain('**THEN**');
+    expect(content).toContain('oprim/specs/<capability>/spec.md');
+    expect(content).toContain('rules.spec');
+  });
+
+  it('does not install oprim-spec for openspec or none frameworks', () => {
+    installAgentSkills('claude', tmpDir, 'openspec');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(false);
+
+    installAgentSkills('claude', tmpDir, 'none');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(false);
+  });
+
+  it('removes a previously-installed oprim-spec skill when the framework switches away from native', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('claude', tmpDir, 'openspec');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(false);
+  });
+
+  it('works with no openspec/ directory and no other OpenSpec scaffolding present', () => {
+    expect(fs.existsSync(path.join(tmpDir, 'openspec'))).toBe(false);
+    installAgentSkills('claude', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'openspec'))).toBe(false);
+  });
+
+  it('installs oprim-spec for cursor and poolside when framework is native', () => {
+    installAgentSkills('cursor', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.cursor', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('poolside', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.poolside', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+  });
+});
+
+// bet-023 — promoteContent branches on the selected speccing framework ─────────
+
+describe('promote command branches on speccing framework', () => {
+  it('openspec framework: promote.md keeps the existing OpenSpec delegation path', () => {
+    installAgentSkills('claude', tmpDir, 'openspec');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → OpenSpec change');
+    expect(content).toContain('openspec-propose');
+    expect(content).not.toContain('oprim-spec');
+  });
+
+  it('native framework: promote.md invokes oprim-spec and links oprim/specs path, no OpenSpec', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → native oprim spec');
+    expect(content).toContain('oprim-spec');
+    expect(content).toContain('oprim/specs/<capability>/spec.md');
+    expect(content).not.toContain('openspec-propose');
+  });
+
+  it('none framework: promote.md stops without creating a spec artifact', () => {
+    installAgentSkills('claude', tmpDir, 'none');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → spec (no framework configured)');
+    expect(content).toContain('no speccing framework is configured');
+    expect(content).not.toContain('openspec-propose');
+    expect(content).not.toContain('oprim-spec');
+  });
+
+  it('branches the same way for the Cursor oprim-promote.md command', () => {
+    installAgentSkills('cursor', tmpDir, 'native');
+    const content = fs.readFileSync(path.join(tmpDir, '.cursor', 'commands', 'oprim-promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → native oprim spec');
+    expect(content).toContain('oprim-spec');
+  });
+});
+
+// bet-023 — framework selection offers a native choice ─────────────────────────
+
+describe('promptFrameworkSelection', () => {
+  it('offers openspec, native, and none as choices when prompting', async () => {
+    const { promptFrameworkSelection } = await import('../lib/install-agent');
+    const { select } = await import('@inquirer/prompts');
+    vi.mocked(select).mockResolvedValueOnce('native' as never);
+
+    const result = await promptFrameworkSelection(tmpDir);
+
+    expect(result).toBe('native');
+    const call = vi.mocked(select).mock.calls[0][0] as { choices: Array<{ value: string }> };
+    const values = call.choices.map((c) => c.value);
+    expect(values).toEqual(['openspec', 'native', 'none']);
+  });
+
+  it('returns the persisted oprim/config.yaml value without prompting', async () => {
+    const { promptFrameworkSelection } = await import('../lib/install-agent');
+    const { select } = await import('@inquirer/prompts');
+    const selectMock = vi.mocked(select).mockClear();
+
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'integrations:\n  spec_framework: native\n'
+    );
+
+    const result = await promptFrameworkSelection(tmpDir);
+
+    expect(result).toBe('native');
+    expect(selectMock).not.toHaveBeenCalled();
   });
 });

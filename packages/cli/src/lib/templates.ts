@@ -2,7 +2,8 @@ export function configTemplate(
   projectName: string,
   openspecEnabled: boolean,
   graphifyEnabled: boolean,
-  okfEnabled: boolean
+  okfEnabled: boolean,
+  specFramework: string = openspecEnabled ? 'openspec' : 'none'
 ): string {
   return `version: 1
 project:
@@ -15,6 +16,7 @@ integrations:
   graphify:
     enabled: ${graphifyEnabled}
     graph_dir: graphify-out
+  spec_framework: ${specFramework}
 okf:
   enabled: ${okfEnabled}
 measurement:
@@ -26,6 +28,10 @@ measurement:
 sequencing:
   wip_limits:
     now: 2
+context: ""
+rules: {}
+store:
+  enabled: false
 `;
 }
 

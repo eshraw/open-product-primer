@@ -48,3 +48,4 @@
 - OpenSpec change: openspec/changes/bet-023-native-spec-authoring/
 - Unlocks: BET-024 (change/current spec dir lifecycle)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/writing-specs.md
+- Native spec-authoring skill: `oprim-spec` (`packages/cli/src/lib/install-agent.ts` `specAuthoringSkill()`)

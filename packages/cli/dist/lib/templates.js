@@ -5,7 +5,7 @@ exports.configTemplate = configTemplate;
 exports.okfFrontmatter = okfFrontmatter;
 exports.noteMinimalFrontmatter = noteMinimalFrontmatter;
 exports.indexTemplate = indexTemplate;
-function configTemplate(projectName, openspecEnabled, graphifyEnabled, okfEnabled) {
+function configTemplate(projectName, openspecEnabled, graphifyEnabled, okfEnabled, specFramework = openspecEnabled ? 'openspec' : 'none') {
     return `version: 1
 project:
   name: "${projectName}"
@@ -17,6 +17,7 @@ integrations:
   graphify:
     enabled: ${graphifyEnabled}
     graph_dir: graphify-out
+  spec_framework: ${specFramework}
 okf:
   enabled: ${okfEnabled}
 measurement:
@@ -28,6 +29,10 @@ measurement:
 sequencing:
   wip_limits:
     now: 2
+context: ""
+rules: {}
+store:
+  enabled: false
 `;
 }
 // OKF (Open Knowledge Format) — https://github.com/GoogleCloudPlatform/okf

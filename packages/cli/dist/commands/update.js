@@ -45,6 +45,19 @@ const install_agent_1 = require("../lib/install-agent");
 const detect_1 = require("../lib/detect");
 const scaffold_1 = require("../lib/scaffold");
 const templates_1 = require("../lib/templates");
+const config_merge_1 = require("../lib/config-merge");
+// bet-023 — persist the resolved spec_framework into oprim/config.yaml, inserting it only
+// when the key is missing (never overwrites an already-persisted choice).
+function persistSpecFramework(configPath, framework) {
+    if (!fs.existsSync(configPath))
+        return;
+    const existing = fs.readFileSync(configPath, 'utf-8');
+    const { content, changed } = (0, config_merge_1.mergeSpecFramework)(existing, framework);
+    if (changed) {
+        fs.writeFileSync(configPath, content, 'utf-8');
+        console.log(chalk_1.default.green('✓') + ` oprim/config.yaml — integrations.spec_framework set to ${framework}`);
+    }
+}
 function updateCommand() {
     return new commander_1.Command('update')
         .description('Refresh /oprim:* assistant commands and skills from package templates')
@@ -58,13 +71,23 @@ function updateCommand() {
         const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
         (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
+        const configPath = path.join(primerDir, 'config.yaml');
+        if (fs.existsSync(configPath)) {
+            const existingConfig = fs.readFileSync(configPath, 'utf-8');
+            const { content: mergedConfig, changed } = (0, config_merge_1.mergeConfigSchema)(existingConfig);
+            if (changed) {
+                fs.writeFileSync(configPath, mergedConfig, 'utf-8');
+                console.log(chalk_1.default.green('✓') + ' oprim/config.yaml — schema updated with new keys (existing values preserved)');
+            }
+        }
         if (configAgents !== null && configAgents.length > 0) {
-            let specFramework = 'openspec';
+            let specFramework = (0, install_agent_1.resolveSpecFramework)(projectRoot);
             let pdrSurfacing = false;
             if (configAgents.includes('claude')) {
                 specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
                 pdrSurfacing = await (0, install_agent_1.promptPdrSurfacing)();
             }
+            persistSpecFramework(configPath, specFramework);
             for (const agent of configAgents) {
                 (0, install_agent_1.installAgentSkills)(agent, projectRoot, specFramework, pdrSurfacing);
             }
@@ -75,6 +98,7 @@ function updateCommand() {
             const legacyAgents = [];
             if (fs.existsSync(path.join(projectRoot, '.claude'))) {
                 const specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
+                persistSpecFramework(configPath, specFramework);
                 const pdrSurfacing = await (0, install_agent_1.promptPdrSurfacing)();
                 (0, install_agent_1.installAgentSkills)('claude', projectRoot, specFramework, pdrSurfacing);
                 legacyAgents.push('claude');
@@ -99,22 +123,25 @@ function updateCommand() {
             default: false,
         });
         if (!addMore) {
+            persistSpecFramework(configPath, (0, install_agent_1.resolveSpecFramework)(projectRoot));
             console.log('\nRun ' + chalk_1.default.cyan('oprim doctor') + ' to verify your setup.');
             return;
         }
         console.log('');
         const selected = await (0, install_agent_1.promptAgentSelection)(projectRoot);
         if (selected.length === 0) {
+            persistSpecFramework(configPath, (0, install_agent_1.resolveSpecFramework)(projectRoot));
             console.log('\n' + chalk_1.default.yellow('No agents selected.'));
             console.log('\nRun ' + chalk_1.default.cyan('oprim doctor') + ' to verify your setup.');
             return;
         }
-        let addSpecFramework = 'openspec';
+        let addSpecFramework = (0, install_agent_1.resolveSpecFramework)(projectRoot);
         let addPdrSurfacing = false;
         if (selected.includes('claude')) {
             addSpecFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
             addPdrSurfacing = await (0, install_agent_1.promptPdrSurfacing)();
         }
+        persistSpecFramework(configPath, addSpecFramework);
         console.log('\n' + chalk_1.default.bold('Installing agent skills...'));
         for (const agent of selected) {
             (0, install_agent_1.installAgentSkills)(agent, projectRoot, addSpecFramework, addPdrSurfacing);

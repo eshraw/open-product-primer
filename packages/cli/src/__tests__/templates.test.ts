@@ -11,6 +11,37 @@ describe('configTemplate', () => {
     const content = configTemplate('my-project', true, false, false);
     expect(content).toContain('okf:\n  enabled: false');
   });
+
+  it('renders an empty context field', () => {
+    const content = configTemplate('my-project', true, false, false);
+    expect(content).toContain('context: ""');
+  });
+
+  it('renders an empty rules object', () => {
+    const content = configTemplate('my-project', true, false, false);
+    expect(content).toContain('rules: {}');
+  });
+
+  it('renders an inert store key', () => {
+    const content = configTemplate('my-project', true, false, false);
+    expect(content).toContain('store:\n  enabled: false');
+  });
+
+  it('renders the given spec_framework value under integrations', () => {
+    const content = configTemplate('my-project', true, false, false, 'native');
+    expect(content).toContain('integrations:');
+    expect(content).toContain('  spec_framework: native');
+  });
+
+  it('defaults spec_framework to openspec when openspec is enabled and no value is given', () => {
+    const content = configTemplate('my-project', true, false, false);
+    expect(content).toContain('  spec_framework: openspec');
+  });
+
+  it('defaults spec_framework to none when openspec is disabled and no value is given', () => {
+    const content = configTemplate('my-project', false, false, false);
+    expect(content).toContain('  spec_framework: none');
+  });
 });
 
 describe('okfFrontmatter', () => {

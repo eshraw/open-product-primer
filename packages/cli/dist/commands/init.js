@@ -61,6 +61,7 @@ function initCommand() {
             console.log(chalk_1.default.green('✓') + ' Graphify detected');
         console.log('');
         const okfEnabled = await (0, install_agent_1.promptOkfFrontmatter)();
+        const specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
         const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'decisions'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets'));
@@ -68,7 +69,7 @@ function initCommand() {
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'notes'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'templates'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
-        const configWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'config.yaml'), (0, templates_1.configTemplate)(projectName, openspec.detected, graphify.detected, okfEnabled));
+        const configWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'config.yaml'), (0, templates_1.configTemplate)(projectName, openspec.detected, graphify.detected, okfEnabled, specFramework));
         const sequenceWritten = (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'sequence.yaml'), templates_1.sequenceTemplate);
         const pdrContent = okfEnabled ? (0, templates_1.okfFrontmatter)('pdr', '<Decision title>') + templates_1.pdrTemplate : templates_1.pdrTemplate;
         const betContent = okfEnabled
@@ -136,10 +137,8 @@ function initCommand() {
                 ' after configuring an AI tool to install /oprim:* skills.');
         }
         else {
-            let specFramework = 'openspec';
             let pdrSurfacing = false;
             if (selectedAgents.includes('claude')) {
-                specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
                 pdrSurfacing = await (0, install_agent_1.promptPdrSurfacing)();
             }
             console.log('\n' + chalk_1.default.bold('Installing agent skills...'));
