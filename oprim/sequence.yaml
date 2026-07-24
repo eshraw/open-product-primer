@@ -1,9 +1,7 @@
 wip_limits:
   now: 2
 
-now: []
-
-next:
+now:
   - id: BET-013
     title: "Introduce atomic notes in oprim for lightweight thinking capture"
     blocked_by: []
@@ -14,6 +12,8 @@ next:
     blocked_by: []
     unlocks: [BET-024]
     requires_pdrs: []
+
+next:
   - id: BET-024
     title: "Adopt change and current spec dir lifecycle"
     blocked_by: [BET-023]
