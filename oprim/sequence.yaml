@@ -10,12 +10,6 @@ now:
     requires_pdrs: []
 
 next:
-  - id: BET-024
-    title: "Adopt change and current spec dir lifecycle"
-    release: v2.0.0
-    blocked_by: [BET-023]
-    unlocks: [BET-026, BET-028]
-    requires_pdrs: []
   - id: BET-025
     title: "Supercharge oprim config with merge on update"
     release: v2.0.0
