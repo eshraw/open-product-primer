@@ -5,7 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initCommand } from '../commands/init';
 import { updateCommand } from '../commands/update';
 import { readAgentsFromConfig } from '../lib/detect';
-import { confirm } from '@inquirer/prompts';
+import { confirm, select } from '@inquirer/prompts';
 
 vi.mock('@inquirer/prompts', () => ({
   checkbox: vi.fn().mockResolvedValue([]),
@@ -186,5 +186,117 @@ describe('oprim update — persisted OKF flag', () => {
     const notices = logSpy.mock.calls.map((c) => String(c[0]));
     expect(notices.some((n) => n.includes('OKF frontmatter') && n.includes('enabled'))).toBe(true);
     expect(vi.mocked(confirm).mock.calls.some((call) => String(call[0]?.message).includes('OKF'))).toBe(false);
+  });
+});
+
+// bet-025 — oprim update additively merges new config schema keys ─────────────
+
+describe('oprim update — config schema merge', () => {
+  it('adds context, rules, and store to a config predating those keys, preserving existing values', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nproject:\n  name: "my-project"\nagents:\n  - claude\n'
+    );
+
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(content).toContain('name: "my-project"');
+    expect(content).toContain('agents:\n  - claude');
+    expect(content).toContain('context: ""');
+    expect(content).toContain('rules: {}');
+    expect(content).toContain('store:\n  enabled: false');
+  });
+
+  it('is a no-op on a config that already has the current schema', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    const current =
+      'version: 1\nagents:\n  - claude\nintegrations:\n  spec_framework: openspec\ncontext: ""\nrules: {}\nstore:\n  enabled: false\n';
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), current);
+
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    expect(fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8')).toBe(current);
+  });
+
+  it('never overwrites a user-set context or rules value', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nagents:\n  - claude\ncontext: "TypeScript monorepo"\nrules:\n  bet: "cite a Slack thread"\n'
+    );
+
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(content).toContain('context: "TypeScript monorepo"');
+    expect(content).toContain('bet: "cite a Slack thread"');
+    expect(content).toContain('store:\n  enabled: false');
+  });
+
+  it('running update twice in a row produces no further changes the second time', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'version: 1\nagents:\n  - claude\n');
+
+    await updateCommand().parseAsync([], { from: 'user' });
+    const afterFirst = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+
+    await updateCommand().parseAsync([], { from: 'user' });
+    const afterSecond = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+
+    expect(afterSecond).toBe(afterFirst);
+  });
+});
+
+// bet-023 — native spec framework selection and persistence ───────────────────
+
+describe('oprim init — native framework selection', () => {
+  it('persists integrations.spec_framework: native to oprim/config.yaml and installs the oprim-spec skill', async () => {
+    vi.mocked(select).mockResolvedValueOnce('native' as never);
+
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    const configContent = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(configContent).toContain('spec_framework: native');
+
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+  });
+});
+
+describe('oprim update — spec_framework schema key', () => {
+  it('adds integrations.spec_framework to a config predating the key, preserving existing values', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nagents:\n  - claude\nintegrations:\n  openspec:\n    enabled: true\n    changes_dir: openspec/changes\ncontext: "custom"\n'
+    );
+
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(content).toContain('spec_framework: openspec');
+    expect(content).toContain('context: "custom"');
+    expect(content).toContain('changes_dir: openspec/changes');
+  });
+
+  it('does not re-prompt or change the value once persisted', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nagents:\n  - claude\nintegrations:\n  spec_framework: native\n'
+    );
+    const selectMock = vi.mocked(select).mockClear();
+
+    await updateCommand().parseAsync([], { from: 'user' });
+
+    const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
+    expect(content).toContain('spec_framework: native');
+    expect(selectMock).not.toHaveBeenCalled();
   });
 });

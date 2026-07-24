@@ -1,4 +1,4 @@
-export declare function configTemplate(projectName: string, openspecEnabled: boolean, graphifyEnabled: boolean, okfEnabled: boolean): string;
+export declare function configTemplate(projectName: string, openspecEnabled: boolean, graphifyEnabled: boolean, okfEnabled: boolean, specFramework?: string): string;
 export declare function okfFrontmatter(type: string, titleHint: string): string;
 export declare function noteMinimalFrontmatter(titleHint: string): string;
 export declare function indexTemplate(projectName: string): string;

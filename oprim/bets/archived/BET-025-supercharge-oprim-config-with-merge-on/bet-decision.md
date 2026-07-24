@@ -39,6 +39,6 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
+- OpenSpec change: openspec/changes/bet-025-config-schema-merge/
 - Unlocks: BET-026 (store: key), relates to BET-027 (declarative schemas)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/customization.md

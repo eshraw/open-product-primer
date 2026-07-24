@@ -38,10 +38,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.POOLSIDE_SKILLS = exports.CLAUDE_COMMANDS = exports.CLAUDE_SKILLS = exports.OPRIM_CONTEXT_SKILL_STEP = exports.SUPPORTED_AGENTS = void 0;
 exports.promptFrameworkSelection = promptFrameworkSelection;
+exports.resolveSpecFramework = resolveSpecFramework;
 exports.promptAgentSelection = promptAgentSelection;
 exports.promptPdrSurfacing = promptPdrSurfacing;
 exports.promptOkfFrontmatter = promptOkfFrontmatter;
 exports.installAgentSkills = installAgentSkills;
+exports.specAuthoringSkill = specAuthoringSkill;
 exports.writeAgentInstructionFile = writeAgentInstructionFile;
 exports.codexInstructions = codexInstructions;
 exports.geminiInstructions = geminiInstructions;
@@ -51,29 +53,59 @@ const fs = __importStar(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
 const scaffold_1 = require("./scaffold");
 const detect_1 = require("./detect");
+const config_merge_1 = require("./config-merge");
 exports.SUPPORTED_AGENTS = ['claude', 'cursor', 'codex', 'gemini', 'poolside'];
-async function promptFrameworkSelection(projectRoot) {
-    const configPath = path.join(projectRoot, '.claude', 'hooks', 'config.json');
-    if (fs.existsSync(configPath)) {
+// oprim/config.yaml (via integrations.spec_framework) is the source of truth for the
+// selected speccing framework; .claude/hooks/config.json is checked only as a fallback for
+// projects that installed before that key existed.
+function readPersistedFramework(projectRoot) {
+    const configYamlPath = path.join(projectRoot, 'oprim', 'config.yaml');
+    if (fs.existsSync(configYamlPath)) {
+        const persisted = (0, config_merge_1.readSpecFramework)(fs.readFileSync(configYamlPath, 'utf-8'));
+        if (persisted)
+            return persisted;
+    }
+    const hooksConfigPath = path.join(projectRoot, '.claude', 'hooks', 'config.json');
+    if (fs.existsSync(hooksConfigPath)) {
         try {
-            const existing = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-            if (typeof existing.framework === 'string') {
-                console.log(chalk_1.default.dim(`  Speccing framework: ${existing.framework} (from config)`));
+            const existing = JSON.parse(fs.readFileSync(hooksConfigPath, 'utf-8'));
+            if (typeof existing.framework === 'string')
                 return existing.framework;
-            }
         }
         catch {
-            // fallthrough to prompt
+            // fallthrough
         }
+    }
+    return null;
+}
+async function promptFrameworkSelection(projectRoot) {
+    const persisted = readPersistedFramework(projectRoot);
+    if (persisted) {
+        console.log(chalk_1.default.dim(`  Speccing framework: ${persisted} (from config)`));
+        return persisted;
     }
     const { select } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
     return select({
         message: 'Which speccing framework does this project use?',
         choices: [
             { name: 'OpenSpec (recommended)', value: 'openspec' },
+            { name: 'Native (oprim-authored specs, no OpenSpec required)', value: 'native' },
             { name: 'None', value: 'none' },
         ],
     });
+}
+// No-prompt resolution used where an interactive choice isn't appropriate (e.g. non-Claude
+// agent branches): the persisted value if one exists, else a default derived from the
+// project's existing openspec state.
+function resolveSpecFramework(projectRoot) {
+    const persisted = readPersistedFramework(projectRoot);
+    if (persisted)
+        return persisted;
+    const configYamlPath = path.join(projectRoot, 'oprim', 'config.yaml');
+    if (fs.existsSync(configYamlPath)) {
+        return (0, config_merge_1.deriveDefaultSpecFramework)(fs.readFileSync(configYamlPath, 'utf-8'));
+    }
+    return 'none';
 }
 async function promptAgentSelection(projectRoot) {
     const detected = (0, detect_1.detectAvailableAgents)(projectRoot);
@@ -129,6 +161,21 @@ function installAgentSkills(agent, projectRoot, framework = 'openspec', pdrSurfa
             (0, scaffold_1.writeFile)(path.join(skillsBase, name, 'SKILL.md'), skillContent);
             console.log(chalk_1.default.green('✓') + ` .claude/skills/${name}/SKILL.md`);
         }
+        // oprim-spec (native spec authoring) — install only when spec_framework is native, remove otherwise
+        const specSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+        if (framework === 'native') {
+            const specSkillContent = pdrSurfacing ? withContextStep(specAuthoringSkill()) : specAuthoringSkill();
+            (0, scaffold_1.writeFile)(specSkillPath, specSkillContent);
+            console.log(chalk_1.default.green('✓') + ' .claude/skills/oprim-spec/SKILL.md');
+        }
+        else if (fs.existsSync(specSkillPath)) {
+            fs.unlinkSync(specSkillPath);
+            try {
+                fs.rmdirSync(path.dirname(specSkillPath));
+            }
+            catch { /* not empty or already gone */ }
+            console.log(chalk_1.default.dim('  removed .claude/skills/oprim-spec/SKILL.md'));
+        }
         // openspec skills — add/remove Step 0 in-place when they exist
         for (const name of OPENSPEC_SKILL_NAMES) {
             const skillFilePath = path.join(skillsBase, name, 'SKILL.md');
@@ -144,7 +191,12 @@ function installAgentSkills(agent, projectRoot, framework = 'openspec', pdrSurfa
         }
         const cmdsDir = path.join(claudeDir, 'commands', 'oprim');
         for (const [filename, content] of Object.entries(exports.CLAUDE_COMMANDS)) {
-            (0, scaffold_1.writeFile)(path.join(cmdsDir, filename), content);
+            // promote.md is regenerated per-project since its content branches on the selected
+            // speccing framework — the static CLAUDE_COMMANDS entry only reflects the default.
+            const finalContent = filename === 'promote.md'
+                ? claudeWrapper('OPRIM: Promote', 'Promote a note into a bet, or a prioritized bet into a capability spec', promoteContent(framework))
+                : content;
+            (0, scaffold_1.writeFile)(path.join(cmdsDir, filename), finalContent);
             console.log(chalk_1.default.green('✓') + ` .claude/commands/oprim/${filename}`);
         }
         // Tombstone cleanup: remove command wrappers deleted in v0.2.0 (bet/criteria/pdr/review
@@ -188,6 +240,19 @@ function installAgentSkills(agent, projectRoot, framework = 'openspec', pdrSurfa
             (0, scaffold_1.writeFile)(path.join(skillsBase, name, 'SKILL.md'), content);
             console.log(chalk_1.default.green('✓') + ` .poolside/skills/${name}/SKILL.md`);
         }
+        const poolsideSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+        if (framework === 'native') {
+            (0, scaffold_1.writeFile)(poolsideSpecSkillPath, specAuthoringSkill());
+            console.log(chalk_1.default.green('✓') + ' .poolside/skills/oprim-spec/SKILL.md');
+        }
+        else if (fs.existsSync(poolsideSpecSkillPath)) {
+            fs.unlinkSync(poolsideSpecSkillPath);
+            try {
+                fs.rmdirSync(path.dirname(poolsideSpecSkillPath));
+            }
+            catch { /* not empty or already gone */ }
+            console.log(chalk_1.default.dim('  removed .poolside/skills/oprim-spec/SKILL.md'));
+        }
         const agentsFile = path.join(projectRoot, 'AGENTS.md');
         writeAgentInstructionFile(agentsFile, poolsideInstructions());
         console.log(chalk_1.default.green('✓') + ' AGENTS.md (oprim section written)');
@@ -213,9 +278,27 @@ function installAgentSkills(agent, projectRoot, framework = 'openspec', pdrSurfa
             (0, scaffold_1.writeFile)(path.join(skillsBase, name, 'SKILL.md'), content);
             console.log(chalk_1.default.green('✓') + ` .cursor/skills/${name}/SKILL.md`);
         }
+        const cursorSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+        if (framework === 'native') {
+            (0, scaffold_1.writeFile)(cursorSpecSkillPath, specAuthoringSkill());
+            console.log(chalk_1.default.green('✓') + ' .cursor/skills/oprim-spec/SKILL.md');
+        }
+        else if (fs.existsSync(cursorSpecSkillPath)) {
+            fs.unlinkSync(cursorSpecSkillPath);
+            try {
+                fs.rmdirSync(path.dirname(cursorSpecSkillPath));
+            }
+            catch { /* not empty or already gone */ }
+            console.log(chalk_1.default.dim('  removed .cursor/skills/oprim-spec/SKILL.md'));
+        }
         const cmdsDir = path.join(cursorDir, 'commands');
         for (const [filename, content] of Object.entries(exports.CURSOR_COMMANDS)) {
-            (0, scaffold_1.writeFile)(path.join(cmdsDir, filename), content);
+            // oprim-promote.md is regenerated per-project since its content branches on the
+            // selected speccing framework — the static CURSOR_COMMANDS entry only reflects the default.
+            const finalContent = filename === 'oprim-promote.md'
+                ? cursorWrapper('oprim-promote', 'Promote a note into a bet, or a prioritized bet into a capability spec', promoteContent(framework))
+                : content;
+            (0, scaffold_1.writeFile)(path.join(cmdsDir, filename), finalContent);
             console.log(chalk_1.default.green('✓') + ` .cursor/commands/${filename}`);
         }
         if (dirCreated) {
@@ -302,7 +385,7 @@ exports.CLAUDE_SKILLS = {
 };
 // ─── Claude command wrappers (thin, invoke skill) ────────────────────────────
 exports.CLAUDE_COMMANDS = {
-    'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a note into a bet, or a prioritized bet into an OpenSpec change', promoteContent()),
+    'promote.md': claudeWrapper('OPRIM: Promote', 'Promote a note into a bet, or a prioritized bet into a capability spec', promoteContent()),
     'sequence.md': claudeWrapper('OPRIM: Sequence', 'Validate and update the primer sequencing board', sequenceContent()),
     'archive.md': claudeWrapper('OPRIM: Archive', 'Archive a completed bet — move it out of the active board', archiveCommandContent()),
 };
@@ -326,7 +409,7 @@ exports.CURSOR_SKILLS = {
 };
 // ─── Cursor command files (full inline — no Skill tool in Cursor) ────────────
 exports.CURSOR_COMMANDS = {
-    'oprim-promote.md': cursorWrapper('oprim-promote', 'Promote a note into a bet, or a prioritized bet into an OpenSpec change', promoteContent()),
+    'oprim-promote.md': cursorWrapper('oprim-promote', 'Promote a note into a bet, or a prioritized bet into a capability spec', promoteContent()),
     'oprim-sequence.md': cursorWrapper('oprim-sequence', 'Validate and update the primer sequencing board', sequenceInlineContent()),
     'oprim-pdr.md': cursorWrapper('oprim-pdr', 'Create a new Product Decision Record with auto-assigned ID', pdrInlineContent()),
     'oprim-bet.md': cursorWrapper('oprim-bet', 'Create a new bet decision and register it on the sequencing board', betInlineContent()),
@@ -377,6 +460,9 @@ If not provided, ask: "What is the title of this product decision?"
 Scan \`oprim/decisions/\` for files matching \`PDR-(\\d+)-\`. Extract all integers. Assign max+1, zero-padded to 3 digits. Default \`001\` if none found.
 Slug: title → lowercase → spaces to hyphens → remove non-alphanumeric (except hyphens).
 Output path: \`oprim/decisions/PDR-NNN-<slug>.md\`
+
+### 2b. Check for custom rules
+Read \`oprim/config.yaml\`. If it has a non-empty \`rules.pdr\` value, treat it as additional guidance from the team — factor it into the questions you ask in step 3 and reflect it in the generated content. If \`rules.pdr\` is absent or empty, skip this step; behavior is unchanged.
 
 ### 3. Gather content
 Ask: Context (what forced this decision), Decision (clear statement), Alternatives considered (why rejected), Consequences (positives / trade-offs / follow-ups), Evidence links (optional), Related bets (optional), Related OpenSpec changes (optional).
@@ -465,6 +551,9 @@ From the bet title: lowercase all characters, replace any character that is not 
 
 ### 3. Check sequence.yaml exists
 If \`oprim/sequence.yaml\` not found: report and stop — advise \`oprim init\`.
+
+### 3b. Check for custom rules
+Read \`oprim/config.yaml\`. If it has a non-empty \`rules.bet\` value, treat it as additional guidance from the team — factor it into the questions you ask in step 4 and reflect it in the generated \`bet-decision.md\` content. If \`rules.bet\` is absent or empty, skip this step; behavior is unchanged.
 
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
@@ -666,10 +755,10 @@ If not: create with \`metrics:\` list.
 function archiveSkill() {
     return `---
 name: oprim-archive
-description: Archive a completed bet — moves it to oprim/bets/archived/ and removes its sequence.yaml entry
+description: Archive a completed bet — moves it to oprim/bets/archived/, removes its sequence.yaml entry, and folds any spec deltas under its specs/ directory into oprim/specs/ current truth
 ---
 
-Archive a completed bet by moving it to \`oprim/bets/archived/\` and removing it from \`sequence.yaml\`.
+Archive a completed bet by moving it to \`oprim/bets/archived/\`, removing it from \`sequence.yaml\`, and (if present) merging its spec deltas into current truth.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
 
@@ -699,26 +788,50 @@ If neither pattern matches:
 - Report: "Bet BET-NNN was not found in oprim/bets/. Nothing was changed."
 - Stop.
 
-### 3. Check for active dependencies in sequence.yaml
+### 3. Check for active dependencies and concurrent spec-delta conflicts
 
 Read \`oprim/sequence.yaml\`. Scan every entry across all buckets (now, next, later, backlog) for any entry whose \`blocked_by\` or \`unlocks\` list contains the target bet ID.
 
-If dependents are found:
-- Show a warning listing each dependent entry and which field references the target bet.
+Separately, if \`oprim/bets/<resolved-dir>/specs/\` exists: for each \`<capability>/spec.md\` delta file under it, extract every \`### Requirement:\` header from its \`## ADDED\`/\`## MODIFIED\`/\`## REMOVED Requirements\` sections. Then scan every other bet directory directly under \`oprim/bets/\` (excluding \`archived/\` and the bet being archived) for a \`specs/<capability>/spec.md\` file for the same capability; if one exists, extract its \`### Requirement:\` headers too. Flag any header that matches (whitespace-insensitive) between the archiving bet's delta and another still-active bet's delta as an **overlap**.
+
+If either sequence.yaml dependents or delta overlaps are found:
+- Show a combined warning listing each dependent entry and each overlapping requirement.
 
   Example:
   \`\`\`
   ⚠ Warning: BET-005 is referenced by active bets:
     - BET-007 (blocked_by: [BET-005])
     - BET-008 (unlocks: [BET-005])
+  ⚠ Warning: BET-005's delta for requirement "The system SHALL ..." in capability foo overlaps with active bet BET-009's delta for the same requirement. Archiving BET-005 now applies its version to oprim/specs/foo/spec.md; if BET-009 archives later, its version will overwrite this requirement again (last-write-wins — no 3-way merge is attempted).
   \`\`\`
-- Ask: "Archive BET-NNN anyway? These references will become stale. (y/N)"
+- Ask: "Archive BET-NNN anyway? (y/N)"
   - If "n" or Enter: stop, no changes made.
   - If "y": proceed.
 
-If no dependents found: proceed without warning.
+If neither is found: proceed without warning.
 
-### 4. Move the bet directory to archive
+### 4. Fold spec deltas into current truth
+
+If \`oprim/bets/<resolved-dir>/specs/\` does not exist: skip this step entirely and go to Step 5 — archive behavior is unchanged from before spec deltas existed.
+
+Otherwise, for each capability subdirectory under \`oprim/bets/<resolved-dir>/specs/\` containing a \`spec.md\`:
+
+1. Read the delta file's \`## ADDED Requirements\` / \`## MODIFIED Requirements\` / \`## REMOVED Requirements\` sections. Each \`### Requirement:\` block runs from its header through its body and any \`#### Scenario:\` sub-entries, up to the next \`### Requirement:\` or \`## \` header.
+2. Read \`oprim/specs/<capability>/spec.md\` if it exists (current truth uses a single flat \`## Requirements\` section).
+   - **If it does not exist:**
+     - If the delta is entirely \`## ADDED Requirements\` (no MODIFIED/REMOVED sections): create \`oprim/specs/<capability>/spec.md\` with a \`## Requirements\` header and append each ADDED requirement block beneath it.
+     - If the delta contains any MODIFIED or REMOVED requirements: stop before moving anything and report an error — "cannot modify/remove requirement '<header>' in capability <capability> — no current-truth spec exists yet for this capability."
+   - **If it does exist:**
+     - **ADDED**: append the requirement block to the end of the \`## Requirements\` section.
+     - **MODIFIED**: find the existing \`### Requirement:\` block whose header text matches the delta's (whitespace-insensitive); replace that entire block (header, body, and scenarios) with the delta's version. If no match is found, treat it as ADDED instead (append) and note this in the final report.
+     - **REMOVED**: find and delete the matching block entirely. If no match is found, note this in the final report and continue — nothing to remove.
+3. Write the updated \`oprim/specs/<capability>/spec.md\`.
+
+This fold always overwrites the matched requirement wholesale — it never reconciles two bets' overlapping changes. If a later bet's archive touches the same requirement again, its version simply replaces this one (last-write-wins, confirmed by construction — no 3-way merge).
+
+Track which capabilities were merged (and any no-match notes) for the final report.
+
+### 5. Move the bet directory to archive
 
 Create the archive subfolder if it doesn't exist:
 \`\`\`bash
@@ -730,11 +843,11 @@ Move the resolved directory:
 mv oprim/bets/<resolved-dir> oprim/bets/archived/<resolved-dir>
 \`\`\`
 
-### 5. Remove the bet entry from sequence.yaml
+### 6. Remove the bet entry from sequence.yaml
 
 Read \`oprim/sequence.yaml\`, parse it, and remove the entry with \`id: BET-NNN\` from whichever bucket it appears in (now, next, later, or backlog). Write the updated YAML back using 2-space indentation. Do not modify any other entries.
 
-### 6. Report what was done
+### 7. Report what was done
 
 \`\`\`
 ## Bet Archived
@@ -742,6 +855,7 @@ Read \`oprim/sequence.yaml\`, parse it, and remove the entry with \`id: BET-NNN\
 **Bet:** BET-NNN
 **Archived to:** oprim/bets/archived/<resolved-dir>/
 **Removed from sequence.yaml:** ✓
+**Spec deltas merged:** <capability-1>, <capability-2> (omit this line if no specs/ directory was present)
 
 The bet is preserved in full at the archive location.
 \`\`\`
@@ -886,6 +1000,9 @@ Create a KPI review in \`oprim/reviews/\`.
 ### 1. Identify the bet
 If not provided, ask: "Which bet are you reviewing? (e.g. BET-042)"
 
+### 1b. Check for custom rules
+Read \`oprim/config.yaml\`. If it has a non-empty \`rules.review\` value, treat it as additional guidance from the team — factor it into the questions you ask in step 4 and reflect it in the generated review content. If \`rules.review\` is absent or empty, skip this step; behavior is unchanged.
+
 ### 2. Load criteria and check for a run result
 
 Read \`oprim/bets/BET-NNN/criteria.yaml\` if it exists (pre-fills baseline and target).
@@ -940,12 +1057,83 @@ Prepend the frontmatter block from step 5b, if one was prepared.
 ### 7. Report what was created
 `;
 }
+function specAuthoringSkill() {
+    return `---
+name: oprim-spec
+description: Generate a native oprim capability spec delta at oprim/bets/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived
+---
+
+Generate a capability spec delta for an active bet — RFC 2119 requirements plus Gherkin scenarios, no OpenSpec required. This skill never writes to \`oprim/specs/\` directly; \`oprim-archive\` folds the delta into current truth when the bet is archived.
+
+**Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
+## Steps
+
+### 1. Get the active bet
+If a bet ID was provided as context (e.g. invoked from \`/oprim:promote\`), use it directly. Otherwise ask: "Which bet is this spec change for? (e.g. BET-005)"
+
+Resolve it to a directory in \`oprim/bets/\` using the same two patterns \`oprim-archive\` uses: exact \`BET-NNN/\` (legacy, no slug) or the slug variant \`BET-NNN-<slug>/\`. If neither matches, report "Bet BET-NNN was not found in oprim/bets/ — spec deltas can only be authored against an active bet" and stop.
+
+### 2. Get the capability name and description
+If not provided, ask: "What capability are you specifying? (a short name, e.g. 'spec-authoring')" and "What does it do? (one or two sentences)"
+
+### 2b. Derive the slug
+From the capability name: lowercase all characters, replace any character that is not a letter or digit with a hyphen, collapse consecutive hyphens to one, strip leading/trailing hyphens. This becomes \`<capability>\`.
+Output path: \`oprim/bets/<resolved-bet-dir>/specs/<capability>/spec.md\` (a delta, not \`oprim/specs/<capability>/spec.md\` — that file is current truth and is only ever written by \`oprim-archive\`'s merge step).
+
+### 2c. Check for custom rules
+Read \`oprim/config.yaml\`. If it has a non-empty \`rules.spec\` value, treat it as additional guidance from the team — factor it into the requirements and scenarios you draft. If \`rules.spec\` is absent or empty, skip this step; behavior is unchanged.
+
+### 3. Determine the delta type for each requirement
+For each requirement, ask whether it is new (**ADDED**), a change to an existing current-truth requirement (**MODIFIED**), or a removal of one (**REMOVED**).
+
+- **ADDED**: gather the requirement statement fresh.
+- **MODIFIED / REMOVED**: read \`oprim/specs/<capability>/spec.md\` if it exists and list its \`### Requirement:\` headers so the user can pick the one being changed. The header text must match exactly (whitespace-insensitive) for \`oprim-archive\`'s merge step to find it later. If the file doesn't exist yet, MODIFIED/REMOVED aren't possible for this capability — fall back to ADDED.
+
+### 4. Gather requirements and scenarios
+For ADDED and MODIFIED requirements, phrase each as an RFC 2119 statement using SHALL (mandatory), SHOULD (recommended), or MAY (optional), then ask for at least one scenario: a WHEN (trigger) and a THEN (expected outcome), with an optional GIVEN (context) and additional AND steps. REMOVED requirements only need the matching header — no new scenarios.
+
+### 5. Write the delta file
+Append to (or create) \`oprim/bets/<resolved-bet-dir>/specs/<capability>/spec.md\`, grouping requirements under the matching section header — only include a section if it has at least one requirement under it:
+
+\`\`\`markdown
+## ADDED Requirements
+
+### Requirement: <capability> SHALL/SHOULD/MAY <requirement statement>
+<one-sentence elaboration>
+
+#### Scenario: <scenario title>
+- **GIVEN** <context> (optional)
+- **WHEN** <trigger>
+- **THEN** <outcome>
+- **AND** <additional outcome> (optional)
+
+## MODIFIED Requirements
+
+### Requirement: <exact header text matched from oprim/specs/<capability>/spec.md>
+<revised elaboration>
+
+#### Scenario: <scenario title>
+- **WHEN** <trigger>
+- **THEN** <outcome>
+
+## REMOVED Requirements
+
+### Requirement: <exact header text matched from oprim/specs/<capability>/spec.md>
+\`\`\`
+
+If the delta file already exists (a prior spec-authoring pass for this bet/capability), append new requirements to the matching section, creating that section if it's not yet present.
+
+### 6. Report what was created
+Show the delta file path, which bet it's scoped to, and a summary of the ADDED/MODIFIED/REMOVED requirements captured. Note that it merges into \`oprim/specs/<capability>/spec.md\` when \`BET-NNN\` is archived — nothing is current truth yet.
+`;
+}
 // ─── Cursor inline content (condensed versions for command files) ─────────────
 function pdrInlineContent() {
-    return `Create a new PDR in \`oprim/decisions/\`. Scan for \`PDR-(\\d+)-\` to assign next ID (zero-padded, default 001). Gather: title, context, decision, alternatives, consequences, evidence, related bets/specs. Ask if superseding an existing PDR. Write \`oprim/decisions/PDR-NNN-<slug>.md\`. If superseding: update old PDR Status to "Superseded by PDR-NNN". Report what was created.`;
+    return `Create a new PDR in \`oprim/decisions/\`. Scan for \`PDR-(\\d+)-\` to assign next ID (zero-padded, default 001). Read \`oprim/config.yaml\`'s \`rules.pdr\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged. Gather: title, context, decision, alternatives, consequences, evidence, related bets/specs. Ask if superseding an existing PDR. Write \`oprim/decisions/PDR-NNN-<slug>.md\`. If superseding: update old PDR Status to "Superseded by PDR-NNN". Report what was created.`;
 }
 function betInlineContent() {
-    return `Create a new bet in \`oprim/bets/\`. First explain: "A bet is a product decision you're committing to explore — a problem worth solving, a hypothesis worth testing, or a direction worth taking. You'll name it, explain why now, and set a kill criterion." Then show: "Naming tip: verb + object [for context] — Good: 'Improve bet naming for scannability' / Bad: 'Naming'". Scan \`BET-(\\d+)\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). After receiving the title, validate: if fewer than 4 words OR fewer than 25 characters, warn "this title may be too vague", suggest a reformulation, and ask "Proceed anyway? (y/N)" — if "n", prompt for a revised title. Gather: decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\` with an inline naming tip comment in the header. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
+    return `Create a new bet in \`oprim/bets/\`. First explain: "A bet is a product decision you're committing to explore — a problem worth solving, a hypothesis worth testing, or a direction worth taking. You'll name it, explain why now, and set a kill criterion." Then show: "Naming tip: verb + object [for context] — Good: 'Improve bet naming for scannability' / Bad: 'Naming'". Scan \`BET-(\\d+)\` dirs for next ID (zero-padded, default 001). Check \`oprim/sequence.yaml\` exists (stop if not — advise oprim init). Read \`oprim/config.yaml\`'s \`rules.bet\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged. After receiving the title, validate: if fewer than 4 words OR fewer than 25 characters, warn "this title may be too vague", suggest a reformulation, and ask "Proceed anyway? (y/N)" — if "n", prompt for a revised title. Gather: decision (default Build now), owner, review date, why-now, alternatives, expected outcomes, kill criteria, PDR links. Write \`oprim/bets/BET-NNN/bet-decision.md\` with an inline naming tip comment in the header. Append entry to sequence.yaml backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`. Then ask: "Do you want to scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/BET-NNN/discovery.md\` from the discovery template (sections: Problem Framing, User Research Signals, Competitive Context, Open Questions); if "n" or Enter, skip silently. Report what was created.`;
 }
 function noteInlineContent() {
     return `Create a new note in \`oprim/notes/\` for lightweight thinking capture — an observation, idea, or connection that hasn't yet earned a place in a bet or PDR. Notes carry no owner or kill criterion; promote one into a bet later with \`/oprim:promote NOTE-NNN\`. Ask for a short title. Scan \`oprim/notes/NOTE-(\\d+)-\` for the next id (zero-padded, default 001). Ask for the note body (free-form), tags, and optional related BET-IDs. Tags are checked against \`oprim/config.yaml\`'s \`notes.tags\`; any new tag is accepted and appended to that list rather than rejected — the vocabulary grows from usage. Read \`oprim/templates/note.md\` — if its frontmatter has a \`description:\` field, this workspace is on the OKF tier and needs a one-line description; if it has no \`description:\` field, use the minimal tier; if the file doesn't exist, fall back to reading \`okf.enabled\` directly from \`oprim/config.yaml\`. Write \`oprim/notes/NOTE-NNN-<slug>.md\` with the correct frontmatter tier and a \`## Bets\` section listing any related BET-IDs. For each related bet, append \`- Notes: NOTE-NNN\` to that bet-decision's \`## Links\` section. Report what was created.`;
@@ -954,7 +1142,7 @@ function criteriaInlineContent() {
     return `Add metrics to \`oprim/bets/BET-NNN/criteria.yaml\`. Verify bet dir exists. Gather: metric ID, name, baseline, target, timeframe, launch date, segment. Ask source type (amplitude or bigquery). Amplitude: event, aggregation, denominator_event. BigQuery: table, metric_column, filter, aggregation, denominator_query. If file exists: append to metrics list (never overwrite). If not: create. Ask if adding more metrics. Report what was created.`;
 }
 function reviewInlineContent() {
-    return `Create KPI review in \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`. Read \`criteria.yaml\` for pre-fill (baseline/target). Check \`oprim/bets/BET-NNN/measurements/\` for \`run-*.yaml\` files — if found, use the most recent to pre-populate actuals and status (include "Actuals from run: YYYY-MM-DD" note). If no run result, ask for each metric's actual value. Status: actual >= target → hit, actual < target → missed, not provided → pending. Ask reviewer name and decision quality notes. Write review with metric table and Actions checklist. Report what was created.`;
+    return `Create KPI review in \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`. Read \`oprim/config.yaml\`'s \`rules.review\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged. Read \`criteria.yaml\` for pre-fill (baseline/target). Check \`oprim/bets/BET-NNN/measurements/\` for \`run-*.yaml\` files — if found, use the most recent to pre-populate actuals and status (include "Actuals from run: YYYY-MM-DD" note). If no run result, ask for each metric's actual value. Status: actual >= target → hit, actual < target → missed, not provided → pending. Ask reviewer name and decision quality notes. Write review with metric table and Actions checklist. Report what was created.`;
 }
 // ─── Hook scripts: co-archival coordination ──────────────────────────────────
 function hooksConfig(framework) {
@@ -1106,20 +1294,14 @@ function mergeClaudeSettingsHooks(claudeDir) {
     console.log(chalk_1.default.green('✓') + ' .claude/settings.json (UserPromptSubmit + Stop hooks registered)');
 }
 // ─── Legacy content (promote remains inline; sequence now delegates to skill) ─
-function promoteContent() {
-    return `
-Promote an atomic note into a bet, or a prioritized bet into an OpenSpec change. The promotion path is determined solely by the prefix of the ID argument — there is no separate command for each.
-
-**Input**: Specify an ID (e.g., \`/oprim:promote BET-042\` or \`/oprim:promote NOTE-005\`) or omit to be prompted.
-
-### 0. Determine the promotion path from the ID prefix
-- \`BET-\` → **A. Bet → OpenSpec change**
-- \`NOTE-\` → **B. Note → Bet**
-- Anything else → report "Unrecognized ID prefix — expected BET- or NOTE-" and stop. Do not silently do nothing.
-
-## A. Bet → OpenSpec change
-
-1. **Locate the bet** — read \`oprim/bets/BET-XXX/bet-decision.md\`
+function promoteContent(framework = 'openspec') {
+    const sectionATitle = framework === 'openspec'
+        ? 'A. Bet → OpenSpec change'
+        : framework === 'native'
+            ? 'A. Bet → native oprim spec'
+            : 'A. Bet → spec (no framework configured)';
+    const sectionABody = framework === 'openspec'
+        ? `1. **Locate the bet** — read \`oprim/bets/BET-XXX/bet-decision.md\`
 2. **Validate status** — decision must be "Build now"
 3. **Check authority boundary** — confirm primer artifact owns why/order/outcome only
 4. **Create OpenSpec change** — derive the change name as \`bet-NNN-<slug>\` where \`NNN\` is the zero-padded bet number (e.g. BET-004 → \`bet-004\`) and \`<slug>\` is a short kebab-case summary of the change. Then invoke the \`/openspec-propose\` skill (or \`/opsx:propose\`) with that name to create the change directory with **all required artifacts**: \`proposal.md\`, \`design.md\`, \`tasks.md\`, and \`specs/<capability>/spec.md\` for every capability listed under \`## Capabilities\`.
@@ -1136,7 +1318,31 @@ Promote an atomic note into a bet, or a prioritized bet into an OpenSpec change.
    - \`tasks.md\`
    - \`specs/<capability>/spec.md\` for each capability in \`## Capabilities\`
    If any artifact is missing, create it before reporting done.
-8. **Report** — show what was linked and what remains for engineering
+8. **Report** — show what was linked and what remains for engineering`
+        : framework === 'native'
+            ? `1. **Locate the bet** — read \`oprim/bets/BET-XXX/bet-decision.md\`
+2. **Validate status** — decision must be "Build now"
+3. **Check authority boundary** — confirm primer artifact owns why/order/outcome only
+4. **Generate the native spec delta(s)** — for each capability listed under the bet's \`## Capabilities\` section (or a single capability derived from the bet title if none is listed), invoke the \`oprim-spec\` skill with this bet as context to write \`oprim/bets/BET-XXX/specs/<capability>/spec.md\` — a delta using \`## ADDED\`/\`## MODIFIED\`/\`## REMOVED Requirements\` headers reflecting the bet's why/outcome. No OpenSpec change directory is created and OpenSpec need not be installed. Nothing is written to \`oprim/specs/<capability>/spec.md\` (current truth) at promote time — that only happens when this bet is archived.
+5. **Link artifacts** — add \`- Spec (delta): oprim/bets/BET-XXX/specs/<capability>/spec.md\` (one line per capability) to the bet-decision \`## Links\` section
+6. **Copy criteria** — if \`oprim/bets/BET-XXX/criteria.yaml\` exists, note it alongside the spec link
+7. **Report** — show what was created and linked, and note that merge-on-archive will fold the delta into \`oprim/specs/\` when the bet archives`
+            : `1. **Locate the bet** — read \`oprim/bets/BET-XXX/bet-decision.md\`
+2. **Validate status** — decision must be "Build now"
+3. **Report and stop** — no speccing framework is configured (\`integrations.spec_framework: none\`). Add \`- Spec: none (no speccing framework configured)\` to the bet-decision \`## Links\` section. No spec artifact is created.`;
+    return `
+Promote an atomic note into a bet, or a prioritized bet into a capability spec. The promotion path is determined solely by the prefix of the ID argument — there is no separate command for each.
+
+**Input**: Specify an ID (e.g., \`/oprim:promote BET-042\` or \`/oprim:promote NOTE-005\`) or omit to be prompted.
+
+### 0. Determine the promotion path from the ID prefix
+- \`BET-\` → **${sectionATitle}**
+- \`NOTE-\` → **B. Note → Bet**
+- Anything else → report "Unrecognized ID prefix — expected BET- or NOTE-" and stop. Do not silently do nothing.
+
+## ${sectionATitle}
+
+${sectionABody}
 
 ## B. Note → Bet
 
@@ -1200,6 +1406,7 @@ Create a new bet in \`oprim/bets/\` and register it on the sequencing board.
 2. Ask for the bet title. Validate: fewer than 4 words OR fewer than 25 chars → warn, suggest reformulation, ask "Proceed anyway? (y/N)".
 3. Assign next BET ID: scan \`oprim/bets/BET-(\\d+)\` dirs, max+1 zero-padded to 3 digits (default 001).
 4. Check \`oprim/sequence.yaml\` exists — stop if not, advise \`oprim init\`.
+4b. Read \`oprim/config.yaml\`'s \`rules.bet\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
 5. Gather: decision (default Build now), owner, review date (YYYY-MM-DD), why now, alternatives, expected outcomes, kill criteria, PDR links.
 6. Write \`oprim/bets/BET-NNN/bet-decision.md\` with all fields.
 7. Append to \`oprim/sequence.yaml\` backlog: \`{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}\`.
@@ -1235,6 +1442,7 @@ Create a new Product Decision Record in \`oprim/decisions/\`.
 
 1. Ask for decision title.
 2. Assign next PDR ID: scan \`oprim/decisions/PDR-(\\d+)-\`, max+1 zero-padded to 3 digits (default 001).
+2b. Read \`oprim/config.yaml\`'s \`rules.pdr\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
 3. Gather: context, decision, alternatives, consequences, evidence, related bets/specs.
 4. Ask if superseding an existing PDR.
 5. Write \`oprim/decisions/PDR-NNN-<slug>.md\`. If superseding, update old PDR Status.
@@ -1244,6 +1452,7 @@ Create a new Product Decision Record in \`oprim/decisions/\`.
 Create a KPI review artifact in \`oprim/reviews/\`.
 
 1. Ask which bet (e.g. BET-042).
+1b. Read \`oprim/config.yaml\`'s \`rules.review\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
 2. Read \`oprim/bets/BET-NNN/criteria.yaml\` for pre-fill. Check \`oprim/bets/BET-NNN/measurements/\` for \`run-*.yaml\` — use most recent if present.
 3. If no run result, ask for each metric's actual value.
 4. Status: actual >= target → hit; actual < target → missed; not provided → pending.
@@ -1256,10 +1465,11 @@ Archive a completed bet.
 
 1. Ask for bet ID (accept bet-005, 005, 5, BET-005 — normalize to BET-NNN).
 2. Verify \`oprim/bets/BET-NNN/\` exists.
-3. Check \`oprim/sequence.yaml\` for entries where \`blocked_by\` or \`unlocks\` reference the target bet — warn if found, ask "Archive anyway? (y/N)".
-4. Move directory: \`oprim/bets/BET-NNN → oprim/bets/archived/BET-NNN\`.
-5. Remove the bet entry from \`oprim/sequence.yaml\`.
-6. Report what was done.
+3. Check \`oprim/sequence.yaml\` for entries where \`blocked_by\` or \`unlocks\` reference the target bet — warn if found. Also check other active bet dirs for delta specs against the same requirement (matching \`### Requirement:\` headers, whitespace-insensitive) — warn if an overlap is found. Ask "Archive anyway? (y/N)" if either warning fires.
+4. If \`oprim/bets/BET-NNN/specs/\` exists, fold each capability's \`## ADDED\`/\`## MODIFIED\`/\`## REMOVED Requirements\` delta into \`oprim/specs/<capability>/spec.md\` (matching by \`### Requirement:\` header; create the current-truth file if the delta is entirely ADDED) — last-write-wins on overlaps, no 3-way merge. Skip this step entirely if no \`specs/\` dir is present.
+5. Move directory: \`oprim/bets/BET-NNN → oprim/bets/archived/BET-NNN\`.
+6. Remove the bet entry from \`oprim/sequence.yaml\`.
+7. Report what was done.
 
 ### Sequencing board (oprim-sequence)
 Validate the primer sequencing board and regenerate the visual view.

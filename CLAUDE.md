@@ -56,6 +56,7 @@ Hook registration is merged into `.claude/settings.json` (does not clobber exist
 - `oprim/` owns **why / order / outcomes** (PDRs, bets, sequencing, KPI reviews)
 - `openspec/changes/` owns **what / how** (proposals, designs, tasks, specs)
 - The link between layers is the `/oprim:promote` command, which invokes `/opsx:propose` to create the OpenSpec change
+- When the `native` speccing framework is selected (opt-in, alongside/instead of OpenSpec): `oprim/specs/<capability>/spec.md` is current truth; `oprim/bets/BET-NNN.../specs/<capability>/spec.md` holds an in-flight bet's ADDED/MODIFIED/REMOVED delta until `/oprim:archive` folds it into current truth
 
 ### Agent detection
 

@@ -3,7 +3,13 @@ import * as os from 'os';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS } from '../lib/install-agent';
+import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS, CURSOR_COMMANDS } from '../lib/install-agent';
+
+vi.mock('@inquirer/prompts', () => ({
+  checkbox: vi.fn().mockResolvedValue([]),
+  confirm: vi.fn().mockResolvedValue(false),
+  select: vi.fn().mockResolvedValue('openspec'),
+}));
 
 let tmpDir: string;
 
@@ -325,6 +331,42 @@ describe('oprim-note skill', () => {
   });
 });
 
+// bet-025 — rules.<artifact> consumption in generated content ──────────────────
+
+describe('rules.<artifact> guidance in generated skill content', () => {
+  it('oprim-bet skill reads rules.bet when non-empty, no-op when empty', () => {
+    const content = CLAUDE_SKILLS['oprim-bet'];
+    expect(content).toContain('rules.bet');
+    expect(content).toContain('behavior is unchanged');
+  });
+
+  it('oprim-pdr skill reads rules.pdr when non-empty, no-op when empty', () => {
+    const content = CLAUDE_SKILLS['oprim-pdr'];
+    expect(content).toContain('rules.pdr');
+    expect(content).toContain('behavior is unchanged');
+  });
+
+  it('oprim-review skill reads rules.review when non-empty, no-op when empty', () => {
+    const content = CLAUDE_SKILLS['oprim-review'];
+    expect(content).toContain('rules.review');
+    expect(content).toContain('behavior is unchanged');
+  });
+
+  it('Cursor command wrappers reference rules.bet / rules.pdr / rules.review', () => {
+    expect(CURSOR_COMMANDS['oprim-bet.md']).toContain('rules.bet');
+    expect(CURSOR_COMMANDS['oprim-pdr.md']).toContain('rules.pdr');
+    expect(CURSOR_COMMANDS['oprim-review.md']).toContain('rules.review');
+  });
+
+  it('Codex/Gemini/Poolside inline workflow text references rules.bet / rules.pdr / rules.review', () => {
+    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions()]) {
+      expect(instructions).toContain('rules.bet');
+      expect(instructions).toContain('rules.pdr');
+      expect(instructions).toContain('rules.review');
+    }
+  });
+});
+
 // promoteContent ID-prefix dispatch ────────────────────────────────────────────
 
 describe('promoteContent dispatch', () => {
@@ -466,5 +508,241 @@ describe('on-stop.sh hook', () => {
     expect(output).toContain('oprim:sequence');
     expect(output).toContain('promoted');
     expect(fs.existsSync(nudgePath)).toBe(false);
+  });
+});
+
+// bet-023 — native spec-authoring skill (oprim-spec) ───────────────────────────
+
+describe('oprim-spec skill installation', () => {
+  it('installs .claude/skills/oprim-spec/SKILL.md only when framework is native', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const skillPath = path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('name: oprim-spec');
+    expect(content).toContain('SHALL');
+    expect(content).toContain('SHOULD');
+    expect(content).toContain('MAY');
+    expect(content).toContain('#### Scenario:');
+    expect(content).toContain('**WHEN**');
+    expect(content).toContain('**THEN**');
+    expect(content).toContain('oprim/specs/<capability>/spec.md');
+    expect(content).toContain('rules.spec');
+  });
+
+  it('does not install oprim-spec for openspec or none frameworks', () => {
+    installAgentSkills('claude', tmpDir, 'openspec');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(false);
+
+    installAgentSkills('claude', tmpDir, 'none');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(false);
+  });
+
+  it('removes a previously-installed oprim-spec skill when the framework switches away from native', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('claude', tmpDir, 'openspec');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(false);
+  });
+
+  it('works with no openspec/ directory and no other OpenSpec scaffolding present', () => {
+    expect(fs.existsSync(path.join(tmpDir, 'openspec'))).toBe(false);
+    installAgentSkills('claude', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'openspec'))).toBe(false);
+  });
+
+  it('installs oprim-spec for cursor and poolside when framework is native', () => {
+    installAgentSkills('cursor', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.cursor', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('poolside', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.poolside', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+  });
+});
+
+// bet-023 — promoteContent branches on the selected speccing framework ─────────
+
+describe('promote command branches on speccing framework', () => {
+  it('openspec framework: promote.md keeps the existing OpenSpec delegation path', () => {
+    installAgentSkills('claude', tmpDir, 'openspec');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → OpenSpec change');
+    expect(content).toContain('openspec-propose');
+    expect(content).not.toContain('oprim-spec');
+  });
+
+  it('native framework: promote.md invokes oprim-spec and links oprim/specs path, no OpenSpec', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → native oprim spec');
+    expect(content).toContain('oprim-spec');
+    expect(content).toContain('oprim/specs/<capability>/spec.md');
+    expect(content).not.toContain('openspec-propose');
+  });
+
+  it('none framework: promote.md stops without creating a spec artifact', () => {
+    installAgentSkills('claude', tmpDir, 'none');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → spec (no framework configured)');
+    expect(content).toContain('no speccing framework is configured');
+    expect(content).not.toContain('openspec-propose');
+    expect(content).not.toContain('oprim-spec');
+  });
+
+  it('branches the same way for the Cursor oprim-promote.md command', () => {
+    installAgentSkills('cursor', tmpDir, 'native');
+    const content = fs.readFileSync(path.join(tmpDir, '.cursor', 'commands', 'oprim-promote.md'), 'utf-8');
+    expect(content).toContain('A. Bet → native oprim spec');
+    expect(content).toContain('oprim-spec');
+  });
+});
+
+// bet-024 — spec-dir lifecycle: delta authoring writes under the bet dir ───────
+
+describe('oprim-spec skill — delta authoring scoped to an active bet (bet-024)', () => {
+  it('resolves an active bet and writes the delta under oprim/bets/, not oprim/specs/ directly', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const content = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'),
+      'utf-8'
+    );
+
+    expect(content).toContain('Which bet is this spec change for?');
+    expect(content).toContain('oprim/bets/<resolved-bet-dir>/specs/<capability>/spec.md');
+    expect(content).toContain('never writes to \`oprim/specs/\` directly');
+    expect(content).toContain('## ADDED Requirements');
+    expect(content).toContain('## MODIFIED Requirements');
+    expect(content).toContain('## REMOVED Requirements');
+    // current-truth path still referenced as the header-matching source and eventual merge target
+    expect(content).toContain('oprim/specs/<capability>/spec.md');
+  });
+
+  it('reports a bet-not-found stop condition when the bet id does not resolve', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const content = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'),
+      'utf-8'
+    );
+    expect(content).toContain('spec deltas can only be authored against an active bet');
+  });
+});
+
+describe('promote (native): links a delta path, not a direct current-truth write (bet-024)', () => {
+  it('promote.md tells the agent to write a delta and defer merge to archive', () => {
+    installAgentSkills('claude', tmpDir, 'native');
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
+    expect(content).toContain('oprim/bets/BET-XXX/specs/<capability>/spec.md');
+    expect(content).toContain('Spec (delta):');
+    expect(content).toContain('merge-on-archive will fold the delta');
+  });
+});
+
+// bet-024 — spec-dir lifecycle: merge-on-archive folds deltas into current truth
+
+describe('oprim-archive skill — merge-on-archive spec-delta folding (bet-024)', () => {
+  function readArchiveSkill(): string {
+    installAgentSkills('claude', tmpDir, 'native');
+    return fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-archive', 'SKILL.md'), 'utf-8');
+  }
+
+  it('detects a specs/ directory on the bet before moving it', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('oprim/bets/<resolved-dir>/specs/');
+    expect(content).toContain('Fold spec deltas into current truth');
+  });
+
+  it('matches requirements by ### Requirement: header text, whitespace-insensitive', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('### Requirement:');
+    expect(content).toContain('whitespace-insensitive');
+  });
+
+  it('describes fold logic for ADDED, MODIFIED, and REMOVED deltas', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('**ADDED**: append the requirement block');
+    expect(content).toContain('**MODIFIED**: find the existing');
+    expect(content).toContain('**REMOVED**: find and delete the matching block');
+  });
+
+  it('creates oprim/specs/<capability>/spec.md when absent and the delta is entirely ADDED', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('create \`oprim/specs/<capability>/spec.md\`');
+    expect(content).toContain('entirely \`## ADDED Requirements\`');
+  });
+
+  it('errors instead of silently proceeding when MODIFIED/REMOVED target a non-existent current-truth capability', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('no current-truth spec exists yet for this capability');
+  });
+
+  it('skips the fold step entirely and preserves prior behavior when no specs/ dir is present', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('skip this step entirely and go to Step 5');
+    expect(content).toContain('archive behavior is unchanged from before spec deltas existed');
+  });
+
+  it('warns on concurrent delta overlaps with another still-active bet before archiving', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('concurrent') ; // combined warning intro references delta overlaps
+    expect(content).toContain('overlap');
+    expect(content).toContain('Archiving BET-005 now applies its version');
+  });
+
+  it('documents last-write-wins (no 3-way merge) for overlapping requirement deltas across sequential archives', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('last-write-wins');
+    expect(content).toContain('no 3-way merge');
+  });
+
+  it('reports merged capabilities alongside the existing archive report fields', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('**Spec deltas merged:**');
+    expect(content).toContain('**Archived to:**');
+    expect(content).toContain('**Removed from sequence.yaml:**');
+  });
+});
+
+describe('archive workflow inline content mentions the merge step for Codex/Gemini/Poolside (bet-024)', () => {
+  it('codexInstructions includes the spec-delta fold step in the archive section', () => {
+    const content = codexInstructions();
+    expect(content).toContain('fold each capability');
+    expect(content).toContain('last-write-wins on overlaps');
+  });
+});
+
+// bet-023 — framework selection offers a native choice ─────────────────────────
+
+describe('promptFrameworkSelection', () => {
+  it('offers openspec, native, and none as choices when prompting', async () => {
+    const { promptFrameworkSelection } = await import('../lib/install-agent');
+    const { select } = await import('@inquirer/prompts');
+    vi.mocked(select).mockResolvedValueOnce('native' as never);
+
+    const result = await promptFrameworkSelection(tmpDir);
+
+    expect(result).toBe('native');
+    const call = vi.mocked(select).mock.calls[0][0] as { choices: Array<{ value: string }> };
+    const values = call.choices.map((c) => c.value);
+    expect(values).toEqual(['openspec', 'native', 'none']);
+  });
+
+  it('returns the persisted oprim/config.yaml value without prompting', async () => {
+    const { promptFrameworkSelection } = await import('../lib/install-agent');
+    const { select } = await import('@inquirer/prompts');
+    const selectMock = vi.mocked(select).mockClear();
+
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'integrations:\n  spec_framework: native\n'
+    );
+
+    const result = await promptFrameworkSelection(tmpDir);
+
+    expect(result).toBe('native');
+    expect(selectMock).not.toHaveBeenCalled();
   });
 });

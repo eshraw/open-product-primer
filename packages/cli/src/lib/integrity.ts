@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { CLAUDE_SKILLS, OPRIM_CONTEXT_SKILL_STEP } from './install-agent';
+import { CLAUDE_SKILLS, OPRIM_CONTEXT_SKILL_STEP, specAuthoringSkill } from './install-agent';
 
 export interface Check {
   name: string;
@@ -88,7 +88,9 @@ export function checkSkillVersionDrift(projectRoot: string, checks: Check[]): vo
   const skillsDir = path.join(projectRoot, '.claude', 'skills');
   if (!fs.existsSync(skillsDir)) return;
 
-  for (const [name, bundledContent] of Object.entries(CLAUDE_SKILLS)) {
+  const bundledSkills: Record<string, string> = { ...CLAUDE_SKILLS, 'oprim-spec': specAuthoringSkill() };
+
+  for (const [name, bundledContent] of Object.entries(bundledSkills)) {
     const skillPath = path.join(skillsDir, name, 'SKILL.md');
     if (!fs.existsSync(skillPath)) continue;
 

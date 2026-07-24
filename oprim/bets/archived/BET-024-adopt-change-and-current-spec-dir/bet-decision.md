@@ -44,7 +44,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
+- OpenSpec change: openspec/changes/bet-024-spec-dir-lifecycle/
 - Blocked by: BET-023 (native spec syntax)
 - Unlocks: BET-026 (remote stores), BET-028 (validate)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/concepts.md
