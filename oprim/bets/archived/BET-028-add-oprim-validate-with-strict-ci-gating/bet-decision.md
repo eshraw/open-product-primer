@@ -2,10 +2,12 @@
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
-- Decision: Defer
-- Date: 2026-07-23
+- Decision: Build now
+- Date: 2026-07-27
 - Owner: Eshane
 - Review date: 2026-09-30
+
+Updated from Defer: its blocker (BET-024, spec dir model) has shipped (`openspec/changes/archive/2026-07-24-bet-024-spec-dir-lifecycle/`), and BET-028 was moved into the sequencing board's `now` slot unblocked (see `oprim/sequence.yaml`), being built in tandem with BET-027 on the `feat-declarative-schemas-and-validate-ci` branch.
 
 ## Door type
 - [x] 2-way door (reversible — safe to try, easy to undo)
@@ -44,6 +46,6 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
-- Blocked by: BET-024 (spec dir model)
+- OpenSpec change: `openspec/changes/bet-028-validate-ci-gating/`
+- Blocked by: BET-024 (spec dir model) — shipped, see `openspec/changes/archive/2026-07-24-bet-024-spec-dir-lifecycle/`
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/cli.md

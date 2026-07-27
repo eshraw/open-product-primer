@@ -8,6 +8,7 @@ const commander_1 = require("commander");
 const init_1 = require("./commands/init");
 const update_1 = require("./commands/update");
 const doctor_1 = require("./commands/doctor");
+const validate_1 = require("./commands/validate");
 const migrate_1 = require("./commands/migrate");
 const measure_1 = require("./commands/measure");
 const ovw_1 = require("./commands/ovw");
@@ -21,6 +22,7 @@ program
 program.addCommand((0, init_1.initCommand)());
 program.addCommand((0, update_1.updateCommand)());
 program.addCommand((0, doctor_1.doctorCommand)());
+program.addCommand((0, validate_1.validateCommand)());
 program.addCommand((0, migrate_1.migrateCommand)());
 program.addCommand((0, measure_1.measureCommand)());
 program.addCommand((0, ovw_1.ovwCommand)());

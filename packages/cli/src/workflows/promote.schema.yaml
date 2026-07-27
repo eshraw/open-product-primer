@@ -1,0 +1,14 @@
+id: promote
+skillName: null
+title: "OPRIM: Promote"
+description: Promote a note into a bet, or a prioritized bet into a capability spec
+claude:
+  skill: false
+  command: promote.md
+cursor:
+  skill: false
+  command: oprim-promote.md
+poolside:
+  skill: false
+inline: false
+variants: [openspec, native, none]

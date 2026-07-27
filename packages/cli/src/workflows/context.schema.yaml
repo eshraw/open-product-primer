@@ -1,0 +1,13 @@
+id: context
+skillName: oprim-context-init
+title: "OPRIM: Context Init"
+description: Declare the current project a citable remote context, guided by a short Q&A to draft its description
+claude:
+  skill: true
+  command: context-init.md
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: false
+inline: false

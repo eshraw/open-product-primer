@@ -1,0 +1,13 @@
+id: sequence
+skillName: oprim-sequence
+title: "OPRIM: Sequence"
+description: Validate and update the primer sequencing board
+claude:
+  skill: true
+  command: sequence.md
+cursor:
+  skill: false
+  command: oprim-sequence.md
+poolside:
+  skill: true
+inline: true

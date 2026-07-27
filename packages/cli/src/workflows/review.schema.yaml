@@ -1,0 +1,14 @@
+id: review
+skillName: oprim-review
+title: null
+description: Create a KPI review artifact for a completed bet, pre-filled from criteria.yaml with actuals gathered from the user
+cursorDescription: Create a KPI review artifact pre-filled from a bet's criteria contract
+claude:
+  skill: true
+  command: null
+cursor:
+  skill: true
+  command: oprim-review.md
+poolside:
+  skill: true
+inline: true

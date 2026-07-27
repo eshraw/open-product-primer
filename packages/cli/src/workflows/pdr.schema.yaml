@@ -1,0 +1,14 @@
+id: pdr
+skillName: oprim-pdr
+title: null
+description: Create a new Product Decision Record in oprim/decisions/ with auto-assigned ID and guided prompting
+cursorDescription: Create a new Product Decision Record with auto-assigned ID
+claude:
+  skill: true
+  command: null
+cursor:
+  skill: true
+  command: oprim-pdr.md
+poolside:
+  skill: true
+inline: true

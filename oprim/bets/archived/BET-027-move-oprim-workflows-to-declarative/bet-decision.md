@@ -2,10 +2,12 @@
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
-- Decision: Defer
-- Date: 2026-07-23
+- Decision: Build now
+- Date: 2026-07-27
 - Owner: Eshane
 - Review date: 2026-09-30
+
+Updated from Defer: BET-027 was moved into the sequencing board's `now` slot ahead of schedule (see `oprim/sequence.yaml`), and BET-028 (`oprim validate` with strict CI gating) is being built in tandem on the `feat-declarative-schemas-and-validate-ci` branch, satisfying the deferral condition of sequencing after the Build-now spec/config bets.
 
 ## Door type
 - [ ] 2-way door (reversible — safe to try, easy to undo)
@@ -39,6 +41,6 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
+- OpenSpec change: `openspec/changes/bet-027-declarative-schemas/`
 - Relates to: BET-023 (spec authoring), BET-025 (config rules)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/customization.md

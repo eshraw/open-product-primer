@@ -1,0 +1,14 @@
+id: note
+skillName: oprim-note
+title: null
+description: Create a new atomic note in oprim/notes/ for lightweight thinking capture, with tiered frontmatter and optional bet links
+cursorDescription: Create a new atomic note for lightweight thinking capture
+claude:
+  skill: true
+  command: null
+cursor:
+  skill: true
+  command: oprim-note.md
+poolside:
+  skill: true
+inline: true
