@@ -5,10 +5,13 @@
 
 ```mermaid
 graph TD
-    subgraph Next
-        BET026["BET-026: Pull team context from remote oprim s..."]
+    subgraph Now
         BET027["BET-027: Move oprim workflows to declarative s..."]
+    end
+    subgraph Next
         BET028["BET-028: Add oprim validate with strict CI gating"]
+        BET032["BET-032: Move active bets into a pending sub-d..."]
+        BET033["BET-033: Add proposal, design, and tasks artif..."]
         BET029["BET-029: Add explore and reconcile commands to..."]
         BET031["BET-031: Add a current decisions rollup view"]
     end
@@ -16,24 +19,6 @@ graph TD
         BET014["BET-014: Improve agent focus during bet discovery"]
         BET019["BET-019: Add quick-capture mode to bet creatio..."]
     end
-    BET026 --> [
-    BET026 --> B
-    BET026 --> E
-    BET026 --> T
-    BET026 --> 
-    BET026 --> 0
-    BET026 --> 2
-    BET026 --> 4
-    BET026 --> ,
-    BET026 -->  
-    BET026 --> B
-    BET026 --> E
-    BET026 --> T
-    BET026 --> 
-    BET026 --> 0
-    BET026 --> 2
-    BET026 --> 5
-    BET026 --> ]
     BET028 --> [
     BET028 --> B
     BET028 --> E
@@ -43,6 +28,15 @@ graph TD
     BET028 --> 2
     BET028 --> 4
     BET028 --> ]
+    BET033 --> [
+    BET033 --> B
+    BET033 --> E
+    BET033 --> T
+    BET033 --> 
+    BET033 --> 0
+    BET033 --> 3
+    BET033 --> 2
+    BET033 --> ]
 ```
 
 ### Backlog
