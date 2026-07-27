@@ -17,6 +17,14 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.2.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.1.0...cli-v2.2.0) (2026-07-27)
+
+
+### Features
+
+* declarative schemas for workflows ([c322f11](https://github.com/eshraw/open-product-primer/commit/c322f11af414f1807935c8eaced8806b748a28bf))
+* oprim validate ([a3722d0](https://github.com/eshraw/open-product-primer/commit/a3722d0e543b30f872fba2b0adf264975bf0ff78))
+
 ## [2.1.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.0.0...cli-v2.1.0) (2026-07-27)
 
 
