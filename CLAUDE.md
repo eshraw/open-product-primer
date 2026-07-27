@@ -20,9 +20,28 @@ To test the CLI locally:
 ```bash
 node dist/cli.js init
 node dist/cli.js doctor
+node dist/cli.js validate
 ```
 
 Releases publish automatically via GitHub Actions when a `v*` tag is pushed to `main`.
+
+### `oprim validate`
+
+A standalone, CI-runnable counterpart to `oprim doctor`: it aggregates sequence-integrity, skill-version-drift, bet definition-of-done, spec-delta drift, and cross-bet conflict checks into one report and exits non-zero when a check fails, so a team can gate a merge or release on it (`doctor` never sets a non-zero exit code).
+
+```bash
+oprim validate                    # human-readable report; exits non-zero only on a required check failure
+oprim validate --json             # print { "checks": [...] } instead of the human-readable report
+oprim validate --strict           # exit non-zero on ANY failing check, not only required ones
+oprim validate --diff <BET-ID>    # preview a bet's specs/<capability>/spec.md delta folded into
+                                   # oprim/specs/<capability>/spec.md, without writing any files
+```
+
+Suggested CI usage (e.g. a GitHub Actions step gating a PR merge):
+```yaml
+- name: Validate oprim workspace
+  run: npx oprim validate --strict --json
+```
 
 ## Architecture
 
@@ -31,7 +50,7 @@ This repo is itself an `oprim`-managed project — the `oprim/` workspace and `.
 ### Source layout (`packages/cli/src/`)
 
 - **`cli.ts`** — Commander entrypoint; registers all subcommands
-- **`commands/`** — one file per CLI subcommand (`init`, `update`, `doctor`, `migrate`, `measure`, `ovw`, `context`)
+- **`commands/`** — one file per CLI subcommand (`init`, `update`, `doctor`, `validate`, `migrate`, `measure`, `ovw`, `context`)
 - **`lib/detect.ts`** — detects OpenSpec, Graphify, and AI agent environments (`.claude/`, `.cursor/`, `AGENTS.md`, `GEMINI.md`, `.poolside/`)
 - **`lib/install-agent.ts`** — orchestrates which files get written to which agent directories (hooks, tombstone cleanup, PDR-surfacing Step 0 injection); the workflow *content* itself now lives in `workflow-schema.ts`/`workflow-renderer.ts`/`workflows/*` (see below). Supports `claude`, `cursor`, `codex`, `gemini`, `poolside`. Claude gets skills + command wrappers + hooks; Poolside gets skills + an `AGENTS.md`-style instruction file; Codex/Gemini get inline workflow text written into `AGENTS.md`/`GEMINI.md` between `<!-- oprim:start -->` / `<!-- oprim:end -->` delimiters; Cursor gets full inline command files
 - **`lib/workflow-schema.ts`** — loads a workflow's `<id>.schema.yaml` + `<id>.template.md`, resolving a project-level `oprim/workflows/<id>.{schema.yaml,template.md}` override over the CLI-bundled default (independently per file); throws an actionable, file-naming error on a malformed override rather than silently falling back
@@ -40,7 +59,9 @@ This repo is itself an `oprim`-managed project — the `oprim/` workspace and `.
 - **`lib/scaffold.ts`** — thin filesystem helpers (`ensureDir`, `writeFile`, `writeFileIfAbsent`)
 - **`lib/templates.ts`** — YAML/Markdown template strings for the `oprim/` workspace files, including `configTemplate()` for `oprim/config.yaml`
 - **`lib/config-merge.ts`** — additive, non-destructive merge of new `oprim/config.yaml` schema keys (`context`, `rules`, `remote_context`, `integrations.spec_framework`) into existing projects on `oprim update`; edits the raw text rather than parsing+re-dumping YAML so untouched lines are never reformatted
-- **`lib/integrity.ts`** — `oprim doctor` checks for sequencing-board integrity (WIP limits, dangling `blocked_by`/`unlocks` references) and installed-Claude-skill version drift against the bundled `install-agent.ts` content
+- **`lib/integrity.ts`** — `oprim doctor` checks for sequencing-board integrity (WIP limits, dangling `blocked_by`/`unlocks` references) and installed-Claude-skill version drift against the bundled `install-agent.ts` content; reused as-is by `oprim validate`
+- **`lib/spec-delta.ts`** — `foldDelta()` (ADDED-append / MODIFIED-replace / REMOVED-delete, matching `### Requirement:` headers whitespace-insensitively) and `findCrossBetConflicts()` (overlapping requirement headers across active bets' deltas), extracted out of `/oprim:archive`'s prose (`workflows/archive.template.md`) into shared, testable TypeScript that `oprim validate` calls deterministically; also `resolveBetDirectory()`/`normalizeBetId()`, the same bet-ID-to-directory resolution `/oprim:archive` describes
+- **`lib/validate-checks.ts`** — the checks unique to `oprim validate` (not shared with `doctor`): `checkBetDefinitionOfDone()` (a promoted bet — one whose `bet-decision.md` links a non-placeholder OpenSpec change — must have a `criteria.yaml`), `checkSpecDeltaDrift()` (a bet's MODIFIED/REMOVED delta requirement must still header-match `oprim/specs/<capability>/spec.md`), and `checkCrossBetConflicts()` (wraps `spec-delta.ts`'s `findCrossBetConflicts()` into `Check[]` entries)
 - **`lib/remote-context.ts`** — resolves `remote_context.sources` entries (git or local path) declared in `oprim/config.yaml`; git sources are cloned into a throttled cache at `~/.oprim/remote-context-cache/` (identity-only sparse clone vs. full clone, see below)
 - **`lib/measure.ts`** — Amplitude and BigQuery metric fetching for the `measure` subcommand
 - **`__tests__/`** — Vitest tests using real temp directories (no mocking of the filesystem)

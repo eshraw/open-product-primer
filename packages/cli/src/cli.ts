@@ -3,6 +3,7 @@ import { Command } from 'commander';
 import { initCommand } from './commands/init';
 import { updateCommand } from './commands/update';
 import { doctorCommand } from './commands/doctor';
+import { validateCommand } from './commands/validate';
 import { migrateCommand } from './commands/migrate';
 import { measureCommand } from './commands/measure';
 import { ovwCommand } from './commands/ovw';
@@ -19,6 +20,7 @@ program
 program.addCommand(initCommand());
 program.addCommand(updateCommand());
 program.addCommand(doctorCommand());
+program.addCommand(validateCommand());
 program.addCommand(migrateCommand());
 program.addCommand(measureCommand());
 program.addCommand(ovwCommand());
