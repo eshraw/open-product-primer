@@ -17,6 +17,13 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.1.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.0.0...cli-v2.1.0) (2026-07-27)
+
+
+### Features
+
+* remote context management ([693fde8](https://github.com/eshraw/open-product-primer/commit/693fde8112d9a381a3f55563a869511f7dc91725))
+
 ## [2.0.0](https://github.com/eshraw/open-product-primer/compare/cli-v1.2.0...cli-v2.0.0) (2026-07-24)
 
 
