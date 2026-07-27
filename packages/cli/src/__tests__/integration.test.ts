@@ -192,7 +192,7 @@ describe('oprim update — persisted OKF flag', () => {
 // bet-025 — oprim update additively merges new config schema keys ─────────────
 
 describe('oprim update — config schema merge', () => {
-  it('adds context, rules, and store to a config predating those keys, preserving existing values', async () => {
+  it('adds context, rules, and remote_context to a config predating those keys, preserving existing values', async () => {
     fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
     fs.writeFileSync(
       path.join(tmpDir, 'oprim', 'config.yaml'),
@@ -207,13 +207,13 @@ describe('oprim update — config schema merge', () => {
     expect(content).toContain('agents:\n  - claude');
     expect(content).toContain('context: ""');
     expect(content).toContain('rules: {}');
-    expect(content).toContain('store:\n  enabled: false');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
   });
 
   it('is a no-op on a config that already has the current schema', async () => {
     fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
     const current =
-      'version: 1\nagents:\n  - claude\nintegrations:\n  spec_framework: openspec\ncontext: ""\nrules: {}\nstore:\n  enabled: false\n';
+      'version: 1\nagents:\n  - claude\nintegrations:\n  spec_framework: openspec\ncontext: ""\nrules: {}\nremote_context:\n  enabled: false\n  sources: []\n';
     fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), current);
 
     const cmd = updateCommand();
@@ -235,7 +235,7 @@ describe('oprim update — config schema merge', () => {
     const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'utf-8');
     expect(content).toContain('context: "TypeScript monorepo"');
     expect(content).toContain('bet: "cite a Slack thread"');
-    expect(content).toContain('store:\n  enabled: false');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
   });
 
   it('running update twice in a row produces no further changes the second time', async () => {

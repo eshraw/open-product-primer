@@ -10,7 +10,11 @@ interface ConfigSchemaField {
 const CONFIG_SCHEMA_FIELDS: ConfigSchemaField[] = [
   { key: 'context', block: 'context: ""\n' },
   { key: 'rules', block: 'rules: {}\n' },
-  { key: 'store', block: 'store:\n  enabled: false\n' },
+  // bet-026 — supersedes the old inert `store:` key (BET-025). `store` is intentionally left
+  // out of this table going forward: a project that already has it keeps it untouched (this
+  // merge only adds missing keys, never removes existing ones), but new/updated configs only
+  // ever gain `remote_context`.
+  { key: 'remote_context', block: 'remote_context:\n  enabled: false\n  sources: []\n' },
 ];
 
 function existingTopLevelKeys(content: string): Set<string> {

@@ -2,14 +2,25 @@ import { describe, it, expect } from 'vitest';
 import { mergeConfigSchema, readSpecFramework, deriveDefaultSpecFramework, mergeSpecFramework } from '../lib/config-merge';
 
 describe('mergeConfigSchema', () => {
-  it('adds context, rules, and store to a config predating those keys', () => {
+  it('adds context, rules, and remote_context to a config predating those keys', () => {
     const old = 'version: 1\nproject:\n  name: "my-project"\nagents: []\n';
     const { content, changed } = mergeConfigSchema(old);
 
     expect(changed).toBe(true);
     expect(content).toContain('context: ""');
     expect(content).toContain('rules: {}');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
+  });
+
+  it('adds remote_context to a config that still has the old inert store key, leaving store untouched', () => {
+    const old = 'version: 1\nagents: []\ncontext: ""\nrules: {}\nstore:\n  enabled: false\n';
+    const { content, changed } = mergeConfigSchema(old);
+
+    expect(changed).toBe(true);
     expect(content).toContain('store:\n  enabled: false');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
+    // store's own value is untouched — still exactly one occurrence, unmodified
+    expect((content.match(/store:/g) || []).length).toBe(1);
   });
 
   it('preserves every pre-existing key and value exactly', () => {
@@ -21,7 +32,7 @@ describe('mergeConfigSchema', () => {
   });
 
   it('is a no-op when all schema keys are already present', () => {
-    const current = 'version: 1\nagents: []\ncontext: ""\nrules: {}\nstore:\n  enabled: false\n';
+    const current = 'version: 1\nagents: []\ncontext: ""\nrules: {}\nremote_context:\n  enabled: false\n  sources: []\n';
     const { content, changed } = mergeConfigSchema(current);
 
     expect(changed).toBe(false);
@@ -43,18 +54,18 @@ describe('mergeConfigSchema', () => {
 
     expect(content).toContain('context: "TypeScript monorepo"');
     expect(content).toContain('bet: "cite a Slack thread"');
-    // only `store` was missing
+    // only `remote_context` was missing
     expect(changed).toBe(true);
-    expect(content).toContain('store:\n  enabled: false');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
   });
 
   it('adds only the missing keys, leaving present ones untouched', () => {
     const old = 'version: 1\ncontext: ""\nagents: []\n';
     const { content } = mergeConfigSchema(old);
 
-    expect((content.match(/context:/g) || []).length).toBe(1);
+    expect((content.match(/^context:/gm) || []).length).toBe(1);
     expect(content).toContain('rules: {}');
-    expect(content).toContain('store:\n  enabled: false');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
   });
 });
 
