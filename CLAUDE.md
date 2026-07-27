@@ -33,7 +33,10 @@ This repo is itself an `oprim`-managed project — the `oprim/` workspace and `.
 - **`cli.ts`** — Commander entrypoint; registers all subcommands
 - **`commands/`** — one file per CLI subcommand (`init`, `update`, `doctor`, `migrate`, `measure`, `ovw`, `context`)
 - **`lib/detect.ts`** — detects OpenSpec, Graphify, and AI agent environments (`.claude/`, `.cursor/`, `AGENTS.md`, `GEMINI.md`, `.poolside/`)
-- **`lib/install-agent.ts`** — the largest file; owns all skill/command content as string literals and writes them to agent directories. Supports `claude`, `cursor`, `codex`, `gemini`, `poolside`. Claude gets skills + command wrappers + hooks; Poolside gets skills + an `AGENTS.md`-style instruction file; Codex/Gemini get inline workflow text written into `AGENTS.md`/`GEMINI.md` between `<!-- oprim:start -->` / `<!-- oprim:end -->` delimiters; Cursor gets full inline command files
+- **`lib/install-agent.ts`** — orchestrates which files get written to which agent directories (hooks, tombstone cleanup, PDR-surfacing Step 0 injection); the workflow *content* itself now lives in `workflow-schema.ts`/`workflow-renderer.ts`/`workflows/*` (see below). Supports `claude`, `cursor`, `codex`, `gemini`, `poolside`. Claude gets skills + command wrappers + hooks; Poolside gets skills + an `AGENTS.md`-style instruction file; Codex/Gemini get inline workflow text written into `AGENTS.md`/`GEMINI.md` between `<!-- oprim:start -->` / `<!-- oprim:end -->` delimiters; Cursor gets full inline command files
+- **`lib/workflow-schema.ts`** — loads a workflow's `<id>.schema.yaml` + `<id>.template.md`, resolving a project-level `oprim/workflows/<id>.{schema.yaml,template.md}` override over the CLI-bundled default (independently per file); throws an actionable, file-naming error on a malformed override rather than silently falling back
+- **`lib/workflow-renderer.ts`** — renders a resolved schema+template pair into each agent's output shape: Claude skill body / thin command wrapper, Cursor skill body / condensed inline command, and the shared Codex/Gemini/Poolside inline instruction block
+- **`workflows/`** — one `<id>.schema.yaml` + `<id>.template.md` pair per oprim workflow (`bet`, `pdr`, `note`, `criteria`, `review`, `archive`, `sequence`, `context`, `spec-authoring`, `promote`), plus bundled, non-overridable variant files (`<id>.cursor-command.md`, `<id>.inline.md`, and `promote.<framework>.template.md`) that back the condensed Cursor/Codex/Gemini/Poolside renderings. Copied into `dist/workflows/` at build time by `scripts/copy-workflow-assets.js` (tsc does not copy non-`.ts` files)
 - **`lib/scaffold.ts`** — thin filesystem helpers (`ensureDir`, `writeFile`, `writeFileIfAbsent`)
 - **`lib/templates.ts`** — YAML/Markdown template strings for the `oprim/` workspace files, including `configTemplate()` for `oprim/config.yaml`
 - **`lib/config-merge.ts`** — additive, non-destructive merge of new `oprim/config.yaml` schema keys (`context`, `rules`, `remote_context`, `integrations.spec_framework`) into existing projects on `oprim update`; edits the raw text rather than parsing+re-dumping YAML so untouched lines are never reformatted
@@ -42,9 +45,13 @@ This repo is itself an `oprim`-managed project — the `oprim/` workspace and `.
 - **`lib/measure.ts`** — Amplitude and BigQuery metric fetching for the `measure` subcommand
 - **`__tests__/`** — Vitest tests using real temp directories (no mocking of the filesystem)
 
-### Key design: skills as code
+### Key design: skills as declarative schema + template pairs
 
-All `/oprim:*` skill content lives as string constants in `install-agent.ts` (not as separate files). `oprim update` re-generates and overwrites them in the target agent directories. This means the source of truth for skill behavior is `install-agent.ts`, not the installed files in `.claude/skills/`.
+Each `/oprim:*` workflow's content is a `<id>.schema.yaml` (metadata: `skillName`, `title`, `description`, per-agent targets) + `<id>.template.md` (the instructional body) pair under `packages/cli/src/workflows/`. `oprim update` re-renders them via `workflow-renderer.ts` and overwrites the installed files in the target agent directories. This means the source of truth for a workflow's wording is `workflows/<id>.template.md`, not the installed files in `.claude/skills/` — and, unlike the old string-literal-function design, a project can fork a single workflow without touching CLI TypeScript at all (see "Forking a workflow" below).
+
+#### Forking a workflow
+
+Drop `oprim/workflows/<id>.schema.yaml` and/or `oprim/workflows/<id>.template.md` into your own repo (matching a bundled workflow id — see the list in `workflows/` above). Either file alone is enough; the other falls back to the CLI-bundled default. The next `oprim update` renders your fork for every installed agent instead of the bundled version. This only forks that one workflow — a malformed override fails loudly (naming the file) rather than silently falling back, and `oprim doctor`'s skill-drift check will (correctly) keep flagging the installed file as differing from the CLI-bundled default, since you opted into the fork.
 
 ### Claude Code hook architecture
 

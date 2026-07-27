@@ -1,0 +1,13 @@
+id: archive
+skillName: oprim-archive
+title: "OPRIM: Archive"
+description: Archive a completed bet — move it out of the active board
+claude:
+  skill: true
+  command: archive.md
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: true
+inline: true

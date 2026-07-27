@@ -777,3 +777,95 @@ describe('promptFrameworkSelection', () => {
     expect(selectMock).not.toHaveBeenCalled();
   });
 });
+
+// bet-027 — declarative workflow schemas: project-level oprim/workflows/ overrides ─────────
+
+describe('project-level workflow overrides (bet-027)', () => {
+  it('oprim update picks up a project oprim/workflows/<name>.template.md override and reflects it in the installed skill file', () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'workflows'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'workflows', 'bet.template.md'),
+      '---\nname: oprim-bet\ndescription: Custom forked bet workflow\n---\n\nCustom forked bet body.\n'
+    );
+
+    installAgentSkills('claude', tmpDir);
+
+    const content = fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-bet', 'SKILL.md'), 'utf-8');
+    expect(content).toContain('Custom forked bet body.');
+    expect(content).not.toContain('Naming tip');
+  });
+
+  it('does not affect other, non-overridden workflows', () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'workflows'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'workflows', 'bet.template.md'), 'Custom forked bet body.\n');
+
+    installAgentSkills('claude', tmpDir);
+
+    const pdrContent = fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-pdr', 'SKILL.md'), 'utf-8');
+    expect(pdrContent).toBe(CLAUDE_SKILLS['oprim-pdr']);
+  });
+
+  it('a schema-only override changes metadata while the bundled template is still used', () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'workflows'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'workflows', 'archive.schema.yaml'),
+      [
+        'id: archive',
+        'skillName: oprim-archive',
+        'title: "OPRIM: Custom Archive Title"',
+        'description: Archive a completed bet — move it out of the active board',
+        'claude:',
+        '  skill: true',
+        '  command: archive.md',
+        'cursor:',
+        '  skill: false',
+        '  command: null',
+        'poolside:',
+        '  skill: true',
+        'inline: true',
+      ].join('\n')
+    );
+
+    installAgentSkills('claude', tmpDir);
+
+    const cmdContent = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'archive.md'), 'utf-8');
+    expect(cmdContent).toContain('name: "OPRIM: Custom Archive Title"');
+
+    const skillContent = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'skills', 'oprim-archive', 'SKILL.md'),
+      'utf-8'
+    );
+    expect(skillContent).toBe(CLAUDE_SKILLS['oprim-archive']); // template itself is untouched
+  });
+
+  it('a malformed override causes oprim update to fail loudly, naming the file, rather than silently using the bundled default', () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'workflows'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'workflows', 'bet.schema.yaml'), 'not: [valid yaml');
+
+    expect(() => installAgentSkills('claude', tmpDir)).toThrowError(/bet\.schema\.yaml/);
+  });
+});
+
+// bet-027 — every bundled workflow renders byte-identical output on a fresh install (5.3) ────
+
+describe('fresh install renders every bundled workflow (bet-027)', () => {
+  it('installs all 8 Claude skills, 4 commands, and every Cursor/Poolside skill matching the bundled exports', () => {
+    installAgentSkills('claude', tmpDir);
+    for (const [name, expected] of Object.entries(CLAUDE_SKILLS)) {
+      expect(fs.readFileSync(path.join(tmpDir, '.claude', 'skills', name, 'SKILL.md'), 'utf-8')).toBe(expected);
+    }
+    for (const [filename, expected] of Object.entries(CLAUDE_COMMANDS)) {
+      expect(fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', filename), 'utf-8')).toBe(expected);
+    }
+
+    installAgentSkills('poolside', tmpDir);
+    for (const [name, expected] of Object.entries(POOLSIDE_SKILLS)) {
+      expect(fs.readFileSync(path.join(tmpDir, '.poolside', 'skills', name, 'SKILL.md'), 'utf-8')).toBe(expected);
+    }
+
+    installAgentSkills('cursor', tmpDir);
+    for (const [filename, expected] of Object.entries(CURSOR_COMMANDS)) {
+      expect(fs.readFileSync(path.join(tmpDir, '.cursor', 'commands', filename), 'utf-8')).toBe(expected);
+    }
+  });
+});
