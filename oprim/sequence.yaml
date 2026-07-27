@@ -2,12 +2,6 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-026
-    title: "Pull team context from remote oprim stores"
-    release: v2.X.0
-    blocked_by: [BET-024, BET-025]
-    unlocks: []
-    requires_pdrs: []
   - id: BET-027
     title: "Move oprim workflows to declarative schemas"
     release: v2.X.0

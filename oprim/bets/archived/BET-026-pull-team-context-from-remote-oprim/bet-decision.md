@@ -40,7 +40,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: openspec/changes/bet-026-remote-context/
+- OpenSpec change: openspec/changes/archive/2026-07-27-bet-026-remote-context/ (implemented and archived)
 - Blocked by: BET-024 (spec dir model, archived), BET-025 (config store: key, archived)
 - Criteria: none (no criteria.yaml authored for this bet)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/stores-beta/user-guide.md
