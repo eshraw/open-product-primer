@@ -30,8 +30,9 @@ sequencing:
     now: 2
 context: ""
 rules: {}
-store:
+remote_context:
   enabled: false
+  sources: []
 `;
 }
 

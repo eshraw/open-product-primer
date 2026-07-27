@@ -31,8 +31,9 @@ sequencing:
     now: 2
 context: ""
 rules: {}
-store:
+remote_context:
   enabled: false
+  sources: []
 `;
 }
 // OKF (Open Knowledge Format) — https://github.com/GoogleCloudPlatform/okf

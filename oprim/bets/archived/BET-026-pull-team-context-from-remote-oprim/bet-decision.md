@@ -2,10 +2,11 @@
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
-- Decision: Defer
-- Date: 2026-07-23
+- Decision: Build now
+- Date: 2026-07-27
 - Owner: Eshane
 - Review date: 2026-09-30
+- Note: Flipped from Defer to Build now on 2026-07-27 — blockers BET-024 and BET-025 have both landed (archived, Build now).
 
 ## Door type
 - [x] 2-way door (reversible — safe to try, easy to undo)
@@ -39,6 +40,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
-- Blocked by: BET-024 (spec dir model), BET-025 (config store: key)
+- OpenSpec change: openspec/changes/archive/2026-07-27-bet-026-remote-context/ (implemented and archived)
+- Blocked by: BET-024 (spec dir model, archived), BET-025 (config store: key, archived)
+- Criteria: none (no criteria.yaml authored for this bet)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/stores-beta/user-guide.md

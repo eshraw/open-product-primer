@@ -5,6 +5,12 @@ import chalk from 'chalk';
 import { readAgentsFromConfig } from '../lib/detect';
 import { scanCriteriaForSourceType } from '../lib/measure';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
+import {
+  readRemoteContextConfig,
+  resolveIdentityOnly,
+  hasEverFullyResolved,
+  isGitSource,
+} from '../lib/remote-context';
 
 const AGENT_DIRS: Record<string, string> = {
   claude: '.claude',
@@ -73,6 +79,57 @@ function checkClaudeHooks(projectRoot: string, checks: Check[]): void {
     note: stopRegistered ? undefined : "Run 'oprim update' to register",
     required: false,
   });
+}
+
+// bet-026 — validates each configured remote_context.sources entry using the identity-only
+// fetch (cheap: single file, not a full workspace pull), plus a separate "ever fully
+// resolved" nudge that only applies to git sources (local paths have no persistent cache).
+function checkRemoteContexts(projectRoot: string, checks: Check[]): void {
+  const config = readRemoteContextConfig(projectRoot);
+  if (!config.enabled || config.sources.length === 0) return;
+
+  for (const source of config.sources) {
+    const kind = isGitSource(source) ? 'git' : 'path';
+    const result = resolveIdentityOnly(source);
+
+    if (result.error) {
+      checks.push({
+        name: `remote_context: ${source.name} (${kind})`,
+        pass: false,
+        note: `${kind === 'git' ? 'Remote unreachable' : 'Path not found'}: ${result.error} — run 'oprim context list' to retry`,
+        required: false,
+      });
+      continue;
+    }
+
+    if (!result.identity) {
+      checks.push({
+        name: `remote_context: ${source.name} (${kind})`,
+        pass: false,
+        note: `Missing remote context identity — ask the source project to run 'oprim context init'`,
+        required: false,
+      });
+      continue;
+    }
+
+    checks.push({
+      name: `remote_context: ${source.name} (${kind})`,
+      pass: true,
+      note: result.nameMismatch
+        ? `Name mismatch: declared "${result.nameMismatch.declared}", resolved "${result.nameMismatch.resolved}"`
+        : undefined,
+      required: false,
+    });
+
+    if (isGitSource(source) && !hasEverFullyResolved(source)) {
+      checks.push({
+        name: `remote_context: ${source.name} never fully resolved`,
+        pass: false,
+        note: `Run 'oprim context --source ${source.name}' to pull its content for the first time`,
+        required: false,
+      });
+    }
+  }
 }
 
 export function doctorCommand(): Command {
@@ -193,6 +250,9 @@ export function doctorCommand(): Command {
 
       // ── Skill version drift checks ────────────────────────────────────────────
       checkSkillVersionDrift(projectRoot, checks);
+
+      // ── Remote context checks ─────────────────────────────────────────────────
+      checkRemoteContexts(projectRoot, checks);
 
       // ── Agent environment checks ──────────────────────────────────────────────
       const configAgents = readAgentsFromConfig(projectRoot);

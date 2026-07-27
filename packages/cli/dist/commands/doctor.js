@@ -44,6 +44,7 @@ const chalk_1 = __importDefault(require("chalk"));
 const detect_1 = require("../lib/detect");
 const measure_1 = require("../lib/measure");
 const integrity_1 = require("../lib/integrity");
+const remote_context_1 = require("../lib/remote-context");
 const AGENT_DIRS = {
     claude: '.claude',
     cursor: '.cursor',
@@ -102,6 +103,52 @@ function checkClaudeHooks(projectRoot, checks) {
         note: stopRegistered ? undefined : "Run 'oprim update' to register",
         required: false,
     });
+}
+// bet-026 — validates each configured remote_context.sources entry using the identity-only
+// fetch (cheap: single file, not a full workspace pull), plus a separate "ever fully
+// resolved" nudge that only applies to git sources (local paths have no persistent cache).
+function checkRemoteContexts(projectRoot, checks) {
+    const config = (0, remote_context_1.readRemoteContextConfig)(projectRoot);
+    if (!config.enabled || config.sources.length === 0)
+        return;
+    for (const source of config.sources) {
+        const kind = (0, remote_context_1.isGitSource)(source) ? 'git' : 'path';
+        const result = (0, remote_context_1.resolveIdentityOnly)(source);
+        if (result.error) {
+            checks.push({
+                name: `remote_context: ${source.name} (${kind})`,
+                pass: false,
+                note: `${kind === 'git' ? 'Remote unreachable' : 'Path not found'}: ${result.error} — run 'oprim context list' to retry`,
+                required: false,
+            });
+            continue;
+        }
+        if (!result.identity) {
+            checks.push({
+                name: `remote_context: ${source.name} (${kind})`,
+                pass: false,
+                note: `Missing remote context identity — ask the source project to run 'oprim context init'`,
+                required: false,
+            });
+            continue;
+        }
+        checks.push({
+            name: `remote_context: ${source.name} (${kind})`,
+            pass: true,
+            note: result.nameMismatch
+                ? `Name mismatch: declared "${result.nameMismatch.declared}", resolved "${result.nameMismatch.resolved}"`
+                : undefined,
+            required: false,
+        });
+        if ((0, remote_context_1.isGitSource)(source) && !(0, remote_context_1.hasEverFullyResolved)(source)) {
+            checks.push({
+                name: `remote_context: ${source.name} never fully resolved`,
+                pass: false,
+                note: `Run 'oprim context --source ${source.name}' to pull its content for the first time`,
+                required: false,
+            });
+        }
+    }
 }
 function doctorCommand() {
     return new commander_1.Command('doctor')
@@ -209,6 +256,8 @@ function doctorCommand() {
         (0, integrity_1.checkSequenceIntegrity)(projectRoot, checks);
         // ── Skill version drift checks ────────────────────────────────────────────
         (0, integrity_1.checkSkillVersionDrift)(projectRoot, checks);
+        // ── Remote context checks ─────────────────────────────────────────────────
+        checkRemoteContexts(projectRoot, checks);
         // ── Agent environment checks ──────────────────────────────────────────────
         const configAgents = (0, detect_1.readAgentsFromConfig)(projectRoot);
         if (configAgents !== null) {

@@ -1,19 +1,4 @@
-## Requirements
-
-### Requirement: oprim/config.yaml SHALL support a context block and per-artifact rules
-The system SHALL support a `context:` free-text field and a `rules:` object with optional per-artifact keys (`bet`, `pdr`, `spec`, `review`) in `oprim/config.yaml`. Both SHALL default to empty when not set by the user.
-
-#### Scenario: Context and rules present in a fresh init
-- **WHEN** a user runs `oprim init`
-- **THEN** the generated `oprim/config.yaml` includes an empty `context:` field and an empty `rules:` object
-
-#### Scenario: Generated bet content honors rules.bet
-- **WHEN** `oprim/config.yaml` has a non-empty `rules.bet` value and a user creates a new bet
-- **THEN** the bet-authoring skill includes that rule's guidance in the generated `bet-decision.md` content
-
-#### Scenario: Empty rules produce unchanged behavior
-- **WHEN** `rules:` is empty or absent
-- **THEN** bet/PDR/spec/review generation behaves exactly as it did before this capability existed
+## ADDED Requirements
 
 ### Requirement: oprim/config.yaml SHALL support an active remote_context schema
 The system SHALL support a `remote_context:` key in `oprim/config.yaml` with an `enabled: boolean` field (default `false`) and a `sources:` list (default empty) of entries, where each entry is either `{name, git}` (a git remote URL) or `{name, path}` (a local filesystem path outside the project), each optionally carrying a local `description` note. This key is distinct from the pre-existing free-text `context: ""` field and is consumed by the remote-context-resolution, oprim-context-command, remote-context-registration, remote-context-listing, and remote-context-doctor-validation capabilities.
@@ -33,6 +18,20 @@ The system SHALL support a `remote_context:` key in `oprim/config.yaml` with an 
 #### Scenario: Empty sources produce unchanged behavior
 - **WHEN** `remote_context.sources` is empty or `remote_context.enabled` is `false`
 - **THEN** `oprim context` and `oprim doctor`'s remote-context checks report no configured sources and no other command behavior changes
+
+## REMOVED Requirements
+
+### Requirement: oprim/config.yaml SHALL reserve an inert store key
+**Reason**: Superseded by the active `remote_context:` schema above. The `store:` key was deliberately reserved inert by BET-025 pending this bet; this bet gives remote-source behavior a home under `remote_context:` instead of extending `store:`, to avoid reusing OpenSpec's "store" terminology and to keep the schema distinct from the pre-existing free-text `context:` key.
+**Migration**: `oprim update`/`oprim init` stop writing the `store:` key going forward. Projects with an existing `store: {enabled: false}` from before this bet keep that key untouched (it is not actively deleted) — it becomes an inert, unused leftover with no behavior attached, same as before. New behavior lives entirely under `remote_context:`.
+
+The system SHALL write a `store: {enabled: false}` key to `oprim/config.yaml`, with no other behavior attached to it in this capability.
+
+#### Scenario: Store key present but inert
+- **WHEN** a user runs `oprim init` or `oprim update`
+- **THEN** `oprim/config.yaml` contains `store: {enabled: false}` and no store-related command or behavior is triggered by its presence
+
+## MODIFIED Requirements
 
 ### Requirement: oprim update SHALL additively merge new config schema keys without altering existing values
 `oprim update` SHALL detect schema key paths present in the current template but absent from the project's existing `oprim/config.yaml`, insert each missing key path with its default value, and SHALL NOT modify, reorder, or remove any key path already present in the existing file.

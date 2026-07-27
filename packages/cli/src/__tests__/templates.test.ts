@@ -22,9 +22,9 @@ describe('configTemplate', () => {
     expect(content).toContain('rules: {}');
   });
 
-  it('renders an inert store key', () => {
+  it('renders an active remote_context key with empty sources', () => {
     const content = configTemplate('my-project', true, false, false);
-    expect(content).toContain('store:\n  enabled: false');
+    expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
   });
 
   it('renders the given spec_framework value under integrations', () => {

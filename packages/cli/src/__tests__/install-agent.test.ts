@@ -419,6 +419,37 @@ describe('sequence.md command', () => {
   });
 });
 
+// bet-026 — guided remote-context-init skill installation ────────────────────
+
+describe('oprim-context-init skill installation', () => {
+  it('oprim update writes oprim-context-init skill file', () => {
+    installAgentSkills('claude', tmpDir);
+    const skillPath = path.join(tmpDir, '.claude', 'skills', 'oprim-context-init', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('name: oprim-context-init');
+    expect(content).toContain('oprim context init');
+    expect(content).toContain('AskUserQuestion');
+  });
+
+  it('warns about opting out of a description, per the guided-init design', () => {
+    installAgentSkills('claude', tmpDir);
+    const content = fs.readFileSync(
+      path.join(tmpDir, '.claude', 'skills', 'oprim-context-init', 'SKILL.md'),
+      'utf-8'
+    );
+    expect(content).toContain('description-less');
+  });
+
+  it('oprim update writes context-init.md as a thin skill wrapper', () => {
+    installAgentSkills('claude', tmpDir);
+    const cmdPath = path.join(tmpDir, '.claude', 'commands', 'oprim', 'context-init.md');
+    expect(fs.existsSync(cmdPath)).toBe(true);
+    const content = fs.readFileSync(cmdPath, 'utf-8');
+    expect(content).toContain('oprim-context-init');
+  });
+});
+
 // 6.3 — on-prompt-submit.sh detects /oprim:bet ────────────────────────────────
 
 describe('on-prompt-submit.sh hook', () => {

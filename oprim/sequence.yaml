@@ -2,24 +2,31 @@ wip_limits:
   now: 2
 
 now:
-
-next:
-  - id: BET-026
-    title: "Pull team context from remote oprim stores"
-    release: v2.X.0
-    blocked_by: [BET-024, BET-025]
-    unlocks: []
-    requires_pdrs: []
   - id: BET-027
     title: "Move oprim workflows to declarative schemas"
     release: v2.X.0
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+
+next:
+
   - id: BET-028
     title: "Add oprim validate with strict CI gating"
     release: v2.X.0
     blocked_by: [BET-024]
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-032
+    title: "Move active bets into a pending sub-dir for build-status visibility"
+    release: v2.X.0
+    blocked_by: []
+    unlocks: [BET-033]
+    requires_pdrs: []
+  - id: BET-033
+    title: "Add proposal, design, and tasks artifacts to native oprim specs"
+    release: v2.X.0
+    blocked_by: [BET-032]
     unlocks: []
     requires_pdrs: []
   - id: BET-029
