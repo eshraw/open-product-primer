@@ -8,15 +8,14 @@ now:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-
-next:
-
   - id: BET-028
     title: "Add oprim validate with strict CI gating"
     release: v2.X.0
-    blocked_by: [BET-024]
+    blocked_by: []
     unlocks: []
     requires_pdrs: []
+
+next:
   - id: BET-032
     title: "Move active bets into a pending sub-dir for build-status visibility"
     release: v2.X.0
