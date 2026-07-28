@@ -33,14 +33,16 @@ If neither pattern matches:
 - Report: "Bet BET-NNN was not found in oprim/bets/pending/. Nothing was changed."
 - Stop.
 
-### 3. Check for active dependencies and concurrent spec-delta conflicts
+### 3. Check for active dependencies, concurrent spec-delta conflicts, and incomplete tasks.md
 
 Read `oprim/sequence.yaml`. Scan every entry across all buckets (now, next, later, backlog) for any entry whose `blocked_by` or `unlocks` list contains the target bet ID.
 
 Separately, if `oprim/bets/pending/<resolved-dir>/specs/` exists: for each `<capability>/spec.md` delta file under it, extract every `### Requirement:` header from its `## ADDED`/`## MODIFIED`/`## REMOVED Requirements` sections. Then scan every other bet directory directly under `oprim/bets/pending/` (excluding the bet being archived) for a `specs/<capability>/spec.md` file for the same capability; if one exists, extract its `### Requirement:` headers too. Flag any header that matches (whitespace-insensitive) between the archiving bet's delta and another still-active bet's delta as an **overlap**.
 
-If either sequence.yaml dependents or delta overlaps are found:
-- Show a combined warning listing each dependent entry and each overlapping requirement.
+Separately, if `oprim/bets/pending/<resolved-dir>/tasks.md` exists: count the number of unchecked `- [ ]` items in it. If one or more remain, flag this as an **incomplete-tasks warning**. If `tasks.md` doesn't exist, or every item is checked (`- [x]`), this contributes nothing to the warning.
+
+If any of sequence.yaml dependents, delta overlaps, or an incomplete tasks.md are found:
+- Show a combined warning listing each dependent entry, each overlapping requirement, and (if applicable) the incomplete-tasks count.
 
   Example:
   ```
@@ -48,12 +50,13 @@ If either sequence.yaml dependents or delta overlaps are found:
     - BET-007 (blocked_by: [BET-005])
     - BET-008 (unlocks: [BET-005])
   ⚠ Warning: BET-005's delta for requirement "The system SHALL ..." in capability foo overlaps with active bet BET-009's delta for the same requirement. Archiving BET-005 now applies its version to oprim/specs/foo/spec.md; if BET-009 archives later, its version will overwrite this requirement again (last-write-wins — no 3-way merge is attempted).
+  ⚠ Warning: BET-005's tasks.md has 3 unchecked item(s) — implementation may be incomplete.
   ```
 - Ask: "Archive BET-NNN anyway? (y/N)"
   - If "n" or Enter: stop, no changes made.
   - If "y": proceed.
 
-If neither is found: proceed without warning.
+If none are found: proceed without warning.
 
 ### 4. Fold spec deltas into current truth
 

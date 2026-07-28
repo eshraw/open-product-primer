@@ -1,6 +1,6 @@
 ---
 name: oprim-spec
-description: Generate a native oprim capability spec delta at oprim/bets/pending/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived
+description: Generate a native oprim capability spec delta at oprim/bets/pending/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived. On the first invocation for a bet, also generates design.md and tasks.md alongside the spec delta.
 ---
 
 Generate a capability spec delta for an active bet — RFC 2119 requirements plus Gherkin scenarios, no OpenSpec required. This skill never writes to `oprim/specs/` directly; `oprim-archive` folds the delta into current truth when the bet is archived.
@@ -33,7 +33,19 @@ For each requirement, ask whether it is new (**ADDED**), a change to an existing
 ### 4. Gather requirements and scenarios
 For ADDED and MODIFIED requirements, phrase each as an RFC 2119 statement using SHALL (mandatory), SHOULD (recommended), or MAY (optional), then ask for at least one scenario: a WHEN (trigger) and a THEN (expected outcome), with an optional GIVEN (context) and additional AND steps. REMOVED requirements only need the matching header — no new scenarios.
 
-### 5. Write the delta file
+### 5. Check for existing design/tasks artifacts
+Before writing the spec delta, check whether `design.md` and `tasks.md` already exist in `oprim/bets/pending/<resolved-bet-dir>/`.
+
+- If neither exists, this is the first `oprim-spec` invocation for this bet — continue to Step 6 to draft both before writing the delta.
+- If either already exists (from a prior `oprim-spec` invocation for this bet, e.g. for a different capability), skip Step 6 entirely and go straight to Step 7 — only the spec delta is written or appended.
+
+### 6. Draft design.md and tasks.md (first invocation only)
+Only performed when Step 5 found neither file yet exists. Write both to `oprim/bets/pending/<resolved-bet-dir>/`:
+
+1. **`design.md`** — the technical approach and trade-offs for the capability being specced: key decisions, alternatives considered, risks. Scope it to this capability's implementation, not the whole bet.
+2. **`tasks.md`** — a flat implementation checklist derived from the requirements and scenarios just captured in Step 4. Group tasks under `## N. <heading>` sections (one heading per logical unit of work, e.g. per requirement or component) with `- [ ] N.M <task description>` checkbox items beneath each — the same convention OpenSpec's own `tasks.md` uses, so completion is a simple parse (count of unchecked boxes), not a new format to learn.
+
+### 7. Write the delta file
 Append to (or create) `oprim/bets/pending/<resolved-bet-dir>/specs/<capability>/spec.md`, grouping requirements under the matching section header — only include a section if it has at least one requirement under it:
 
 ```markdown
@@ -64,5 +76,7 @@ Append to (or create) `oprim/bets/pending/<resolved-bet-dir>/specs/<capability>/
 
 If the delta file already exists (a prior spec-authoring pass for this bet/capability), append new requirements to the matching section, creating that section if it's not yet present.
 
-### 6. Report what was created
+### 8. Report what was created
 Show the delta file path, which bet it's scoped to, and a summary of the ADDED/MODIFIED/REMOVED requirements captured. Note that it merges into `oprim/specs/<capability>/spec.md` when `BET-NNN` is archived — nothing is current truth yet.
+
+On a first invocation (Step 6 ran), also report the `design.md` and `tasks.md` paths that were created. On a later invocation (Step 6 skipped), note that those two files already existed and were left untouched.

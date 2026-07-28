@@ -771,6 +771,74 @@ describe('archive workflow inline content mentions the merge step for Codex/Gemi
   });
 });
 
+// bet-033 — oprim-spec generates proposal/design/tasks on first invocation ────
+
+describe('oprim-spec skill — proposal/design/tasks generation gate (bet-033)', () => {
+  function readSpecSkill(): string {
+    installAgentSkills('claude', tmpDir, 'native');
+    return fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'), 'utf-8');
+  }
+
+  it('checks for existing design/tasks before writing the spec delta', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('Check for existing design/tasks artifacts');
+    expect(content).toContain('already exist in `oprim/bets/pending/<resolved-bet-dir>/`');
+    expect(content).not.toContain('proposal.md');
+  });
+
+  it('describes drafting both artifacts only on the first invocation', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('Draft design.md and tasks.md (first invocation only)');
+    expect(content).toContain('**`design.md`**');
+    expect(content).toContain('**`tasks.md`**');
+    expect(content).toContain('- [ ] N.M <task description>');
+  });
+
+  it('skips artifact generation and only writes the delta on a later invocation', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('skip Step 6 entirely and go straight to Step 7');
+  });
+
+  it('updates the report step to mention the new artifacts', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('also report the `design.md` and `tasks.md` paths');
+    expect(content).toContain('left untouched');
+  });
+});
+
+// bet-033 — oprim-archive warns on an incomplete tasks.md before archiving ────
+
+describe('oprim-archive skill — tasks.md completion warning (bet-033)', () => {
+  function readArchiveSkill(): string {
+    installAgentSkills('claude', tmpDir, 'native');
+    return fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-archive', 'SKILL.md'), 'utf-8');
+  }
+
+  it('counts unchecked tasks.md items before the move step', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('count the number of unchecked `- [ ]` items');
+    expect(content).toContain('incomplete-tasks warning');
+  });
+
+  it('folds the tasks.md warning into the existing confirm-to-proceed prompt', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('Archive BET-NNN anyway? (y/N)');
+    expect(content).toContain('unchecked item(s) — implementation may be incomplete');
+  });
+
+  it('contributes nothing to the warning when tasks.md is absent or fully checked', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain("this contributes nothing to the warning");
+  });
+});
+
+describe('archive workflow inline content mentions the tasks.md check for Codex/Gemini/Poolside (bet-033)', () => {
+  it('codexInstructions includes the tasks.md unchecked-item check in the archive section', () => {
+    const content = codexInstructions();
+    expect(content).toContain('unchecked `- [ ]` items');
+  });
+});
+
 // bet-023 — framework selection offers a native choice ─────────────────────────
 
 describe('promptFrameworkSelection', () => {

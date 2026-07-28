@@ -1,15 +1,15 @@
 ## ADDED Requirements
 
-### Requirement: oprim-spec SHALL generate proposal, design, and tasks artifacts for a native-mode bet
-The system SHALL extend the `oprim-spec` skill so that, the first time it is invoked for a given bet (i.e. no `proposal.md`, `design.md`, or `tasks.md` yet exist in that bet's directory), it also writes `oprim/bets/pending/BET-NNN-<slug>/proposal.md` (why/what), `design.md` (technical approach and trade-offs), and `tasks.md` (a flat implementation checklist), alongside the existing `specs/<capability>/spec.md` delta. Subsequent `oprim-spec` invocations for the same bet (e.g. for a different capability) SHALL only write or append to the spec delta, leaving an already-generated `proposal.md`/`design.md`/`tasks.md` untouched.
+### Requirement: oprim-spec SHALL generate design and tasks artifacts for a native-mode bet
+The system SHALL extend the `oprim-spec` skill so that, the first time it is invoked for a given bet (i.e. no `design.md` or `tasks.md` yet exist in that bet's directory), it also writes `oprim/bets/pending/BET-NNN-<slug>/design.md` (technical approach and trade-offs) and `tasks.md` (a flat implementation checklist), alongside the existing `specs/<capability>/spec.md` delta. Subsequent `oprim-spec` invocations for the same bet (e.g. for a different capability) SHALL only write or append to the spec delta, leaving an already-generated `design.md`/`tasks.md` untouched. `proposal.md` is deliberately not generated — native-mode's `bet-decision.md` already covers the why/what a `proposal.md` would otherwise restate.
 
-#### Scenario: First spec-authoring pass for a bet generates all four artifacts
-- **WHEN** a user invokes `oprim-spec` for `BET-NNN` and no `proposal.md`, `design.md`, or `tasks.md` exist yet in `oprim/bets/pending/BET-NNN-<slug>/`
-- **THEN** the skill writes `proposal.md`, `design.md`, `tasks.md`, and `specs/<capability>/spec.md`, all under `oprim/bets/pending/BET-NNN-<slug>/`
+#### Scenario: First spec-authoring pass for a bet generates all three artifacts
+- **WHEN** a user invokes `oprim-spec` for `BET-NNN` and no `design.md` or `tasks.md` exist yet in `oprim/bets/pending/BET-NNN-<slug>/`
+- **THEN** the skill writes `design.md`, `tasks.md`, and `specs/<capability>/spec.md`, all under `oprim/bets/pending/BET-NNN-<slug>/`
 
 #### Scenario: Second spec-authoring pass for the same bet only touches the spec delta
-- **WHEN** a user invokes `oprim-spec` again for `BET-NNN` (a different capability) and `proposal.md`, `design.md`, and `tasks.md` already exist in its bet directory
-- **THEN** the skill writes or appends only to `specs/<capability>/spec.md`, leaving the existing `proposal.md`, `design.md`, and `tasks.md` unchanged
+- **WHEN** a user invokes `oprim-spec` again for `BET-NNN` (a different capability) and `design.md` and `tasks.md` already exist in its bet directory
+- **THEN** the skill writes or appends only to `specs/<capability>/spec.md`, leaving the existing `design.md` and `tasks.md` unchanged
 
 ### Requirement: tasks.md SHALL use a flat checkbox format matching OpenSpec's convention
 `tasks.md` SHALL use `- [ ] N.M <task description>` checkbox items grouped under `## N. <heading>` sections, mirroring the checkbox format OpenSpec's own `tasks.md` uses, so completion state is a simple parse (count of unchecked boxes).
