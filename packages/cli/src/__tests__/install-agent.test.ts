@@ -331,6 +331,33 @@ describe('oprim-note skill', () => {
   });
 });
 
+// bet-032 — bets live under oprim/bets/pending/, ID scanning spans pending+archived ─
+
+describe('oprim-bet skill — bet ID scanning spans pending/ and archived/ (bet-032)', () => {
+  it('creates new bet directories under oprim/bets/pending/', () => {
+    const content = CLAUDE_SKILLS['oprim-bet'];
+    expect(content).toContain('oprim/bets/pending/BET-NNN-<slug>/bet-decision.md');
+  });
+
+  it('scans both oprim/bets/pending/ and oprim/bets/archived/ for the next BET ID', () => {
+    const content = CLAUDE_SKILLS['oprim-bet'];
+    expect(content).toContain('Scan both \`oprim/bets/pending/\` and \`oprim/bets/archived/\`');
+  });
+});
+
+describe('oprim-archive skill — moves from oprim/bets/pending/, not the flat directory (bet-032)', () => {
+  it('resolves the bet directory under oprim/bets/pending/', () => {
+    const content = CLAUDE_SKILLS['oprim-archive'];
+    expect(content).toContain('oprim/bets/pending/');
+    expect(content).not.toContain('oprim/bets/<resolved-dir>');
+  });
+
+  it('moves the resolved bet directory from pending/ to archived/', () => {
+    const content = CLAUDE_SKILLS['oprim-archive'];
+    expect(content).toContain('mv oprim/bets/pending/<resolved-dir> oprim/bets/archived/<resolved-dir>');
+  });
+});
+
 // bet-025 — rules.<artifact> consumption in generated content ──────────────────
 
 describe('rules.<artifact> guidance in generated skill content', () => {
@@ -634,7 +661,7 @@ describe('promote command branches on speccing framework', () => {
 // bet-024 — spec-dir lifecycle: delta authoring writes under the bet dir ───────
 
 describe('oprim-spec skill — delta authoring scoped to an active bet (bet-024)', () => {
-  it('resolves an active bet and writes the delta under oprim/bets/, not oprim/specs/ directly', () => {
+  it('resolves an active bet and writes the delta under oprim/bets/pending/, not oprim/specs/ directly', () => {
     installAgentSkills('claude', tmpDir, 'native');
     const content = fs.readFileSync(
       path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'),
@@ -642,7 +669,7 @@ describe('oprim-spec skill — delta authoring scoped to an active bet (bet-024)
     );
 
     expect(content).toContain('Which bet is this spec change for?');
-    expect(content).toContain('oprim/bets/<resolved-bet-dir>/specs/<capability>/spec.md');
+    expect(content).toContain('oprim/bets/pending/<resolved-bet-dir>/specs/<capability>/spec.md');
     expect(content).toContain('never writes to \`oprim/specs/\` directly');
     expect(content).toContain('## ADDED Requirements');
     expect(content).toContain('## MODIFIED Requirements');
@@ -665,7 +692,7 @@ describe('promote (native): links a delta path, not a direct current-truth write
   it('promote.md tells the agent to write a delta and defer merge to archive', () => {
     installAgentSkills('claude', tmpDir, 'native');
     const content = fs.readFileSync(path.join(tmpDir, '.claude', 'commands', 'oprim', 'promote.md'), 'utf-8');
-    expect(content).toContain('oprim/bets/BET-XXX/specs/<capability>/spec.md');
+    expect(content).toContain('oprim/bets/pending/BET-XXX/specs/<capability>/spec.md');
     expect(content).toContain('Spec (delta):');
     expect(content).toContain('merge-on-archive will fold the delta');
   });
@@ -681,7 +708,7 @@ describe('oprim-archive skill — merge-on-archive spec-delta folding (bet-024)'
 
   it('detects a specs/ directory on the bet before moving it', () => {
     const content = readArchiveSkill();
-    expect(content).toContain('oprim/bets/<resolved-dir>/specs/');
+    expect(content).toContain('oprim/bets/pending/<resolved-dir>/specs/');
     expect(content).toContain('Fold spec deltas into current truth');
   });
 
@@ -741,6 +768,74 @@ describe('archive workflow inline content mentions the merge step for Codex/Gemi
     const content = codexInstructions();
     expect(content).toContain('fold each capability');
     expect(content).toContain('last-write-wins on overlaps');
+  });
+});
+
+// bet-033 — oprim-spec generates proposal/design/tasks on first invocation ────
+
+describe('oprim-spec skill — proposal/design/tasks generation gate (bet-033)', () => {
+  function readSpecSkill(): string {
+    installAgentSkills('claude', tmpDir, 'native');
+    return fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-spec', 'SKILL.md'), 'utf-8');
+  }
+
+  it('checks for existing design/tasks before writing the spec delta', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('Check for existing design/tasks artifacts');
+    expect(content).toContain('already exist in `oprim/bets/pending/<resolved-bet-dir>/`');
+    expect(content).not.toContain('proposal.md');
+  });
+
+  it('describes drafting both artifacts only on the first invocation', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('Draft design.md and tasks.md (first invocation only)');
+    expect(content).toContain('**`design.md`**');
+    expect(content).toContain('**`tasks.md`**');
+    expect(content).toContain('- [ ] N.M <task description>');
+  });
+
+  it('skips artifact generation and only writes the delta on a later invocation', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('skip Step 6 entirely and go straight to Step 7');
+  });
+
+  it('updates the report step to mention the new artifacts', () => {
+    const content = readSpecSkill();
+    expect(content).toContain('also report the `design.md` and `tasks.md` paths');
+    expect(content).toContain('left untouched');
+  });
+});
+
+// bet-033 — oprim-archive warns on an incomplete tasks.md before archiving ────
+
+describe('oprim-archive skill — tasks.md completion warning (bet-033)', () => {
+  function readArchiveSkill(): string {
+    installAgentSkills('claude', tmpDir, 'native');
+    return fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-archive', 'SKILL.md'), 'utf-8');
+  }
+
+  it('counts unchecked tasks.md items before the move step', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('count the number of unchecked `- [ ]` items');
+    expect(content).toContain('incomplete-tasks warning');
+  });
+
+  it('folds the tasks.md warning into the existing confirm-to-proceed prompt', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain('Archive BET-NNN anyway? (y/N)');
+    expect(content).toContain('unchecked item(s) — implementation may be incomplete');
+  });
+
+  it('contributes nothing to the warning when tasks.md is absent or fully checked', () => {
+    const content = readArchiveSkill();
+    expect(content).toContain("this contributes nothing to the warning");
+  });
+});
+
+describe('archive workflow inline content mentions the tasks.md check for Codex/Gemini/Poolside (bet-033)', () => {
+  it('codexInstructions includes the tasks.md unchecked-item check in the archive section', () => {
+    const content = codexInstructions();
+    expect(content).toContain('unchecked `- [ ]` items');
   });
 });
 

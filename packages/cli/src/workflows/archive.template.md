@@ -19,8 +19,8 @@ Normalize the input: accept `bet-005`, `005`, `5`, or `BET-005` — always treat
 
 ### 2. Resolve the bet directory
 
-Look for the bet directory in `oprim/bets/` using two patterns:
-1. Exact match: `oprim/bets/BET-NNN/` (legacy non-slug format)
+Look for the bet directory in `oprim/bets/pending/` using two patterns:
+1. Exact match: `oprim/bets/pending/BET-NNN/` (legacy non-slug format)
 2. Slug variant: any directory starting with `BET-NNN-` (e.g., `BET-NNN-<slug>/`)
 
 Use whichever pattern matches. Call this the **resolved directory name**.
@@ -30,17 +30,19 @@ If multiple directories match (e.g., both `BET-NNN/` and `BET-NNN-slug/` exist):
 - Stop.
 
 If neither pattern matches:
-- Report: "Bet BET-NNN was not found in oprim/bets/. Nothing was changed."
+- Report: "Bet BET-NNN was not found in oprim/bets/pending/. Nothing was changed."
 - Stop.
 
-### 3. Check for active dependencies and concurrent spec-delta conflicts
+### 3. Check for active dependencies, concurrent spec-delta conflicts, and incomplete tasks.md
 
 Read `oprim/sequence.yaml`. Scan every entry across all buckets (now, next, later, backlog) for any entry whose `blocked_by` or `unlocks` list contains the target bet ID.
 
-Separately, if `oprim/bets/<resolved-dir>/specs/` exists: for each `<capability>/spec.md` delta file under it, extract every `### Requirement:` header from its `## ADDED`/`## MODIFIED`/`## REMOVED Requirements` sections. Then scan every other bet directory directly under `oprim/bets/` (excluding `archived/` and the bet being archived) for a `specs/<capability>/spec.md` file for the same capability; if one exists, extract its `### Requirement:` headers too. Flag any header that matches (whitespace-insensitive) between the archiving bet's delta and another still-active bet's delta as an **overlap**.
+Separately, if `oprim/bets/pending/<resolved-dir>/specs/` exists: for each `<capability>/spec.md` delta file under it, extract every `### Requirement:` header from its `## ADDED`/`## MODIFIED`/`## REMOVED Requirements` sections. Then scan every other bet directory directly under `oprim/bets/pending/` (excluding the bet being archived) for a `specs/<capability>/spec.md` file for the same capability; if one exists, extract its `### Requirement:` headers too. Flag any header that matches (whitespace-insensitive) between the archiving bet's delta and another still-active bet's delta as an **overlap**.
 
-If either sequence.yaml dependents or delta overlaps are found:
-- Show a combined warning listing each dependent entry and each overlapping requirement.
+Separately, if `oprim/bets/pending/<resolved-dir>/tasks.md` exists: count the number of unchecked `- [ ]` items in it. If one or more remain, flag this as an **incomplete-tasks warning**. If `tasks.md` doesn't exist, or every item is checked (`- [x]`), this contributes nothing to the warning.
+
+If any of sequence.yaml dependents, delta overlaps, or an incomplete tasks.md are found:
+- Show a combined warning listing each dependent entry, each overlapping requirement, and (if applicable) the incomplete-tasks count.
 
   Example:
   ```
@@ -48,18 +50,19 @@ If either sequence.yaml dependents or delta overlaps are found:
     - BET-007 (blocked_by: [BET-005])
     - BET-008 (unlocks: [BET-005])
   ⚠ Warning: BET-005's delta for requirement "The system SHALL ..." in capability foo overlaps with active bet BET-009's delta for the same requirement. Archiving BET-005 now applies its version to oprim/specs/foo/spec.md; if BET-009 archives later, its version will overwrite this requirement again (last-write-wins — no 3-way merge is attempted).
+  ⚠ Warning: BET-005's tasks.md has 3 unchecked item(s) — implementation may be incomplete.
   ```
 - Ask: "Archive BET-NNN anyway? (y/N)"
   - If "n" or Enter: stop, no changes made.
   - If "y": proceed.
 
-If neither is found: proceed without warning.
+If none are found: proceed without warning.
 
 ### 4. Fold spec deltas into current truth
 
-If `oprim/bets/<resolved-dir>/specs/` does not exist: skip this step entirely and go to Step 5 — archive behavior is unchanged from before spec deltas existed.
+If `oprim/bets/pending/<resolved-dir>/specs/` does not exist: skip this step entirely and go to Step 5 — archive behavior is unchanged from before spec deltas existed.
 
-Otherwise, for each capability subdirectory under `oprim/bets/<resolved-dir>/specs/` containing a `spec.md`:
+Otherwise, for each capability subdirectory under `oprim/bets/pending/<resolved-dir>/specs/` containing a `spec.md`:
 
 1. Read the delta file's `## ADDED Requirements` / `## MODIFIED Requirements` / `## REMOVED Requirements` sections. Each `### Requirement:` block runs from its header through its body and any `#### Scenario:` sub-entries, up to the next `### Requirement:` or `## ` header.
 2. Read `oprim/specs/<capability>/spec.md` if it exists (current truth uses a single flat `## Requirements` section).
@@ -85,7 +88,7 @@ mkdir -p oprim/bets/archived
 
 Move the resolved directory:
 ```bash
-mv oprim/bets/<resolved-dir> oprim/bets/archived/<resolved-dir>
+mv oprim/bets/pending/<resolved-dir> oprim/bets/archived/<resolved-dir>
 ```
 
 ### 6. Remove the bet entry from sequence.yaml

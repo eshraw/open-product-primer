@@ -64,7 +64,7 @@ function initCommand() {
         const specFramework = await (0, install_agent_1.promptFrameworkSelection)(projectRoot);
         const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'decisions'));
-        (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets'));
+        (0, scaffold_1.ensureDir)(path.join(primerDir, 'bets', 'pending'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'reviews'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'notes'));
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'templates'));
@@ -94,7 +94,7 @@ function initCommand() {
             (0, scaffold_1.writeFile)(path.join(primerDir, 'index.md'), (0, templates_1.indexTemplate)(projectName));
         }
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'decisions', '.gitkeep'), '');
-        (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', '.gitkeep'), '');
+        (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'bets', 'pending', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'reviews', '.gitkeep'), '');
         (0, scaffold_1.writeFileIfAbsent)(path.join(primerDir, 'notes', '.gitkeep'), '');
         console.log('\n' + chalk_1.default.green('✓') + ' oprim/ workspace created');

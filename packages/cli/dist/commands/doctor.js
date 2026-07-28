@@ -231,7 +231,7 @@ function doctorCommand() {
             required: false,
         });
         // ── Discovery checks — warn if bet is missing discovery.md ───────────────
-        const betsDir = path.join(primerDir, 'bets');
+        const betsDir = path.join(primerDir, 'bets', 'pending');
         if (fs.existsSync(betsDir)) {
             const betEntries = fs.readdirSync(betsDir, { withFileTypes: true });
             for (const entry of betEntries) {

@@ -31,11 +31,11 @@ function printReport(checks: Check[]): void {
 }
 
 function runDiff(projectRoot: string, betIdInput: string): void {
-  const betsDir = path.join(projectRoot, 'oprim', 'bets');
+  const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
   const resolvedDir = resolveBetDirectory(betsDir, betIdInput);
 
   if (!resolvedDir) {
-    console.error(chalk.red(`Bet ${betIdInput} was not found in oprim/bets/.`));
+    console.error(chalk.red(`Bet ${betIdInput} was not found in oprim/bets/pending/.`));
     process.exitCode = 1;
     return;
   }

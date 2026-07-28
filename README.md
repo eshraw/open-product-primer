@@ -87,7 +87,7 @@ Renames a legacy `primer/` directory to `oprim/` in place. Run this once before 
 
 ### `oprim measure <bet-id>`
 
-Generates and runs KPI measurements for a bet from its `criteria.yaml`: writes Amplitude event definitions and BigQuery SQL to `oprim/bets/BET-XXX/measurements/`, then executes them (requires `AMPLITUDE_API_KEY` / `GOOGLE_APPLICATION_CREDENTIALS` as applicable) and records a dated run result. Use `--dry-run` to generate the definition files without calling either API.
+Generates and runs KPI measurements for a bet from its `criteria.yaml`: writes Amplitude event definitions and BigQuery SQL to `oprim/bets/pending/BET-XXX/measurements/`, then executes them (requires `AMPLITUDE_API_KEY` / `GOOGLE_APPLICATION_CREDENTIALS` as applicable) and records a dated run result. Use `--dry-run` to generate the definition files without calling either API.
 
 ### `oprim ovw`
 
@@ -114,7 +114,7 @@ Durable product policy decisions stored at `oprim/decisions/PDR-XXX-name.md`. Se
 
 ### Bet decisions
 
-Say you're deciding whether to rewrite a legacy service, cut a feature that isn't landing, or invest in a new capability. Before you build, you write a *bet*: what's the problem, why tackle it now, and what outcome would tell you it worked. That artifact lives at `oprim/bets/BET-XXX/bet-decision.md` and links to relevant policy decisions (PDRs) so you're not restating policy each time.
+Say you're deciding whether to rewrite a legacy service, cut a feature that isn't landing, or invest in a new capability. Before you build, you write a *bet*: what's the problem, why tackle it now, and what outcome would tell you it worked. That artifact lives at `oprim/bets/pending/BET-XXX/bet-decision.md` and links to relevant policy decisions (PDRs) so you're not restating policy each time. A bet's directory sits under `oprim/bets/pending/` while active and moves to `oprim/bets/archived/` once folded into current truth — an at-a-glance built-vs-in-flight signal with no file inspection required.
 
 ### Sequencing board
 
@@ -122,7 +122,7 @@ Say you're deciding whether to rewrite a legacy service, cut a feature that isn'
 
 ### Criteria contracts
 
-`oprim/bets/BET-XXX/criteria.yaml` — metric definitions with baseline, target, timeframe, and data source. Imported from Notion at bet promotion time and linked forward to OpenSpec changes.
+`oprim/bets/pending/BET-XXX/criteria.yaml` — metric definitions with baseline, target, timeframe, and data source. Imported from Notion at bet promotion time and linked forward to OpenSpec changes.
 
 ### KPI reviews
 
@@ -134,7 +134,7 @@ Say you're deciding whether to rewrite a legacy service, cut a feature that isn'
 
 ### Native specs
 
-An opt-in alternative (or complement) to OpenSpec, chosen at `oprim init` time (`integrations.spec_framework: native`). Current truth for a capability lives at `oprim/specs/<capability>/spec.md`, written in Gherkin; an in-flight bet's proposed ADDED/MODIFIED/REMOVED delta lives at `oprim/bets/BET-XXX/specs/<capability>/spec.md` until `/oprim:archive` folds it into current truth.
+An opt-in alternative (or complement) to OpenSpec, chosen at `oprim init` time (`integrations.spec_framework: native`). Current truth for a capability lives at `oprim/specs/<capability>/spec.md`, written in Gherkin; an in-flight bet's proposed ADDED/MODIFIED/REMOVED delta lives at `oprim/bets/pending/BET-XXX/specs/<capability>/spec.md` until `/oprim:archive` folds it into current truth. The first `oprim-spec` pass for a bet also scaffolds `design.md` (technical approach) and `tasks.md` (a flat, checkbox implementation list matching OpenSpec's own convention) alongside the spec delta; later passes for the same bet only touch the spec delta. A `tasks.md` with unchecked items makes `/oprim:archive` warn before archiving, so implementation completeness is visible without asking.
 
 ### Remote context
 

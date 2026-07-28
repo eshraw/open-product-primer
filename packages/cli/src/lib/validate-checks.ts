@@ -37,7 +37,7 @@ function isPromoted(betDecisionContent: string): boolean {
  * change) that has no criteria.yaml alongside it. Un-promoted bets are not checked.
  */
 export function checkBetDefinitionOfDone(projectRoot: string, checks: Check[]): void {
-  const betsDir = path.join(projectRoot, 'oprim', 'bets');
+  const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
 
   for (const entry of activeBetDirs(betsDir)) {
     const betDir = path.join(betsDir, entry.name);
@@ -53,7 +53,7 @@ export function checkBetDefinitionOfDone(projectRoot: string, checks: Check[]): 
       checks.push({
         name: `bet: ${betId} promoted without criteria.yaml`,
         pass: false,
-        note: `Add criteria.yaml to oprim/bets/${entry.name}/, or run the oprim-criteria skill`,
+        note: `Add criteria.yaml to oprim/bets/pending/${entry.name}/, or run the oprim-criteria skill`,
         required: false,
       });
     }
@@ -65,7 +65,7 @@ export function checkBetDefinitionOfDone(projectRoot: string, checks: Check[]): 
  * longer text-matches (whitespace-insensitive) current truth.
  */
 export function checkSpecDeltaDrift(projectRoot: string, checks: Check[]): void {
-  const betsDir = path.join(projectRoot, 'oprim', 'bets');
+  const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
 
   for (const entry of activeBetDirs(betsDir)) {
     const betId = extractBetId(entry.name);
@@ -102,7 +102,7 @@ export function checkSpecDeltaDrift(projectRoot: string, checks: Check[]): void 
 
 /** Surfaces overlapping requirement headers across active bets' spec deltas. */
 export function checkCrossBetConflicts(projectRoot: string, checks: Check[]): void {
-  const betsDir = path.join(projectRoot, 'oprim', 'bets');
+  const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
   for (const conflict of findCrossBetConflicts(betsDir)) {
     checks.push({
       name: `spec-delta: ${extractBetId(conflict.betA)} and ${extractBetId(conflict.betB)} both touch "${conflict.header}" in ${conflict.capability}`,

@@ -15,7 +15,7 @@ function writeSequenceYaml(content: string): void {
 }
 
 function writeBetDecision(betId: string, slug: string, content: string): void {
-  const dir = path.join(tmpDir, 'oprim', 'bets', `${betId}-${slug}`);
+  const dir = path.join(tmpDir, 'oprim', 'bets', 'pending', `${betId}-${slug}`);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'bet-decision.md'), content);
 }

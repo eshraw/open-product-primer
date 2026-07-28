@@ -28,7 +28,7 @@ function writeBetDecision(betDir: string, linksBody: string): void {
 
 describe('checkBetDefinitionOfDone', () => {
   it('2.2 flags a promoted bet missing criteria.yaml', () => {
-    const betsDir = path.join(tmpDir, 'oprim', 'bets');
+    const betsDir = path.join(tmpDir, 'oprim', 'bets', 'pending');
     writeBetDecision(
       path.join(betsDir, 'BET-030-foo'),
       "- OpenSpec change: `openspec/changes/bet-030-foo/`\n"
@@ -43,7 +43,7 @@ describe('checkBetDefinitionOfDone', () => {
   });
 
   it('2.2 does not flag a promoted bet that has criteria.yaml', () => {
-    const betsDir = path.join(tmpDir, 'oprim', 'bets');
+    const betsDir = path.join(tmpDir, 'oprim', 'bets', 'pending');
     const betDir = path.join(betsDir, 'BET-030-foo');
     writeBetDecision(betDir, "- OpenSpec change: `openspec/changes/bet-030-foo/`\n");
     fs.writeFileSync(path.join(betDir, 'criteria.yaml'), 'bet: BET-030\n', 'utf-8');
@@ -55,7 +55,7 @@ describe('checkBetDefinitionOfDone', () => {
   });
 
   it('2.2 does not flag an un-promoted bet regardless of criteria.yaml', () => {
-    const betsDir = path.join(tmpDir, 'oprim', 'bets');
+    const betsDir = path.join(tmpDir, 'oprim', 'bets', 'pending');
     writeBetDecision(path.join(betsDir, 'BET-031-bar'), '- OpenSpec change: to be filled when promoted\n');
 
     const checks: Check[] = [];
@@ -65,7 +65,7 @@ describe('checkBetDefinitionOfDone', () => {
   });
 
   it('2.2 does not flag an un-promoted bet using the angle-bracket placeholder', () => {
-    const betsDir = path.join(tmpDir, 'oprim', 'bets');
+    const betsDir = path.join(tmpDir, 'oprim', 'bets', 'pending');
     writeBetDecision(path.join(betsDir, 'BET-032-baz'), '- OpenSpec change: <to be filled when promoted>\n');
 
     const checks: Check[] = [];
@@ -75,9 +75,8 @@ describe('checkBetDefinitionOfDone', () => {
   });
 
   it('2.2 excludes archived bets', () => {
-    const betsDir = path.join(tmpDir, 'oprim', 'bets');
     writeBetDecision(
-      path.join(betsDir, 'archived', 'BET-033-qux'),
+      path.join(tmpDir, 'oprim', 'bets', 'archived', 'BET-033-qux'),
       "- OpenSpec change: `openspec/changes/bet-033-qux/`\n"
     );
 
@@ -97,7 +96,7 @@ function writeCurrentTruth(projectRoot: string, capability: string, content: str
 }
 
 function writeBetDelta(projectRoot: string, betDirName: string, capability: string, content: string): void {
-  const dir = path.join(projectRoot, 'oprim', 'bets', betDirName, 'specs', capability);
+  const dir = path.join(projectRoot, 'oprim', 'bets', 'pending', betDirName, 'specs', capability);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'spec.md'), content, 'utf-8');
 }
