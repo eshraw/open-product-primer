@@ -61,6 +61,6 @@ timestamp: <today, ISO 8601>
 OKF tier: same as above, with `description: "<description>"` inserted immediately after `title`.
 
 ### 8. Link back from referenced bets
-For each BET-ID gathered in step 5: read `oprim/bets/BET-NNN/bet-decision.md`, and add `- Notes: NOTE-NNN` under its `## Links` section (append to an existing `Notes:` line, or add a new one).
+For each BET-ID gathered in step 5: read `oprim/bets/pending/BET-NNN/bet-decision.md`, and add `- Notes: NOTE-NNN` under its `## Links` section (append to an existing `Notes:` line, or add a new one).
 
 ### 9. Report what was created

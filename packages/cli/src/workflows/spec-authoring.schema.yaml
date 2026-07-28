@@ -1,7 +1,7 @@
 id: spec-authoring
 skillName: oprim-spec
 title: null
-description: Generate a native oprim capability spec delta at oprim/bets/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived
+description: Generate a native oprim capability spec delta at oprim/bets/pending/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived
 claude:
   skill: true
   command: null

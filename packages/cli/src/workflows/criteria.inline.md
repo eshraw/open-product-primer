@@ -1,5 +1,5 @@
 ### Criteria authoring (oprim-criteria)
-Create or append to `oprim/bets/BET-NNN/criteria.yaml`.
+Create or append to `oprim/bets/pending/BET-NNN/criteria.yaml`.
 
 1. Ask which bet (e.g. BET-042). Verify dir exists.
 2. Gather: metric ID (snake_case), name, baseline, target, timeframe, launch date, segment.

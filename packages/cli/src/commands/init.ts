@@ -55,7 +55,7 @@ export function initCommand(): Command {
 
       const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'decisions'));
-      ensureDir(path.join(primerDir, 'bets'));
+      ensureDir(path.join(primerDir, 'bets', 'pending'));
       ensureDir(path.join(primerDir, 'reviews'));
       ensureDir(path.join(primerDir, 'notes'));
       ensureDir(path.join(primerDir, 'templates'));
@@ -93,7 +93,7 @@ export function initCommand(): Command {
       }
 
       writeFileIfAbsent(path.join(primerDir, 'decisions', '.gitkeep'), '');
-      writeFileIfAbsent(path.join(primerDir, 'bets', '.gitkeep'), '');
+      writeFileIfAbsent(path.join(primerDir, 'bets', 'pending', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'reviews', '.gitkeep'), '');
       writeFileIfAbsent(path.join(primerDir, 'notes', '.gitkeep'), '');
 

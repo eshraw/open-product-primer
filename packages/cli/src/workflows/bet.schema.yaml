@@ -1,7 +1,7 @@
 id: bet
 skillName: oprim-bet
 title: null
-description: Create a new bet directory and bet-decision artifact in oprim/bets/, and add the bet to oprim/sequence.yaml backlog
+description: Create a new bet directory and bet-decision artifact in oprim/bets/pending/, and add the bet to oprim/sequence.yaml backlog
 cursorDescription: Create a new bet decision and register it on the sequencing board
 claude:
   skill: true

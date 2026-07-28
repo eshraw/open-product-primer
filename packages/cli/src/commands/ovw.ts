@@ -233,7 +233,7 @@ export function ovwCommand(): Command {
     .action(() => {
       const projectRoot = process.cwd();
       const sequencePath = path.join(projectRoot, 'oprim', 'sequence.yaml');
-      const betsDir = path.join(projectRoot, 'oprim', 'bets');
+      const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
 
       if (!fs.existsSync(sequencePath)) {
         console.error("No oprim/sequence.yaml found — run 'oprim init' first");

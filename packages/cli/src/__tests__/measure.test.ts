@@ -250,7 +250,7 @@ metrics:
 
 describe('scanCriteriaForSourceType', () => {
   it('returns true when an active bet has a matching source type', () => {
-    const betDir = path.join(tmpDir, 'oprim', 'bets', 'BET-007');
+    const betDir = path.join(tmpDir, 'oprim', 'bets', 'pending', 'BET-007');
     fs.mkdirSync(betDir, { recursive: true });
     fs.writeFileSync(path.join(betDir, 'criteria.yaml'), amplitudeCriteria);
 
@@ -258,7 +258,7 @@ describe('scanCriteriaForSourceType', () => {
   });
 
   it('returns false when no active bet has a matching source type', () => {
-    const betDir = path.join(tmpDir, 'oprim', 'bets', 'BET-007');
+    const betDir = path.join(tmpDir, 'oprim', 'bets', 'pending', 'BET-007');
     fs.mkdirSync(betDir, { recursive: true });
     fs.writeFileSync(path.join(betDir, 'criteria.yaml'), amplitudeCriteria);
 
@@ -273,7 +273,7 @@ describe('scanCriteriaForSourceType', () => {
     expect(scanCriteriaForSourceType(tmpDir, 'amplitude')).toBe(false);
   });
 
-  it('returns false when oprim/bets/ does not exist', () => {
+  it('returns false when oprim/bets/pending/ does not exist', () => {
     expect(scanCriteriaForSourceType(tmpDir, 'amplitude')).toBe(false);
   });
 });

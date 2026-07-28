@@ -230,12 +230,10 @@ async function runBigQueryMetric(sqlPath) {
 }
 // ─── Criteria scanner (used by doctor) ───────────────────────────────────────
 function scanCriteriaForSourceType(projectRoot, sourceType) {
-    const betsDir = path.join(projectRoot, 'oprim', 'bets');
+    const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
     if (!fs.existsSync(betsDir))
         return false;
     for (const entry of fs.readdirSync(betsDir)) {
-        if (entry === 'archived')
-            continue;
         const criteriaPath = path.join(betsDir, entry, 'criteria.yaml');
         if (!fs.existsSync(criteriaPath))
             continue;

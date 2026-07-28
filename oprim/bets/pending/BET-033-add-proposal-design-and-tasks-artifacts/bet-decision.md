@@ -38,5 +38,5 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
-- Blocked by: BET-032 (pending/archived split — tasks.md's main value is feeding that gate)
+- OpenSpec change: openspec/changes/bet-033-native-spec-artifacts/
+- Blocked by: BET-032 (pending/archived split — tasks.md's main value is feeding that gate; also openspec/changes/bet-032-bets-pending-subdir/)

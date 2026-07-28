@@ -36,7 +36,7 @@ describe('oprim doctor — archived bet exclusion', () => {
   });
 
   it('still emits a discovery warning for active bets missing discovery.md', async () => {
-    const activeBetDir = path.join(tmpDir, 'oprim', 'bets', 'BET-005');
+    const activeBetDir = path.join(tmpDir, 'oprim', 'bets', 'pending', 'BET-005');
     fs.mkdirSync(activeBetDir, { recursive: true });
     fs.writeFileSync(path.join(activeBetDir, 'bet-decision.md'), '# BET-005\n');
     // No discovery.md — doctor should warn

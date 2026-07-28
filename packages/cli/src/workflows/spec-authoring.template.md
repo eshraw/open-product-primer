@@ -1,6 +1,6 @@
 ---
 name: oprim-spec
-description: Generate a native oprim capability spec delta at oprim/bets/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived
+description: Generate a native oprim capability spec delta at oprim/bets/pending/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived
 ---
 
 Generate a capability spec delta for an active bet — RFC 2119 requirements plus Gherkin scenarios, no OpenSpec required. This skill never writes to `oprim/specs/` directly; `oprim-archive` folds the delta into current truth when the bet is archived.
@@ -12,14 +12,14 @@ Generate a capability spec delta for an active bet — RFC 2119 requirements plu
 ### 1. Get the active bet
 If a bet ID was provided as context (e.g. invoked from `/oprim:promote`), use it directly. Otherwise ask: "Which bet is this spec change for? (e.g. BET-005)"
 
-Resolve it to a directory in `oprim/bets/` using the same two patterns `oprim-archive` uses: exact `BET-NNN/` (legacy, no slug) or the slug variant `BET-NNN-<slug>/`. If neither matches, report "Bet BET-NNN was not found in oprim/bets/ — spec deltas can only be authored against an active bet" and stop.
+Resolve it to a directory in `oprim/bets/pending/` using the same two patterns `oprim-archive` uses: exact `BET-NNN/` (legacy, no slug) or the slug variant `BET-NNN-<slug>/`. If neither matches, report "Bet BET-NNN was not found in oprim/bets/pending/ — spec deltas can only be authored against an active bet" and stop.
 
 ### 2. Get the capability name and description
 If not provided, ask: "What capability are you specifying? (a short name, e.g. 'spec-authoring')" and "What does it do? (one or two sentences)"
 
 ### 2b. Derive the slug
 From the capability name: lowercase all characters, replace any character that is not a letter or digit with a hyphen, collapse consecutive hyphens to one, strip leading/trailing hyphens. This becomes `<capability>`.
-Output path: `oprim/bets/<resolved-bet-dir>/specs/<capability>/spec.md` (a delta, not `oprim/specs/<capability>/spec.md` — that file is current truth and is only ever written by `oprim-archive`'s merge step).
+Output path: `oprim/bets/pending/<resolved-bet-dir>/specs/<capability>/spec.md` (a delta, not `oprim/specs/<capability>/spec.md` — that file is current truth and is only ever written by `oprim-archive`'s merge step).
 
 ### 2c. Check for custom rules
 Read `oprim/config.yaml`. If it has a non-empty `rules.spec` value, treat it as additional guidance from the team — factor it into the requirements and scenarios you draft. If `rules.spec` is absent or empty, skip this step; behavior is unchanged.
@@ -34,7 +34,7 @@ For each requirement, ask whether it is new (**ADDED**), a change to an existing
 For ADDED and MODIFIED requirements, phrase each as an RFC 2119 statement using SHALL (mandatory), SHOULD (recommended), or MAY (optional), then ask for at least one scenario: a WHEN (trigger) and a THEN (expected outcome), with an optional GIVEN (context) and additional AND steps. REMOVED requirements only need the matching header — no new scenarios.
 
 ### 5. Write the delta file
-Append to (or create) `oprim/bets/<resolved-bet-dir>/specs/<capability>/spec.md`, grouping requirements under the matching section header — only include a section if it has at least one requirement under it:
+Append to (or create) `oprim/bets/pending/<resolved-bet-dir>/specs/<capability>/spec.md`, grouping requirements under the matching section header — only include a section if it has at least one requirement under it:
 
 ```markdown
 ## ADDED Requirements

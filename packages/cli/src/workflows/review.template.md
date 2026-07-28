@@ -17,10 +17,10 @@ Read `oprim/config.yaml`. If it has a non-empty `rules.review` value, treat it a
 
 ### 2. Load criteria and check for a run result
 
-Read `oprim/bets/BET-NNN/criteria.yaml` if it exists (pre-fills baseline and target).
+Read `oprim/bets/pending/BET-NNN/criteria.yaml` if it exists (pre-fills baseline and target).
 If not found: inform user and continue with empty metrics list.
 
-**Check for measurement run result:** Scan `oprim/bets/BET-NNN/measurements/` for files matching `run-*.yaml`. If any exist, sort by filename (date-based) and read the most recent.
+**Check for measurement run result:** Scan `oprim/bets/pending/BET-NNN/measurements/` for files matching `run-*.yaml`. If any exist, sort by filename (date-based) and read the most recent.
 
 **If a run result exists:** use it to pre-populate actuals and status for every metric. Skip step 3 for those metrics. Note the run date — include "Actuals from run: YYYY-MM-DD" in the review artifact.
 

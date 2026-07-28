@@ -53,7 +53,7 @@ now:
 `);
     // dangling blocked_by is required: false in checkSequenceIntegrity, so use a
     // spec-delta drift failure (required: true) to exercise the required-failure path.
-    const betsDir = path.join(tmpDir, 'oprim', 'bets');
+    const betsDir = path.join(tmpDir, 'oprim', 'bets', 'pending');
     fs.mkdirSync(path.join(betsDir, 'BET-040-foo', 'specs', 'checkout'), { recursive: true });
     fs.writeFileSync(
       path.join(betsDir, 'BET-040-foo', 'specs', 'checkout', 'spec.md'),
@@ -110,7 +110,7 @@ describe('oprim validate — --diff', () => {
     fs.writeFileSync(currentTruthPath, '## Requirements\n\n### Requirement: A\n\nBody A.\n', 'utf-8');
     const before = fs.readFileSync(currentTruthPath, 'utf-8');
 
-    const betDeltaDir = path.join(tmpDir, 'oprim', 'bets', 'BET-030-foo', 'specs', 'checkout');
+    const betDeltaDir = path.join(tmpDir, 'oprim', 'bets', 'pending', 'BET-030-foo', 'specs', 'checkout');
     fs.mkdirSync(betDeltaDir, { recursive: true });
     fs.writeFileSync(
       path.join(betDeltaDir, 'spec.md'),
@@ -127,7 +127,7 @@ describe('oprim validate — --diff', () => {
   });
 
   it('4.6 reports no spec deltas when the bet has no specs/ directory', async () => {
-    fs.mkdirSync(path.join(tmpDir, 'oprim', 'bets', 'BET-031-bar'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'bets', 'pending', 'BET-031-bar'), { recursive: true });
 
     await validateCommand().parseAsync(['--diff', 'BET-031'], { from: 'user' });
 
@@ -137,7 +137,7 @@ describe('oprim validate — --diff', () => {
   });
 
   it('4.6 reports an error and exits non-zero for an unresolvable bet ID', async () => {
-    fs.mkdirSync(path.join(tmpDir, 'oprim', 'bets'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'bets', 'pending'), { recursive: true });
 
     await validateCommand().parseAsync(['--diff', 'BET-999'], { from: 'user' });
 
