@@ -45,8 +45,3 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-041
-    title: "Add a pull-and-play demo project for oprim principles"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
