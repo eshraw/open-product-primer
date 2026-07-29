@@ -1,0 +1,13 @@
+id: tutorial
+skillName: oprim-tutorial
+title: null
+description: Guided walkthrough of the oprim bet -> spec -> archive cycle inside the todo-app example workspace (examples/) -- creates a real "add due dates to tasks" bet, specs it, and archives it, narrating each step against the example's existing PDRs, bets, and current-truth specs
+claude:
+  skill: true
+  command: null
+cursor:
+  skill: true
+  command: null
+poolside:
+  skill: true
+inline: false

@@ -55,6 +55,8 @@ oprim doctor  # verify setup
 oprim update  # install /oprim:* assistant commands
 ```
 
+Want to try oprim before setting it up on your own project? Clone this repo and open [`examples/`](examples/) — a ready-to-use `oprim/` workspace for a mock todo app, no `oprim init` required. Open it in Claude Code and run the `oprim-tutorial` skill for a guided walk through the full bet → spec → archive cycle.
+
 ## CLI reference
 
 ### `oprim init`

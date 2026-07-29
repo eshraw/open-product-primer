@@ -33,4 +33,5 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native oprim spec)
+- Spec (delta): oprim/bets/pending/BET-041-add-a-pull-and-play-demo-project-for/specs/demo-project/spec.md

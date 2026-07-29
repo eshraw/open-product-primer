@@ -1,0 +1,33 @@
+version: 1
+project:
+  name: todo-app-demo
+agents:
+  - claude
+  - cursor
+  - poolside
+  - codex
+  - gemini
+integrations:
+  openspec:
+    enabled: false
+    changes_dir: openspec/changes
+  graphify:
+    enabled: false
+    graph_dir: graphify-out
+  spec_framework: native
+okf:
+  enabled: false
+measurement:
+  amplitude:
+    enabled: false
+  bigquery:
+    enabled: false
+    metabase_url: null
+sequencing:
+  wip_limits:
+    now: 2
+context: ''
+rules: {}
+remote_context:
+  enabled: false
+  sources: []
