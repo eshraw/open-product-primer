@@ -55,13 +55,15 @@ oprim doctor  # verify setup
 oprim update  # install /oprim:* assistant commands
 ```
 
+Want to try oprim before setting it up on your own project? Clone this repo and open [`examples/`](examples/) — a ready-to-use `oprim/` workspace for a mock todo app, no `oprim init` required. Open it in Claude Code and run the `oprim-tutorial` skill for a guided walk through the full bet → spec → archive cycle.
+
 ## CLI reference
 
 ### `oprim init`
 
 Creates the project-local `oprim/` workspace. Idempotent — safe to re-run; existing decision artifacts and config values are preserved. Existing repos with `primer/` should run `oprim migrate` first.
 
-Prompts interactively for: OKF frontmatter (whether artifacts get `oprim`-schema YAML frontmatter), a spec framework (`openspec`, `native`, or `none`), and which AI agents to install skills for (`claude`, `cursor`, `codex`, `gemini`, `poolside` — repeatable via `--agent`, or `--name <project-name>` to override the default directory-name project name).
+Prompts interactively for: [OKF](https://github.com/GoogleCloudPlatform/okf) (Open Knowledge Format) frontmatter — whether scaffolded artifacts get `oprim`-schema YAML frontmatter, so other tools can parse them as structured metadata instead of plain prose — a spec framework (`openspec`, `native`, or `none`), and which AI agents to install skills for (`claude`, `cursor`, `codex`, `gemini`, `poolside` — repeatable via `--agent`, or `--name <project-name>` to override the default directory-name project name).
 
 **Creates:**
 
