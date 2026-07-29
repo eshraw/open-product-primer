@@ -1,11 +1,15 @@
 ---
 name: oprim-bet
-description: Create a new bet directory and bet-decision artifact in oprim/bets/, and add the bet to oprim/sequence.yaml backlog
+description: Create a new bet directory and bet-decision artifact in oprim/bets/pending/, and add the bet to oprim/sequence.yaml backlog
 ---
 
-Create a new bet in `oprim/bets/` and register it on the sequencing board.
+Create a new bet in `oprim/bets/pending/` and register it on the sequencing board.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
+
+## What you're creating
+
+A bet is a product decision you're committing to explore: a problem worth solving, a hypothesis worth testing, or a direction worth taking. You'll name it, explain why now, and set a kill criterion so you know when to stop.
 
 ## Steps
 
@@ -26,7 +30,7 @@ After receiving the title, validate: if fewer than 4 words OR fewer than 25 char
   - If "y": proceed with the original title
 
 ### 2. Assign the next BET ID
-Scan both `oprim/bets/` and `oprim/bets/archived/` for directories whose names match `BET-(\d+)(-[^/]*)?` (handles both `BET-NNN/` and `BET-NNN-<slug>/`). Extract the numeric part from each match. Assign max+1, zero-padded to 3 digits. Default `001` if none found in either location.
+Scan both `oprim/bets/pending/` and `oprim/bets/archived/` for directories whose names match `BET-(\d+)(-[^/]*)?` (handles both `BET-NNN/` and `BET-NNN-<slug>/`). Extract the numeric part from each match. Assign max+1, zero-padded to 3 digits. Default `001` if none found in either location.
 
 ### 2b. Derive the slug
 From the bet title: lowercase all characters, replace any character that is not a letter or digit with a hyphen, collapse consecutive hyphens to one, strip leading/trailing hyphens, truncate to 40 characters at the last hyphen boundary. This becomes `<slug>`. Example: "Add title slugs to bet directories for scannability" → `add-title-slugs-to-bet-dirs-for`.
@@ -34,10 +38,27 @@ From the bet title: lowercase all characters, replace any character that is not 
 ### 3. Check sequence.yaml exists
 If `oprim/sequence.yaml` not found: report and stop — advise `oprim init`.
 
+### 3b. Check for custom rules
+Read `oprim/config.yaml`. If it has a non-empty `rules.bet` value, treat it as additional guidance from the team — factor it into the questions you ask in step 4 and reflect it in the generated `bet-decision.md` content. If `rules.bet` is absent or empty, skip this step; behavior is unchanged.
+
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 
-### 5. Write oprim/bets/BET-NNN-<slug>/bet-decision.md
+Then ask about reversibility:
+- "Is this a **2-way door** (reversible — easy to undo, safe to try) or a **1-way door** (hard to reverse — requires high confidence)?"
+
+Then ask about each of the four risk dimensions (Low / Medium / High + short rationale):
+- "**Value risk**: Will users/customers actually use or buy this? (Low / Medium / High — and why?)"
+- "**Usability risk**: Can users figure out how to use it without help? (Low / Medium / High — and why?)"
+- "**Feasibility risk**: Can we build this with our current skills, time, and technology? (Low / Medium / High — and why?)"
+- "**Business viability risk**: Does this solution work for the business (revenue, legal, ops)? (Low / Medium / High — and why?)"
+
+### 4b. Check for OKF frontmatter
+Read `oprim/templates/bet-decision.md`. If it begins with a YAML frontmatter block (`---` ... `---`), this workspace has OKF frontmatter enabled. Ask for a one-line description and comma-separated tags (subject-area keywords). Prepare a frontmatter block with `type: bet-decision`, `title: <title>`, `description: <description>`, `tags: [<tags>]`, `timestamp: <today's date, ISO 8601>`, to prepend in step 5.
+If no frontmatter block is found in the template, skip this step — write the file with no frontmatter, matching current behavior.
+
+### 5. Write oprim/bets/pending/BET-NNN-<slug>/bet-decision.md
+Prepend the frontmatter block from step 4b, if one was prepared.
 ```
 # Decision: BET-NNN <title>
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
@@ -47,6 +68,16 @@ Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date 
 - Date: <today YYYY-MM-DD>
 - Owner: <owner>
 - Review date: <review date>
+
+## Door type
+- [<x if 2-way>] 2-way door (reversible — safe to try, easy to undo)
+- [<x if 1-way>] 1-way door (hard to reverse — requires higher confidence before committing)
+
+## Risk profile
+- **Value risk**: <Low / Medium / High> — <rationale>
+- **Usability risk**: <Low / Medium / High> — <rationale>
+- **Feasibility risk**: <Low / Medium / High> — <rationale>
+- **Business viability risk**: <Low / Medium / High> — <rationale>
 
 ## Why now
 <why-now as bullet list>
@@ -77,7 +108,7 @@ Read → parse YAML → append → write back (2-space indentation):
 
 ### 7. Prompt for optional discovery scaffolding
 Ask: "Do you want to scaffold a discovery.md now? (y/N)"
-- If "y": write `oprim/bets/BET-NNN-<slug>/discovery.md` from the discovery template (same structure as `oprim/templates/discovery.md`).
+- If "y": write `oprim/bets/pending/BET-NNN-<slug>/discovery.md` from the discovery template (same structure as `oprim/templates/discovery.md`).
 - If "n" or Enter: skip silently.
 
 ### 8. Report what was created
