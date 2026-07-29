@@ -12,9 +12,10 @@ flowchart LR
 
     Bet -.->|adds to backlog| Board["sequence.yaml<br/>validated anytime via /oprim:sequence"]
     Archive -.->|removes entry| Board
+    PDR["oprim-pdr<br/>(as needed, any time)"] -.->|optional reference| Bet
 ```
 
-Every stage below is optional except **bet** — it's the smallest unit oprim tracks. The sequencing board isn't a discrete stage in this pipeline: every bet lands in its backlog the moment it's created, and `/oprim:sequence` validates and rebalances the board on demand — before a bet is promoted, after one is archived, or any time in between.
+Every stage below is optional except **bet** — it's the smallest unit oprim tracks. Two pieces sit outside the pipeline entirely rather than at a fixed step: the sequencing board (every bet lands in its `backlog` the moment it's created; `/oprim:sequence` validates and rebalances on demand, not at one fixed point) and PDRs (`oprim-pdr`, written whenever a policy question comes up, independent of any single bet). Both are covered in their own section below rather than a numbered step.
 
 ## 1. Capture the idea — `oprim-note` (optional)
 
@@ -33,15 +34,15 @@ A bet is a commitment to explore a problem, hypothesis, or direction. Running `o
 5. Writes `oprim/bets/pending/BET-NNN-<slug>/bet-decision.md` — problem, why now, alternatives considered, expected outcomes, kill criteria, and that decision
 6. Registers the bet in `oprim/sequence.yaml`'s `backlog` lane — every new bet starts here regardless of its decision
 
-A bet can link to relevant `PDR`s (see below) instead of restating policy, and can list one or more `## Capabilities` it will touch — used later by `/oprim:promote` to know which spec files to create.
+A bet can link to relevant PDRs instead of restating policy, and can list one or more `## Capabilities` it will touch — used later by `/oprim:promote` to know which spec files to create.
 
-### Durable policy — `oprim-pdr` (parallel, as needed)
+## Used as needed, not tied to a pipeline stage
 
-Some decisions are policy, not initiative-scoped — "we don't ship features behind a paywall on mobile," for example. Those go in `oprim/decisions/PDR-XXX-<slug>.md` via `oprim-pdr`, independent of any single bet, and get referenced by ID from any bet that depends on them (`requires_pdrs` in `sequence.yaml`).
+Two pieces of oprim sit outside the linear flow above. Neither belongs to a specific step — both get reached for whenever they're relevant, independent of where a given bet is in its lifecycle.
 
-### Sequencing the board — `/oprim:sequence` (ongoing, not a one-time step)
+**Durable policy — `oprim-pdr`.** A Product Decision Record borrows its shape directly from the [Architecture Decision Record](https://adr.github.io/) pattern (Michael Nygard's "Documenting Architecture Decisions," 2011) — the same "context, decision, consequences" structure that's durable, immutable once accepted, and lives independent of any one piece of work, just aimed at product/policy calls instead of technical ones. Where an ADR answers "why did we choose Postgres over Mongo," a PDR answers "why don't we ship features behind a paywall on mobile" — policy, not initiative-scoped. Those go in `oprim/decisions/PDR-XXX-<slug>.md` via `oprim-pdr`, written whenever a policy question comes up — before a bet exists, alongside one, or well after. A bet can *reference* a PDR it depends on (`requires_pdrs` in `sequence.yaml`, or a link in `bet-decision.md`), but, matching ADR convention, a PDR is superseded rather than edited in place and doesn't belong to any single bet or get created as part of the bet flow.
 
-`oprim/sequence.yaml` is a Now/Next/Later/Backlog board. A bet's `Build now` decision in step 4 above records *intent*; it doesn't move the bet out of `backlog` — that's a separate sequencing call. Run `/oprim:sequence` whenever the board needs a health check, not just once between bet creation and promotion:
+**Sequencing the board — `/oprim:sequence`.** `oprim/sequence.yaml` is a Now/Next/Later/Backlog board. A bet's `Build now` decision (step 2 above) records *intent*; it doesn't move the bet out of `backlog` — that's a separate sequencing call. Run `/oprim:sequence` whenever the board needs a health check, not on any fixed schedule relative to bet creation or promotion:
 
 - Enforces WIP limits per lane
 - Checks `blocked_by`/`unlocks` references actually resolve to real bets
