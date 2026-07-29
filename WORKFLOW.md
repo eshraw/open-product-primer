@@ -4,16 +4,17 @@ This is the full lifecycle of a decision as it moves through `oprim`, from a raw
 
 ```mermaid
 flowchart LR
-    Note["oprim-note<br/>(optional)"] --> Bet["oprim-bet"]
-    Bet --> Sequence["/oprim:sequence"]
-    Sequence --> Promote["/oprim:promote"]
+    Note["oprim-note<br/>(optional)"] --> Bet["oprim-bet<br/>(Build now / Defer / Kill)"]
+    Bet --> Promote["/oprim:promote"]
     Promote --> Build["(implementation)"]
     Build --> Archive["/oprim:archive"]
     Archive --> Measure["oprim measure /<br/>oprim-review"]
-    Archive -.->|folds spec delta into current truth,<br/>closes out sequence.yaml entry| Sequence
+
+    Bet -.->|adds to backlog| Board["sequence.yaml<br/>validated anytime via /oprim:sequence"]
+    Archive -.->|removes entry| Board
 ```
 
-Every stage below is optional except **bet** and **sequence** — a bet is the smallest unit oprim tracks, and every bet lives on the sequencing board.
+Every stage below is optional except **bet** — it's the smallest unit oprim tracks. The sequencing board isn't a discrete stage in this pipeline: every bet lands in its backlog the moment it's created, and `/oprim:sequence` validates and rebalances the board on demand — before a bet is promoted, after one is archived, or any time in between.
 
 ## 1. Capture the idea — `oprim-note` (optional)
 
@@ -28,8 +29,9 @@ A bet is a commitment to explore a problem, hypothesis, or direction. Running `o
 1. Prompts for a title, validating it's specific enough to scan at a glance ("Improve bet naming for scannability", not "Naming")
 2. Assigns the next `BET-NNN` ID by scanning both `oprim/bets/pending/` and `oprim/bets/archived/`
 3. Derives a URL-safe slug from the title
-4. Writes `oprim/bets/pending/BET-NNN-<slug>/bet-decision.md` — problem, why now, alternatives considered, expected outcomes, kill criteria, and a decision (`Build now` / `Not now` / `Never`)
-5. Registers the bet in `oprim/sequence.yaml`'s backlog
+4. Asks the "when to build" question directly — a decision of `Build now` / `Defer` / `Kill` — alongside door type (1-way/2-way) and a Value/Usability/Feasibility/Viability risk rating
+5. Writes `oprim/bets/pending/BET-NNN-<slug>/bet-decision.md` — problem, why now, alternatives considered, expected outcomes, kill criteria, and that decision
+6. Registers the bet in `oprim/sequence.yaml`'s `backlog` lane — every new bet starts here regardless of its decision
 
 A bet can link to relevant `PDR`s (see below) instead of restating policy, and can list one or more `## Capabilities` it will touch — used later by `/oprim:promote` to know which spec files to create.
 
@@ -37,24 +39,24 @@ A bet can link to relevant `PDR`s (see below) instead of restating policy, and c
 
 Some decisions are policy, not initiative-scoped — "we don't ship features behind a paywall on mobile," for example. Those go in `oprim/decisions/PDR-XXX-<slug>.md` via `oprim-pdr`, independent of any single bet, and get referenced by ID from any bet that depends on them (`requires_pdrs` in `sequence.yaml`).
 
-## 3. Define success — `oprim-criteria` (recommended before promoting)
+### Sequencing the board — `/oprim:sequence` (ongoing, not a one-time step)
 
-Before committing engineering time, write down what "worked" means: `oprim-criteria` creates or appends to `oprim/bets/pending/BET-XXX/criteria.yaml` — baseline, target, timeframe, and a data source (Amplitude event or BigQuery query). This is what `oprim measure` and `oprim-review` read from later, and what `/oprim:promote` links forward into the spec change.
-
-Skipping this doesn't block promotion, but it means there's no automated way to check whether the bet paid off.
-
-## 4. Place it on the board — `/oprim:sequence`
-
-`oprim/sequence.yaml` is a Now/Next/Later/Backlog board. `/oprim:sequence` validates and rebalances it:
+`oprim/sequence.yaml` is a Now/Next/Later/Backlog board. A bet's `Build now` decision in step 4 above records *intent*; it doesn't move the bet out of `backlog` — that's a separate sequencing call. Run `/oprim:sequence` whenever the board needs a health check, not just once between bet creation and promotion:
 
 - Enforces WIP limits per lane
 - Checks `blocked_by`/`unlocks` references actually resolve to real bets
 - Flags a `now`/`next` bet whose required PDRs (`requires_pdrs`) don't exist yet
 - Surfaces sequencing risk via `oprim ovw` — e.g., a 1-way-door bet in flight with no 2-way-door "unrisker" ahead of it, or doors sequenced in the wrong order
 
-A bet sitting in `backlog` is a recorded decision with no timeline commitment. Moving it to `now` or `next` is itself a sequencing decision `/oprim:sequence` helps validate.
+Moving a bet from `backlog` into `now` or `next` is itself a sequencing decision `/oprim:sequence` helps validate — you'll typically run it again after archiving a bet too, to pull the next thing forward.
 
-## 5. Hand off to implementation — `/oprim:promote BET-XXX`
+## 3. Define success — `oprim-criteria` (recommended before promoting)
+
+Before committing engineering time, write down what "worked" means: `oprim-criteria` creates or appends to `oprim/bets/pending/BET-XXX/criteria.yaml` — baseline, target, timeframe, and a data source (Amplitude event or BigQuery query). This is what `oprim measure` and `oprim-review` read from later, and what `/oprim:promote` links forward into the spec change.
+
+Skipping this doesn't block promotion, but it means there's no automated way to check whether the bet paid off.
+
+## 4. Hand off to implementation — `/oprim:promote BET-XXX`
 
 This is the seam between **why/order** (oprim) and **what/how** (specs). The promotion path depends on which spec framework the project selected at `oprim init` time:
 
@@ -72,11 +74,11 @@ This is the seam between **why/order** (oprim) and **what/how** (specs). The pro
 
 Either way, a note promotes into a bet the same way regardless of spec framework (`/oprim:promote NOTE-XXX` — see step 1).
 
-## 6. Build it
+## 5. Build it
 
 This is outside oprim's authority boundary by design — implementation happens against whichever spec artifact promotion produced (`openspec/changes/<name>/tasks.md` or the bet's `tasks.md` in native mode). oprim doesn't track code, only the decision and the spec contract.
 
-## 7. Close the loop — `/oprim:archive BET-XXX`
+## 6. Close the loop — `/oprim:archive BET-XXX`
 
 Archiving is what makes the board and specs honest again:
 
@@ -88,7 +90,7 @@ Archiving is what makes the board and specs honest again:
 
 After this, `oprim doctor`/`oprim validate` no longer see the bet as in-flight, and its spec content is current truth rather than a proposal.
 
-## 8. Check the bet — `oprim measure` and `oprim-review`
+## 7. Check the bet — `oprim measure` and `oprim-review`
 
 Once there's enough post-launch data:
 
