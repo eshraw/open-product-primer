@@ -16,6 +16,30 @@ oprim stores the decisions that precede implementation — why you're building s
 
 Pick a spec framework at `oprim init` time (`openspec`, `native`, or `none`) — see [Native specs](#native-specs) below.
 
+## The workflow
+
+```mermaid
+flowchart LR
+    Note["oprim-note<br/>(optional)"] --> Bet["oprim-bet<br/>(Build now / Defer / Kill)"]
+    Bet --> Promote["/oprim:promote"]
+    Promote --> Build["build it"]
+    Build --> Archive["/oprim:archive"]
+    Archive --> Measure["oprim measure /<br/>oprim-review"]
+    Promote -.->|hands off to| Specs["OpenSpec or<br/>native specs"]
+
+    Bet -.->|adds to backlog| Board["sequence.yaml<br/>validated anytime via /oprim:sequence"]
+    Archive -.->|removes entry| Board
+```
+
+1. **Capture** an idea as a note (optional), or go straight to a **bet** — a committed decision with a why, alternatives, expected outcome, kill criterion, and a Build now/Defer/Kill call
+2. Every bet lands in the sequencing board's backlog automatically; `/oprim:sequence` validates and rebalances the Now/Next/Later board at any point, not just here — run it whenever the board needs a health check
+3. **Promote** (`/oprim:promote BET-XXX`) hands the bet to OpenSpec or native specs for the what/how — define success first with `oprim-criteria`
+4. Build against that spec
+5. **Archive** (`/oprim:archive BET-XXX`) folds any spec delta into current truth, closes the bet out, and removes it from the board
+6. **Measure and review** (`oprim measure`, `oprim-review`) compare outcomes against the criteria set in step 3
+
+See [`WORKFLOW.md`](WORKFLOW.md) for the full walkthrough of each stage, what artifact it produces, and what happens if you skip it.
+
 ## Installation
 
 ```bash

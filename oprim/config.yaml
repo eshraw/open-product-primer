@@ -2,9 +2,9 @@ version: 1
 project:
   name: open-product-primer
 integrations:
+  spec_framework: native
   openspec:
-    enabled: true
-    changes_dir: openspec/changes
+    enabled: false
   graphify:
     enabled: false
     graph_dir: graphify-out
@@ -18,8 +18,17 @@ sequencing:
   wip_limits:
     now: 2
 notes:
-  tags: [okf, promotion]
+  tags:
+    - okf
+    - promotion
 agents:
   - claude
   - cursor
   - poolside
+  - codex
+  - gemini
+context: ''
+rules: {}
+remote_context:
+  enabled: false
+  sources: []
