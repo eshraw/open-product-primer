@@ -873,6 +873,33 @@ describe('promptFrameworkSelection', () => {
   });
 });
 
+// bet-020 — PDR surfacing opt-in defaults to true ───────────────────────────
+
+describe('promptPdrSurfacing', () => {
+  it('prompts with default: true and "(Y/n)" copy', async () => {
+    const { promptPdrSurfacing } = await import('../lib/install-agent');
+    const { confirm } = await import('@inquirer/prompts');
+    vi.mocked(confirm).mockResolvedValueOnce(true as never);
+
+    const result = await promptPdrSurfacing();
+
+    expect(result).toBe(true);
+    const call = vi.mocked(confirm).mock.calls[0][0] as { message: string; default: boolean };
+    expect(call.default).toBe(true);
+    expect(call.message).toContain('(Y/n)');
+  });
+
+  it('lets the user opt out by answering "n"', async () => {
+    const { promptPdrSurfacing } = await import('../lib/install-agent');
+    const { confirm } = await import('@inquirer/prompts');
+    vi.mocked(confirm).mockResolvedValueOnce(false as never);
+
+    const result = await promptPdrSurfacing();
+
+    expect(result).toBe(false);
+  });
+});
+
 // bet-027 — declarative workflow schemas: project-level oprim/workflows/ overrides ─────────
 
 describe('project-level workflow overrides (bet-027)', () => {

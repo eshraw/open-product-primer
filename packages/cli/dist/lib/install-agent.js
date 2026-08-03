@@ -129,7 +129,7 @@ async function promptAgentSelection(projectRoot) {
 }
 async function promptPdrSurfacing() {
     const { confirm } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
-    return confirm({ message: 'Enable proactive PDR surfacing in skills? (y/N)', default: false });
+    return confirm({ message: 'Enable proactive PDR surfacing in skills? (Y/n)', default: true });
 }
 async function promptOkfFrontmatter() {
     const { confirm } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));

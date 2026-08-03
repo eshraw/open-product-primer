@@ -163,6 +163,58 @@ describe('oprim init — notes directory', () => {
   });
 });
 
+// bet-020 — PDR surfacing opt-in defaults to true ─────────────────────────────
+
+describe('oprim init — PDR surfacing accepted (default)', () => {
+  it('installs the oprim:context skill and prepends a Step 0 context invocation to other skills', async () => {
+    // 1st confirm() call = OKF opt-in prompt, 2nd = PDR-surfacing prompt
+    vi.mocked(confirm).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim:context', 'SKILL.md'))).toBe(true);
+
+    const pdrSkill = fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-pdr', 'SKILL.md'), 'utf-8');
+    expect(pdrSkill).toContain('oprim:context');
+  });
+});
+
+describe('oprim init — PDR surfacing opted out', () => {
+  it('does not install the oprim:context skill and installs other skills unchanged', async () => {
+    // 1st confirm() call = OKF opt-in prompt, 2nd = PDR-surfacing prompt
+    vi.mocked(confirm).mockResolvedValueOnce(false).mockResolvedValueOnce(false);
+
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'skills', 'oprim:context', 'SKILL.md'))).toBe(false);
+
+    const pdrSkill = fs.readFileSync(path.join(tmpDir, '.claude', 'skills', 'oprim-pdr', 'SKILL.md'), 'utf-8');
+    expect(pdrSkill).not.toContain('oprim:context');
+  });
+});
+
+describe('oprim update — PDR surfacing re-prompts with default true', () => {
+  it('passes default: true to the PDR-surfacing confirm prompt', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nagents:\n  - claude\n'
+    );
+    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    const pdrPromptCall = vi
+      .mocked(confirm)
+      .mock.calls.map((call) => call[0] as { message: string; default: boolean })
+      .find((call) => call.message.includes('PDR surfacing'));
+    expect(pdrPromptCall?.default).toBe(true);
+  });
+});
+
 // 5.3 — update respects persisted flag, no re-prompt, no template rewrite ──────
 
 describe('oprim update — persisted OKF flag', () => {
