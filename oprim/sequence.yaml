@@ -7,11 +7,6 @@ now:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-031
-    title: "Add a current decisions rollup view"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
 
 next: []
 
@@ -31,11 +26,6 @@ backlog:
   - id: BET-005
     title: "Unify oprim, openspec, and grafiphy under a single context folder"
     note: "Decided before native specs (BET-023/024) existed — revisit scope once oprim can own specs without OpenSpec, may reduce or change what this bet needs to do"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-020
-    title: "Enable PDR surfacing by default in oprim init"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
