@@ -394,6 +394,24 @@ describe('rules.<artifact> guidance in generated skill content', () => {
   });
 });
 
+// bet-031 — oprim-pdr regenerates the decisions rollup view after writing a PDR ────
+
+describe('decisions-view regeneration in oprim-pdr', () => {
+  it('Claude oprim-pdr skill runs generate-decisions-view.js', () => {
+    expect(CLAUDE_SKILLS['oprim-pdr']).toContain('generate-decisions-view.js');
+  });
+
+  it('Cursor oprim-pdr command wrapper runs generate-decisions-view.js', () => {
+    expect(CURSOR_COMMANDS['oprim-pdr.md']).toContain('generate-decisions-view.js');
+  });
+
+  it('Codex/Gemini/Poolside inline workflow text runs generate-decisions-view.js', () => {
+    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions()]) {
+      expect(instructions).toContain('generate-decisions-view.js');
+    }
+  });
+});
+
 // promoteContent ID-prefix dispatch ────────────────────────────────────────────
 
 describe('promoteContent dispatch', () => {

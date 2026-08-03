@@ -90,8 +90,8 @@ async function promptFrameworkSelection(projectRoot) {
     return select({
         message: 'Which speccing framework does this project use?',
         choices: [
-            { name: 'OpenSpec (recommended)', value: 'openspec' },
-            { name: 'Native (oprim-authored specs, no OpenSpec required)', value: 'native' },
+            { name: 'Native (oprim-authored specs, recommended)', value: 'native' },
+            { name: 'OpenSpec', value: 'openspec' },
             { name: 'None', value: 'none' },
         ],
     });

@@ -38,6 +38,7 @@ describe('oprim init --agent claude', () => {
     // oprim/ structure created
     expect(fs.existsSync(path.join(tmpDir, 'oprim', 'config.yaml'))).toBe(true);
     expect(fs.existsSync(path.join(tmpDir, 'oprim', 'sequence.yaml'))).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, 'oprim', 'scripts', 'generate-decisions-view.js'))).toBe(true);
 
     // agents persisted to config
     expect(readAgentsFromConfig(tmpDir)).toEqual(['claude']);
@@ -93,6 +94,23 @@ describe('oprim update with agents: [claude] in config', () => {
 
     // Cursor commands NOT installed (even though .cursor/ exists)
     expect(fs.existsSync(path.join(tmpDir, '.cursor', 'commands', 'oprim-pdr.md'))).toBe(false);
+  });
+
+  it('refreshes generate-decisions-view.js', async () => {
+    fs.mkdirSync(path.join(tmpDir, 'oprim'));
+    fs.writeFileSync(
+      path.join(tmpDir, 'oprim', 'config.yaml'),
+      'version: 1\nagents:\n  - claude\n'
+    );
+    fs.mkdirSync(path.join(tmpDir, 'oprim', 'scripts'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, 'oprim', 'scripts', 'generate-decisions-view.js'), '// stale');
+
+    const cmd = updateCommand();
+    await cmd.parseAsync([], { from: 'user' });
+
+    const content = fs.readFileSync(path.join(tmpDir, 'oprim', 'scripts', 'generate-decisions-view.js'), 'utf-8');
+    expect(content).not.toBe('// stale');
+    expect(content).toContain('oprim/decisions-view.md');
   });
 });
 
