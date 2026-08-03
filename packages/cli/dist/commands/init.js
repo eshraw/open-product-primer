@@ -90,6 +90,7 @@ function initCommand() {
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'discovery.md'), templates_1.discoveryTemplate);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'templates', 'note.md'), noteContent);
         (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-decisions-view.js'), templates_1.decisionsViewScriptTemplate);
         if (okfEnabled) {
             (0, scaffold_1.writeFile)(path.join(primerDir, 'index.md'), (0, templates_1.indexTemplate)(projectName));
         }

@@ -21,6 +21,7 @@ notes:
   tags:
     - okf
     - promotion
+    - tech-debt
 agents:
   - claude
   - cursor

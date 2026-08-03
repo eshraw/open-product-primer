@@ -27,4 +27,6 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native oprim spec)
+- Spec (delta): oprim/bets/pending/BET-020-enable-pdr-surfacing-by-default-in-init/specs/pdr-proactive-surfacing/spec.md
+- Criteria: none defined yet — consider adding oprim/bets/pending/BET-020-enable-pdr-surfacing-by-default-in-init/criteria.yaml before archiving

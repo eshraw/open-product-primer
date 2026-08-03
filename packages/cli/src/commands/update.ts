@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, promptPdrSurfacing, resolveSpecFramework, Agent } from '../lib/install-agent';
 import { readAgentsFromConfig, writeAgentsToConfig, readOkfEnabledFromConfig } from '../lib/detect';
 import { ensureDir, writeFile } from '../lib/scaffold';
-import { sequenceViewScriptTemplate } from '../lib/templates';
+import { sequenceViewScriptTemplate, decisionsViewScriptTemplate } from '../lib/templates';
 import { mergeConfigSchema, mergeSpecFramework } from '../lib/config-merge';
 
 // bet-023 — persist the resolved spec_framework into oprim/config.yaml, inserting it only
@@ -36,6 +36,7 @@ export function updateCommand(): Command {
       const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'scripts'));
       writeFile(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), sequenceViewScriptTemplate);
+      writeFile(path.join(primerDir, 'scripts', 'generate-decisions-view.js'), decisionsViewScriptTemplate);
 
       const configPath = path.join(primerDir, 'config.yaml');
       if (fs.existsSync(configPath)) {

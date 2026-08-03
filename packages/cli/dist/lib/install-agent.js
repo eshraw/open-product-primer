@@ -90,8 +90,8 @@ async function promptFrameworkSelection(projectRoot) {
     return select({
         message: 'Which speccing framework does this project use?',
         choices: [
-            { name: 'OpenSpec (recommended)', value: 'openspec' },
-            { name: 'Native (oprim-authored specs, no OpenSpec required)', value: 'native' },
+            { name: 'Native (oprim-authored specs, recommended)', value: 'native' },
+            { name: 'OpenSpec', value: 'openspec' },
             { name: 'None', value: 'none' },
         ],
     });
@@ -129,7 +129,7 @@ async function promptAgentSelection(projectRoot) {
 }
 async function promptPdrSurfacing() {
     const { confirm } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
-    return confirm({ message: 'Enable proactive PDR surfacing in skills? (y/N)', default: false });
+    return confirm({ message: 'Enable proactive PDR surfacing in skills? (Y/n)', default: true });
 }
 async function promptOkfFrontmatter() {
     const { confirm } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));

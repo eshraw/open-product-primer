@@ -71,6 +71,7 @@ function updateCommand() {
         const primerDir = path.join(projectRoot, 'oprim');
         (0, scaffold_1.ensureDir)(path.join(primerDir, 'scripts'));
         (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), templates_1.sequenceViewScriptTemplate);
+        (0, scaffold_1.writeFile)(path.join(primerDir, 'scripts', 'generate-decisions-view.js'), templates_1.decisionsViewScriptTemplate);
         const configPath = path.join(primerDir, 'config.yaml');
         if (fs.existsSync(configPath)) {
             const existingConfig = fs.readFileSync(configPath, 'utf-8');

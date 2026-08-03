@@ -21,6 +21,7 @@ import {
   kpiReviewTemplate,
   discoveryTemplate,
   sequenceViewScriptTemplate,
+  decisionsViewScriptTemplate,
   okfFrontmatter,
   indexTemplate,
   noteTemplate,
@@ -87,6 +88,7 @@ export function initCommand(): Command {
       writeFile(path.join(primerDir, 'templates', 'discovery.md'), discoveryTemplate);
       writeFile(path.join(primerDir, 'templates', 'note.md'), noteContent);
       writeFile(path.join(primerDir, 'scripts', 'generate-sequence-view.js'), sequenceViewScriptTemplate);
+      writeFile(path.join(primerDir, 'scripts', 'generate-decisions-view.js'), decisionsViewScriptTemplate);
 
       if (okfEnabled) {
         writeFile(path.join(primerDir, 'index.md'), indexTemplate(projectName));

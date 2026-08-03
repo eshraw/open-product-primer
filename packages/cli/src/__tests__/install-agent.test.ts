@@ -394,6 +394,24 @@ describe('rules.<artifact> guidance in generated skill content', () => {
   });
 });
 
+// bet-031 — oprim-pdr regenerates the decisions rollup view after writing a PDR ────
+
+describe('decisions-view regeneration in oprim-pdr', () => {
+  it('Claude oprim-pdr skill runs generate-decisions-view.js', () => {
+    expect(CLAUDE_SKILLS['oprim-pdr']).toContain('generate-decisions-view.js');
+  });
+
+  it('Cursor oprim-pdr command wrapper runs generate-decisions-view.js', () => {
+    expect(CURSOR_COMMANDS['oprim-pdr.md']).toContain('generate-decisions-view.js');
+  });
+
+  it('Codex/Gemini/Poolside inline workflow text runs generate-decisions-view.js', () => {
+    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions()]) {
+      expect(instructions).toContain('generate-decisions-view.js');
+    }
+  });
+});
+
 // promoteContent ID-prefix dispatch ────────────────────────────────────────────
 
 describe('promoteContent dispatch', () => {
@@ -870,6 +888,33 @@ describe('promptFrameworkSelection', () => {
 
     expect(result).toBe('native');
     expect(selectMock).not.toHaveBeenCalled();
+  });
+});
+
+// bet-020 — PDR surfacing opt-in defaults to true ───────────────────────────
+
+describe('promptPdrSurfacing', () => {
+  it('prompts with default: true and "(Y/n)" copy', async () => {
+    const { promptPdrSurfacing } = await import('../lib/install-agent');
+    const { confirm } = await import('@inquirer/prompts');
+    vi.mocked(confirm).mockResolvedValueOnce(true as never);
+
+    const result = await promptPdrSurfacing();
+
+    expect(result).toBe(true);
+    const call = vi.mocked(confirm).mock.calls[0][0] as { message: string; default: boolean };
+    expect(call.default).toBe(true);
+    expect(call.message).toContain('(Y/n)');
+  });
+
+  it('lets the user opt out by answering "n"', async () => {
+    const { promptPdrSurfacing } = await import('../lib/install-agent');
+    const { confirm } = await import('@inquirer/prompts');
+    vi.mocked(confirm).mockResolvedValueOnce(false as never);
+
+    const result = await promptPdrSurfacing();
+
+    expect(result).toBe(false);
   });
 });
 

@@ -2,7 +2,7 @@
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
-- Decision: Defer
+- Decision: Build now
 - Date: 2026-07-23
 - Owner: Eshane
 - Review date: 2026-09-30
@@ -36,5 +36,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: to be filled when promoted
+- OpenSpec change: N/A (native oprim spec)
+- Spec (delta): oprim/bets/pending/BET-031-add-a-current-decisions-rollup-view/specs/decisions-view-scaffold/spec.md
+- Criteria: none defined yet — consider adding oprim/bets/pending/BET-031-add-a-current-decisions-rollup-view/criteria.yaml before archiving
 - Relates to: BET-024 (contrast — supersession vs. delta-merge truth models)
