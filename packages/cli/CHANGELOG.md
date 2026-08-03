@@ -17,6 +17,14 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.5.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.4.0...cli-v2.5.0) (2026-08-03)
+
+
+### Features
+
+* add decision view ([7c2a823](https://github.com/eshraw/open-product-primer/commit/7c2a823115ed20ce40c09b464db7000be87c7515))
+* set pdr surfacing toggle as yes ([b82badb](https://github.com/eshraw/open-product-primer/commit/b82badb545ab6d86bd789ea7eebbeada3d9b43f6))
+
 ## [2.4.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.3.0...cli-v2.4.0) (2026-07-29)
 
 
