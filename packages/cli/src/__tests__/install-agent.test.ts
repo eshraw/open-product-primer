@@ -860,7 +860,7 @@ describe('archive workflow inline content mentions the tasks.md check for Codex/
 // bet-023 — framework selection offers a native choice ─────────────────────────
 
 describe('promptFrameworkSelection', () => {
-  it('offers openspec, native, and none as choices when prompting', async () => {
+  it('offers native, openspec, and none as choices when prompting', async () => {
     const { promptFrameworkSelection } = await import('../lib/install-agent');
     const { select } = await import('@inquirer/prompts');
     vi.mocked(select).mockResolvedValueOnce('native' as never);
@@ -870,7 +870,7 @@ describe('promptFrameworkSelection', () => {
     expect(result).toBe('native');
     const call = vi.mocked(select).mock.calls[0][0] as { choices: Array<{ value: string }> };
     const values = call.choices.map((c) => c.value);
-    expect(values).toEqual(['openspec', 'native', 'none']);
+    expect(values).toEqual(['native', 'openspec', 'none']);
   });
 
   it('returns the persisted oprim/config.yaml value without prompting', async () => {
