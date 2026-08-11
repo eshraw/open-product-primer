@@ -50,6 +50,7 @@ Create a new Product Decision Record in `oprim/decisions/`.
 4. Ask if superseding an existing PDR.
 5. Write `oprim/decisions/PDR-NNN-<slug>.md`. If superseding, update old PDR Status.
 6. Report what was created.
+7. Run `node oprim/scripts/generate-decisions-view.js` from the project root to update `oprim/decisions-view.md`.
 
 ### KPI review (oprim-review)
 Create a KPI review artifact in `oprim/reviews/`.

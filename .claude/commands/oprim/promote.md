@@ -1,13 +1,18 @@
 ---
 name: "OPRIM: Promote"
 description: Promote a note into a bet, or a prioritized bet into a capability spec
+description: Promote a note into a bet, or a prioritized bet into a capability spec
 category: Workflow
 tags: [workflow, primer]
 ---
 
 Promote a note into a bet, or a prioritized bet into a capability spec.
+Promote a note into a bet, or a prioritized bet into a capability spec.
 
 
+Promote an atomic note into a bet, or a prioritized bet into a capability spec. The promotion path is determined solely by the prefix of the ID argument — there is no separate command for each.
+
+**Input**: Specify an ID (e.g., `/oprim:promote BET-042` or `/oprim:promote NOTE-005`) or omit to be prompted.
 Promote an atomic note into a bet, or a prioritized bet into a capability spec. The promotion path is determined solely by the prefix of the ID argument — there is no separate command for each.
 
 **Input**: Specify an ID (e.g., `/oprim:promote BET-042` or `/oprim:promote NOTE-005`) or omit to be prompted.
@@ -19,6 +24,7 @@ Promote an atomic note into a bet, or a prioritized bet into a capability spec. 
 
 ## A. Bet → native oprim spec
 
+1. **Locate the bet** — read `oprim/bets/pending/BET-XXX/bet-decision.md`
 1. **Locate the bet** — read `oprim/bets/pending/BET-XXX/bet-decision.md`
 2. **Validate status** — decision must be "Build now"
 3. **Check authority boundary** — confirm primer artifact owns why/order/outcome only
