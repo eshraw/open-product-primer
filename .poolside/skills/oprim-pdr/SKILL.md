@@ -65,3 +65,6 @@ Proposed
 Read the superseded file → replace Status value with `Superseded by PDR-NNN` → write back.
 
 ### 7. Report what was created
+
+### 8. Regenerate the decisions rollup view
+Run `node oprim/scripts/generate-decisions-view.js` from the project root to update `oprim/decisions-view.md`.
