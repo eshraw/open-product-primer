@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.QWEN_SKILLS = exports.VIBE_SKILLS = exports.POOLSIDE_SKILLS = exports.CLAUDE_COMMANDS = exports.CLAUDE_SKILLS = exports.OPRIM_CONTEXT_SKILL_STEP = exports.SUPPORTED_AGENTS = void 0;
+exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.KIMI_SKILLS = exports.QWEN_SKILLS = exports.VIBE_SKILLS = exports.POOLSIDE_SKILLS = exports.CLAUDE_COMMANDS = exports.CLAUDE_SKILLS = exports.OPRIM_CONTEXT_SKILL_STEP = exports.SUPPORTED_AGENTS = void 0;
 exports.promptFrameworkSelection = promptFrameworkSelection;
 exports.resolveSpecFramework = resolveSpecFramework;
 exports.promptAgentSelection = promptAgentSelection;
@@ -50,6 +50,7 @@ exports.geminiInstructions = geminiInstructions;
 exports.poolsideInstructions = poolsideInstructions;
 exports.vibeInstructions = vibeInstructions;
 exports.qwenInstructions = qwenInstructions;
+exports.kimiInstructions = kimiInstructions;
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const chalk_1 = __importDefault(require("chalk"));
@@ -58,7 +59,16 @@ const detect_1 = require("./detect");
 const config_merge_1 = require("./config-merge");
 const workflow_schema_1 = require("./workflow-schema");
 const workflow_renderer_1 = require("./workflow-renderer");
-exports.SUPPORTED_AGENTS = ['claude', 'cursor', 'codex', 'gemini', 'poolside', 'vibe', 'qwen'];
+exports.SUPPORTED_AGENTS = [
+    'claude',
+    'cursor',
+    'codex',
+    'gemini',
+    'poolside',
+    'vibe',
+    'qwen',
+    'kimi',
+];
 // oprim/config.yaml (via integrations.spec_framework) is the source of truth for the
 // selected speccing framework; .claude/hooks/config.json is checked only as a fallback for
 // projects that installed before that key existed.
@@ -128,6 +138,7 @@ async function promptAgentSelection(projectRoot) {
             { name: 'Poolside', value: 'poolside', checked: detected.includes('poolside') },
             { name: 'Mistral Vibe', value: 'vibe', checked: detected.includes('vibe') },
             { name: 'Qwen Code', value: 'qwen', checked: detected.includes('qwen') },
+            { name: 'Kimi CLI', value: 'kimi', checked: detected.includes('kimi') },
         ],
     });
 }
@@ -347,6 +358,47 @@ function installAgentSkills(agent, projectRoot, framework = 'openspec', pdrSurfa
             console.log(chalk_1.default.dim('  .qwen/ created — Qwen Code will discover these files automatically.'));
         }
     }
+    else if (agent === 'kimi') {
+        // Kimi CLI is a split-path install: .kimi/ is the detection signal, but skills are
+        // discovered from a project-root .skills/ directory, not .kimi/skills/ — see
+        // kimi-cli-agent-support spec.
+        const kimiDir = path.join(projectRoot, '.kimi');
+        const kimiDirCreated = !fs.existsSync(kimiDir);
+        if (kimiDirCreated) {
+            fs.mkdirSync(kimiDir, { recursive: true });
+        }
+        const skillsBase = path.join(projectRoot, '.skills');
+        const skillsDirCreated = !fs.existsSync(skillsBase);
+        for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+            const schema = (0, workflow_schema_1.loadWorkflowSchema)(id, projectRoot);
+            if (!schema.kimi.skill || !schema.skillName)
+                continue;
+            (0, scaffold_1.writeFile)(path.join(skillsBase, schema.skillName, 'SKILL.md'), (0, workflow_renderer_1.renderSkillBody)(id, projectRoot));
+            console.log(chalk_1.default.green('✓') + ` .skills/${schema.skillName}/SKILL.md`);
+        }
+        const kimiSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+        if (framework === 'native') {
+            (0, scaffold_1.writeFile)(kimiSpecSkillPath, (0, workflow_renderer_1.renderSkillBody)('spec-authoring', projectRoot));
+            console.log(chalk_1.default.green('✓') + ' .skills/oprim-spec/SKILL.md');
+        }
+        else if (fs.existsSync(kimiSpecSkillPath)) {
+            fs.unlinkSync(kimiSpecSkillPath);
+            try {
+                fs.rmdirSync(path.dirname(kimiSpecSkillPath));
+            }
+            catch { /* not empty or already gone */ }
+            console.log(chalk_1.default.dim('  removed .skills/oprim-spec/SKILL.md'));
+        }
+        const agentsFile = path.join(projectRoot, 'AGENTS.md');
+        writeAgentInstructionFile(agentsFile, kimiInstructions());
+        console.log(chalk_1.default.green('✓') + ' AGENTS.md (oprim section written)');
+        if (kimiDirCreated) {
+            console.log(chalk_1.default.dim('  .kimi/ created — Kimi CLI will discover this directory automatically.'));
+        }
+        if (skillsDirCreated) {
+            console.log(chalk_1.default.dim('  .skills/ created — Kimi CLI will discover these files automatically.'));
+        }
+    }
     else if (agent === 'codex') {
         const agentsFile = path.join(projectRoot, 'AGENTS.md');
         writeAgentInstructionFile(agentsFile, codexInstructions());
@@ -512,6 +564,10 @@ exports.VIBE_SKILLS = Object.fromEntries(POOLSIDE_SKILL_WORKFLOW_IDS.map((id) =>
     return [schema.skillName, (0, workflow_renderer_1.renderSkillBody)(id)];
 }));
 exports.QWEN_SKILLS = Object.fromEntries(POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+    const schema = (0, workflow_schema_1.loadWorkflowSchema)(id);
+    return [schema.skillName, (0, workflow_renderer_1.renderSkillBody)(id)];
+}));
+exports.KIMI_SKILLS = Object.fromEntries(POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
     const schema = (0, workflow_schema_1.loadWorkflowSchema)(id);
     return [schema.skillName, (0, workflow_renderer_1.renderSkillBody)(id)];
 }));
@@ -710,5 +766,8 @@ function vibeInstructions() {
     return (0, workflow_renderer_1.renderAgentInstructions)();
 }
 function qwenInstructions() {
+    return (0, workflow_renderer_1.renderAgentInstructions)();
+}
+function kimiInstructions() {
     return (0, workflow_renderer_1.renderAgentInstructions)();
 }

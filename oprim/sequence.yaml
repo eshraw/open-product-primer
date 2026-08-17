@@ -35,16 +35,6 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-043
-    title: "Add Qwen Code agent support"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-044
-    title: "Add Kimi CLI agent support"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-045
     title: "Evaluate DeepSeek coding-agent harness options"
     blocked_by: []

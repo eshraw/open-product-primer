@@ -146,6 +146,39 @@ describe('loadWorkflowSchema', () => {
     expect(schema.qwen.skill).toBe(false);
   });
 
+  it('kimi.skill defaults to poolside.skill when a schema declares no kimi key (bet-044)', () => {
+    const schema = loadWorkflowSchema('bet', tmpDir);
+    expect(schema.poolside.skill).toBe(true);
+    expect(schema.kimi.skill).toBe(true);
+  });
+
+  it('kimi.skill can be overridden independently of poolside.skill', () => {
+    fs.writeFileSync(
+      path.join(overridesDir, 'bet.schema.yaml'),
+      [
+        'id: bet',
+        'skillName: oprim-bet',
+        'title: null',
+        'description: Custom bet description',
+        'claude:',
+        '  skill: true',
+        '  command: null',
+        'cursor:',
+        '  skill: false',
+        '  command: null',
+        'poolside:',
+        '  skill: true',
+        'kimi:',
+        '  skill: false',
+        'inline: false',
+      ].join('\n')
+    );
+
+    const schema = loadWorkflowSchema('bet', tmpDir);
+    expect(schema.poolside.skill).toBe(true);
+    expect(schema.kimi.skill).toBe(false);
+  });
+
   it('vibe.skill can be overridden independently of poolside.skill', () => {
     fs.writeFileSync(
       path.join(overridesDir, 'bet.schema.yaml'),

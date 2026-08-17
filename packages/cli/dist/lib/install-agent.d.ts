@@ -1,4 +1,4 @@
-export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe' | 'qwen';
+export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe' | 'qwen' | 'kimi';
 export declare const SUPPORTED_AGENTS: readonly Agent[];
 export declare function promptFrameworkSelection(projectRoot: string): Promise<string>;
 export declare function resolveSpecFramework(projectRoot: string): string;
@@ -12,6 +12,7 @@ export declare const CLAUDE_COMMANDS: Record<string, string>;
 export declare const POOLSIDE_SKILLS: Record<string, string>;
 export declare const VIBE_SKILLS: Record<string, string>;
 export declare const QWEN_SKILLS: Record<string, string>;
+export declare const KIMI_SKILLS: Record<string, string>;
 export declare const CURSOR_SKILLS: Record<string, string>;
 export declare const CURSOR_COMMANDS: Record<string, string>;
 export declare function specAuthoringSkill(): string;
@@ -21,3 +22,4 @@ export declare function geminiInstructions(): string;
 export declare function poolsideInstructions(): string;
 export declare function vibeInstructions(): string;
 export declare function qwenInstructions(): string;
+export declare function kimiInstructions(): string;
