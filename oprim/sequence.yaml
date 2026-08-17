@@ -8,7 +8,12 @@ now:
     unlocks: []
     requires_pdrs: []
 
-next: []
+next:
+  - id: BET-042
+    title: "Add Mistral Vibe agent support"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
 later:
   - id: BET-014
@@ -32,6 +37,21 @@ backlog:
   - id: BET-030
     title: "Add list, show, and status JSON commands"
     release: v2.X.0
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-043
+    title: "Add Qwen Code agent support"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-044
+    title: "Add Kimi CLI agent support"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-045
+    title: "Evaluate DeepSeek coding-agent harness options"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
