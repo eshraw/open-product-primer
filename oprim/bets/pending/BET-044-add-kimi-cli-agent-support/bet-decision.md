@@ -32,4 +32,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native oprim spec)
+- Spec (delta): oprim/bets/pending/BET-044-add-kimi-cli-agent-support/specs/kimi-cli-agent-support/spec.md
+- Spec (delta): oprim/bets/pending/BET-044-add-kimi-cli-agent-support/specs/init-agent-selection/spec.md
+- Criteria: none defined yet — consider adding oprim/bets/pending/BET-044-add-kimi-cli-agent-support/criteria.yaml before archiving

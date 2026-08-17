@@ -32,4 +32,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native oprim spec)
+- Spec (delta): oprim/bets/pending/BET-043-add-qwen-code-agent-support/specs/qwen-code-agent-support/spec.md
+- Spec (delta): oprim/bets/pending/BET-043-add-qwen-code-agent-support/specs/init-agent-selection/spec.md
+- Criteria: none defined yet — consider adding oprim/bets/pending/BET-043-add-qwen-code-agent-support/criteria.yaml before archiving
