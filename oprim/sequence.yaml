@@ -8,12 +8,7 @@ now:
     unlocks: []
     requires_pdrs: []
 
-next:
-  - id: BET-042
-    title: "Add Mistral Vibe agent support"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+next: []
 
 later:
   - id: BET-014

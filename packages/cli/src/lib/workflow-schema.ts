@@ -20,6 +20,7 @@ export interface WorkflowSchema {
   claude: WorkflowAgentTarget;
   cursor: WorkflowAgentTarget;
   poolside: { skill: boolean };
+  vibe: { skill: boolean };
   inline: boolean;
   variants: string[] | null;
 }
@@ -52,6 +53,9 @@ function parseSchema(raw: string, filePath: string): WorkflowSchema {
   const claude = requireField<Record<string, unknown>>(obj, 'claude', filePath);
   const cursor = requireField<Record<string, unknown>>(obj, 'cursor', filePath);
   const poolside = requireField<Record<string, unknown>>(obj, 'poolside', filePath);
+  // vibe is optional and mirrors poolside by default — see mistral-vibe-agent-support spec.
+  // This keeps existing bundled/forked schemas (none declare a `vibe:` key) working unchanged.
+  const vibe = (obj.vibe as Record<string, unknown> | undefined) ?? poolside;
   requireField(obj, 'inline', filePath);
 
   return {
@@ -63,6 +67,7 @@ function parseSchema(raw: string, filePath: string): WorkflowSchema {
     claude: { skill: Boolean(claude.skill), command: (claude.command as string | undefined) ?? null },
     cursor: { skill: Boolean(cursor.skill), command: (cursor.command as string | undefined) ?? null },
     poolside: { skill: Boolean(poolside.skill) },
+    vibe: { skill: Boolean(vibe.skill) },
     inline: Boolean(obj.inline),
     variants: (obj.variants as string[] | undefined) ?? null,
   };

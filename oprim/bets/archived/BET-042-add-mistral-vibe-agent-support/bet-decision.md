@@ -34,4 +34,7 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native oprim spec)
+- Spec (delta): oprim/bets/pending/BET-042-add-mistral-vibe-agent-support/specs/mistral-vibe-agent-support/spec.md
+- Spec (delta): oprim/bets/pending/BET-042-add-mistral-vibe-agent-support/specs/init-agent-selection/spec.md
+- Criteria: none defined yet — consider adding oprim/bets/pending/BET-042-add-mistral-vibe-agent-support/criteria.yaml before archiving

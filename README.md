@@ -63,7 +63,7 @@ Want to try oprim before setting it up on your own project? Clone this repo and 
 
 Creates the project-local `oprim/` workspace. Idempotent — safe to re-run; existing decision artifacts and config values are preserved. Existing repos with `primer/` should run `oprim migrate` first.
 
-Prompts interactively for: [OKF](https://github.com/GoogleCloudPlatform/okf) (Open Knowledge Format) frontmatter — whether scaffolded artifacts get `oprim`-schema YAML frontmatter, so other tools can parse them as structured metadata instead of plain prose — a spec framework (`openspec`, `native`, or `none`), and which AI agents to install skills for (`claude`, `cursor`, `codex`, `gemini`, `poolside` — repeatable via `--agent`, or `--name <project-name>` to override the default directory-name project name).
+Prompts interactively for: [OKF](https://github.com/GoogleCloudPlatform/okf) (Open Knowledge Format) frontmatter — whether scaffolded artifacts get `oprim`-schema YAML frontmatter, so other tools can parse them as structured metadata instead of plain prose — a spec framework (`openspec`, `native`, or `none`), and which AI agents to install skills for (`claude`, `cursor`, `codex`, `gemini`, `poolside`, `vibe` — repeatable via `--agent`, or `--name <project-name>` to override the default directory-name project name).
 
 **Creates:**
 
@@ -92,7 +92,7 @@ Detects OpenSpec (`openspec/`) and Graphify (`graphify-out/`) and enables integr
 
 ### `oprim update`
 
-Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor, Codex, Gemini, Poolside). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.
+Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor, Codex, Gemini, Poolside, Mistral Vibe). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.
 
 ### `oprim doctor`
 
@@ -168,7 +168,7 @@ Lets one project cite another project's `oprim/` workspace as read-only context 
 
 ## Agent commands
 
-Install with `oprim update`, then use in Claude Code, Cursor, Codex, Gemini, or Poolside:
+Install with `oprim update`, then use in Claude Code, Cursor, Codex, Gemini, Poolside, or Mistral Vibe:
 
 | Command | Description |
 |---------|-------------|
