@@ -84,6 +84,8 @@ function detectAvailableAgents(projectRoot) {
         detected.push('gemini');
     if (fs.existsSync(path.join(projectRoot, '.poolside')))
         detected.push('poolside');
+    if (fs.existsSync(path.join(projectRoot, '.vibe')))
+        detected.push('vibe');
     return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {

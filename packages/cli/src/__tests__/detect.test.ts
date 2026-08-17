@@ -58,10 +58,20 @@ describe('detectAvailableAgents', () => {
     expect(detectAvailableAgents(tmpDir)).not.toContain('poolside');
   });
 
-  it('detects all five agents when all indicators are present', () => {
+  it('detects vibe when .vibe/ directory exists', () => {
+    fs.mkdirSync(path.join(tmpDir, '.vibe'));
+    expect(detectAvailableAgents(tmpDir)).toContain('vibe');
+  });
+
+  it('does not detect vibe when .vibe/ is absent', () => {
+    expect(detectAvailableAgents(tmpDir)).not.toContain('vibe');
+  });
+
+  it('detects all six agents when all indicators are present', () => {
     fs.mkdirSync(path.join(tmpDir, '.claude'));
     fs.mkdirSync(path.join(tmpDir, '.cursor'));
     fs.mkdirSync(path.join(tmpDir, '.poolside'));
+    fs.mkdirSync(path.join(tmpDir, '.vibe'));
     fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '');
     fs.writeFileSync(path.join(tmpDir, 'GEMINI.md'), '');
     const result = detectAvailableAgents(tmpDir);
@@ -70,6 +80,7 @@ describe('detectAvailableAgents', () => {
     expect(result).toContain('codex');
     expect(result).toContain('gemini');
     expect(result).toContain('poolside');
+    expect(result).toContain('vibe');
   });
 });
 

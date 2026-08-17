@@ -22,6 +22,7 @@ notes:
     - okf
     - promotion
     - tech-debt
+    - usability
 agents:
   - claude
   - cursor

@@ -106,4 +106,37 @@ describe('loadWorkflowSchema', () => {
 
     expect(() => loadWorkflowSchema('bet', tmpDir)).toThrowError(/bet\.schema\.yaml/);
   });
+
+  it('vibe.skill defaults to poolside.skill when a schema declares no vibe key (bet-042)', () => {
+    const schema = loadWorkflowSchema('bet', tmpDir);
+    expect(schema.poolside.skill).toBe(true);
+    expect(schema.vibe.skill).toBe(true);
+  });
+
+  it('vibe.skill can be overridden independently of poolside.skill', () => {
+    fs.writeFileSync(
+      path.join(overridesDir, 'bet.schema.yaml'),
+      [
+        'id: bet',
+        'skillName: oprim-bet',
+        'title: null',
+        'description: Custom bet description',
+        'claude:',
+        '  skill: true',
+        '  command: null',
+        'cursor:',
+        '  skill: false',
+        '  command: null',
+        'poolside:',
+        '  skill: true',
+        'vibe:',
+        '  skill: false',
+        'inline: false',
+      ].join('\n')
+    );
+
+    const schema = loadWorkflowSchema('bet', tmpDir);
+    expect(schema.poolside.skill).toBe(true);
+    expect(schema.vibe.skill).toBe(false);
+  });
 });

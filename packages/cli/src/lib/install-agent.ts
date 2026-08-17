@@ -7,8 +7,8 @@ import { readSpecFramework, deriveDefaultSpecFramework } from './config-merge';
 import { loadWorkflowSchema } from './workflow-schema';
 import { renderSkillBody, renderClaudeCommand, renderCursorCommand, renderAgentInstructions } from './workflow-renderer';
 
-export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside';
-export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor', 'codex', 'gemini', 'poolside'];
+export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe';
+export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor', 'codex', 'gemini', 'poolside', 'vibe'];
 
 // oprim/config.yaml (via integrations.spec_framework) is the source of truth for the
 // selected speccing framework; .claude/hooks/config.json is checked only as a fallback for
@@ -76,6 +76,7 @@ export async function promptAgentSelection(projectRoot: string): Promise<string[
       { name: 'Codex', value: 'codex', checked: detected.includes('codex') },
       { name: 'Gemini CLI', value: 'gemini', checked: detected.includes('gemini') },
       { name: 'Poolside', value: 'poolside', checked: detected.includes('poolside') },
+      { name: 'Mistral Vibe', value: 'vibe', checked: detected.includes('vibe') },
     ],
   });
 }
@@ -247,6 +248,35 @@ export function installAgentSkills(
     if (dirCreated) {
       console.log(chalk.dim('  .poolside/ created — Poolside will discover these files automatically.'));
     }
+  } else if (agent === 'vibe') {
+    const vibeDir = path.join(projectRoot, '.vibe');
+    const dirCreated = !fs.existsSync(vibeDir);
+
+    const skillsBase = path.join(vibeDir, 'skills');
+    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+      const schema = loadWorkflowSchema(id, projectRoot);
+      if (!schema.vibe.skill || !schema.skillName) continue;
+      writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
+      console.log(chalk.green('✓') + ` .vibe/skills/${schema.skillName}/SKILL.md`);
+    }
+
+    const vibeSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+    if (framework === 'native') {
+      writeFile(vibeSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
+      console.log(chalk.green('✓') + ' .vibe/skills/oprim-spec/SKILL.md');
+    } else if (fs.existsSync(vibeSpecSkillPath)) {
+      fs.unlinkSync(vibeSpecSkillPath);
+      try { fs.rmdirSync(path.dirname(vibeSpecSkillPath)); } catch { /* not empty or already gone */ }
+      console.log(chalk.dim('  removed .vibe/skills/oprim-spec/SKILL.md'));
+    }
+
+    const agentsFile = path.join(projectRoot, 'AGENTS.md');
+    writeAgentInstructionFile(agentsFile, vibeInstructions());
+    console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
+
+    if (dirCreated) {
+      console.log(chalk.dim('  .vibe/ created — Mistral Vibe will discover these files automatically.'));
+    }
   } else if (agent === 'codex') {
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
     writeAgentInstructionFile(agentsFile, codexInstructions());
@@ -405,6 +435,13 @@ export const CLAUDE_COMMANDS: Record<string, string> = Object.fromEntries(
 );
 
 export const POOLSIDE_SKILLS: Record<string, string> = Object.fromEntries(
+  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+    const schema = loadWorkflowSchema(id);
+    return [schema.skillName as string, renderSkillBody(id)];
+  })
+);
+
+export const VIBE_SKILLS: Record<string, string> = Object.fromEntries(
   POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
@@ -624,5 +661,9 @@ export function geminiInstructions(): string {
 }
 
 export function poolsideInstructions(): string {
+  return renderAgentInstructions();
+}
+
+export function vibeInstructions(): string {
   return renderAgentInstructions();
 }
