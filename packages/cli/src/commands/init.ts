@@ -34,7 +34,7 @@ export function initCommand(): Command {
     .option('--name <name>', 'project name (defaults to directory name)')
     .option(
       '--agent <name>',
-      'AI agent to install skills for (repeatable; supported: claude, cursor, codex, gemini, poolside, vibe)',
+      'AI agent to install skills for (repeatable; supported: claude, cursor, codex, gemini, poolside, vibe, qwen)',
       (val: string, prev: string[]) => [...prev, val],
       [] as string[]
     )

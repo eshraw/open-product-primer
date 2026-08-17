@@ -67,11 +67,21 @@ describe('detectAvailableAgents', () => {
     expect(detectAvailableAgents(tmpDir)).not.toContain('vibe');
   });
 
-  it('detects all six agents when all indicators are present', () => {
+  it('detects qwen when .qwen/ directory exists', () => {
+    fs.mkdirSync(path.join(tmpDir, '.qwen'));
+    expect(detectAvailableAgents(tmpDir)).toContain('qwen');
+  });
+
+  it('does not detect qwen when .qwen/ is absent', () => {
+    expect(detectAvailableAgents(tmpDir)).not.toContain('qwen');
+  });
+
+  it('detects all seven agents when all indicators are present', () => {
     fs.mkdirSync(path.join(tmpDir, '.claude'));
     fs.mkdirSync(path.join(tmpDir, '.cursor'));
     fs.mkdirSync(path.join(tmpDir, '.poolside'));
     fs.mkdirSync(path.join(tmpDir, '.vibe'));
+    fs.mkdirSync(path.join(tmpDir, '.qwen'));
     fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '');
     fs.writeFileSync(path.join(tmpDir, 'GEMINI.md'), '');
     const result = detectAvailableAgents(tmpDir);
@@ -81,6 +91,7 @@ describe('detectAvailableAgents', () => {
     expect(result).toContain('gemini');
     expect(result).toContain('poolside');
     expect(result).toContain('vibe');
+    expect(result).toContain('qwen');
   });
 });
 

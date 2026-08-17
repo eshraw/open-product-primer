@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { execSync } from 'child_process';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, vibeInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS, VIBE_SKILLS, CURSOR_COMMANDS } from '../lib/install-agent';
+import { installAgentSkills, writeAgentInstructionFile, codexInstructions, geminiInstructions, poolsideInstructions, vibeInstructions, qwenInstructions, CLAUDE_COMMANDS, CLAUDE_SKILLS, POOLSIDE_SKILLS, VIBE_SKILLS, QWEN_SKILLS, CURSOR_COMMANDS } from '../lib/install-agent';
 
 vi.mock('@inquirer/prompts', () => ({
   checkbox: vi.fn().mockResolvedValue([]),
@@ -111,6 +111,18 @@ describe('geminiInstructions', () => {
 describe('vibeInstructions', () => {
   it('contains all six workflow sections', () => {
     const content = vibeInstructions();
+    expect(content).toContain('oprim-bet');
+    expect(content).toContain('oprim-note');
+    expect(content).toContain('oprim-criteria');
+    expect(content).toContain('oprim-pdr');
+    expect(content).toContain('oprim-review');
+    expect(content).toContain('oprim-archive');
+  });
+});
+
+describe('qwenInstructions', () => {
+  it('contains all six workflow sections', () => {
+    const content = qwenInstructions();
     expect(content).toContain('oprim-bet');
     expect(content).toContain('oprim-note');
     expect(content).toContain('oprim-criteria');
@@ -385,6 +397,64 @@ describe('installAgentSkills', () => {
       }
     });
   });
+
+  describe('qwen', () => {
+    it('creates .qwen/skills/ with all seven SKILL.md files', () => {
+      installAgentSkills('qwen', tmpDir);
+      for (const skill of Object.keys(QWEN_SKILLS)) {
+        const skillPath = path.join(tmpDir, '.qwen', 'skills', skill, 'SKILL.md');
+        expect(fs.existsSync(skillPath)).toBe(true);
+      }
+    });
+
+    it('creates .qwen/ when it does not exist', () => {
+      expect(fs.existsSync(path.join(tmpDir, '.qwen'))).toBe(false);
+      installAgentSkills('qwen', tmpDir);
+      expect(fs.existsSync(path.join(tmpDir, '.qwen'))).toBe(true);
+    });
+
+    it('emits a notice when .qwen/ was created', () => {
+      const logSpy = vi.spyOn(console, 'log');
+      installAgentSkills('qwen', tmpDir);
+      const notices = logSpy.mock.calls.map((c) => String(c[0]));
+      expect(notices.some((n) => n.includes('.qwen/'))).toBe(true);
+    });
+
+    it('does not emit a directory-created notice when .qwen/ already exists', () => {
+      fs.mkdirSync(path.join(tmpDir, '.qwen'));
+      const logSpy = vi.spyOn(console, 'log');
+      installAgentSkills('qwen', tmpDir);
+      const notices = logSpy.mock.calls.map((c) => String(c[0]));
+      expect(notices.some((n) => n.includes('.qwen/ created'))).toBe(false);
+    });
+
+    it('writes AGENTS.md with oprim section', () => {
+      installAgentSkills('qwen', tmpDir);
+      const agentsPath = path.join(tmpDir, 'AGENTS.md');
+      expect(fs.existsSync(agentsPath)).toBe(true);
+      const content = fs.readFileSync(agentsPath, 'utf-8');
+      expect(content).toContain('<!-- oprim:start -->');
+      expect(content).toContain('<!-- oprim:end -->');
+    });
+
+    it('replaces existing oprim section in AGENTS.md on re-run', () => {
+      const agentsPath = path.join(tmpDir, 'AGENTS.md');
+      fs.writeFileSync(agentsPath, '# Agents\n<!-- oprim:start -->\nOLD CONTENT\n<!-- oprim:end -->\n');
+      installAgentSkills('qwen', tmpDir);
+      const content = fs.readFileSync(agentsPath, 'utf-8');
+      expect(content).not.toContain('OLD CONTENT');
+      expect(content.split('<!-- oprim:start -->').length).toBe(2);
+    });
+
+    it('re-run is idempotent for skill files', () => {
+      installAgentSkills('qwen', tmpDir);
+      installAgentSkills('qwen', tmpDir);
+      for (const skill of Object.keys(QWEN_SKILLS)) {
+        const skillPath = path.join(tmpDir, '.qwen', 'skills', skill, 'SKILL.md');
+        expect(fs.existsSync(skillPath)).toBe(true);
+      }
+    });
+  });
 });
 
 // oprim-note skill content ─────────────────────────────────────────────────────
@@ -455,8 +525,8 @@ describe('rules.<artifact> guidance in generated skill content', () => {
     expect(CURSOR_COMMANDS['oprim-review.md']).toContain('rules.review');
   });
 
-  it('Codex/Gemini/Poolside/Vibe inline workflow text references rules.bet / rules.pdr / rules.review', () => {
-    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions(), vibeInstructions()]) {
+  it('Codex/Gemini/Poolside/Vibe/Qwen inline workflow text references rules.bet / rules.pdr / rules.review', () => {
+    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions(), vibeInstructions(), qwenInstructions()]) {
       expect(instructions).toContain('rules.bet');
       expect(instructions).toContain('rules.pdr');
       expect(instructions).toContain('rules.review');
@@ -475,8 +545,8 @@ describe('decisions-view regeneration in oprim-pdr', () => {
     expect(CURSOR_COMMANDS['oprim-pdr.md']).toContain('generate-decisions-view.js');
   });
 
-  it('Codex/Gemini/Poolside/Vibe inline workflow text runs generate-decisions-view.js', () => {
-    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions(), vibeInstructions()]) {
+  it('Codex/Gemini/Poolside/Vibe/Qwen inline workflow text runs generate-decisions-view.js', () => {
+    for (const instructions of [codexInstructions(), geminiInstructions(), poolsideInstructions(), vibeInstructions(), qwenInstructions()]) {
       expect(instructions).toContain('generate-decisions-view.js');
     }
   });
@@ -700,7 +770,7 @@ describe('oprim-spec skill installation', () => {
     expect(fs.existsSync(path.join(tmpDir, 'openspec'))).toBe(false);
   });
 
-  it('installs oprim-spec for cursor, poolside, and vibe when framework is native', () => {
+  it('installs oprim-spec for cursor, poolside, vibe, and qwen when framework is native', () => {
     installAgentSkills('cursor', tmpDir, 'native');
     expect(fs.existsSync(path.join(tmpDir, '.cursor', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
 
@@ -709,6 +779,9 @@ describe('oprim-spec skill installation', () => {
 
     installAgentSkills('vibe', tmpDir, 'native');
     expect(fs.existsSync(path.join(tmpDir, '.vibe', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('qwen', tmpDir, 'native');
+    expect(fs.existsSync(path.join(tmpDir, '.qwen', 'skills', 'oprim-spec', 'SKILL.md'))).toBe(true);
   });
 });
 
@@ -1062,7 +1135,7 @@ describe('project-level workflow overrides (bet-027)', () => {
 // bet-027 — every bundled workflow renders byte-identical output on a fresh install (5.3) ────
 
 describe('fresh install renders every bundled workflow (bet-027)', () => {
-  it('installs all 8 Claude skills, 4 commands, and every Cursor/Poolside/Vibe skill matching the bundled exports', () => {
+  it('installs all 8 Claude skills, 4 commands, and every Cursor/Poolside/Vibe/Qwen skill matching the bundled exports', () => {
     installAgentSkills('claude', tmpDir);
     for (const [name, expected] of Object.entries(CLAUDE_SKILLS)) {
       expect(fs.readFileSync(path.join(tmpDir, '.claude', 'skills', name, 'SKILL.md'), 'utf-8')).toBe(expected);
@@ -1079,6 +1152,11 @@ describe('fresh install renders every bundled workflow (bet-027)', () => {
     installAgentSkills('vibe', tmpDir);
     for (const [name, expected] of Object.entries(VIBE_SKILLS)) {
       expect(fs.readFileSync(path.join(tmpDir, '.vibe', 'skills', name, 'SKILL.md'), 'utf-8')).toBe(expected);
+    }
+
+    installAgentSkills('qwen', tmpDir);
+    for (const [name, expected] of Object.entries(QWEN_SKILLS)) {
+      expect(fs.readFileSync(path.join(tmpDir, '.qwen', 'skills', name, 'SKILL.md'), 'utf-8')).toBe(expected);
     }
 
     installAgentSkills('cursor', tmpDir);
