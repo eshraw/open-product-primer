@@ -50,3 +50,13 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+  - id: BET-046
+    title: "Invert id and title in sequence.yaml to improve visibility"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-047
+    title: "Make the bet in sequence.yaml clickable to open the file in my IDE directly"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
