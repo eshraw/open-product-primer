@@ -3,6 +3,9 @@ name: oprim-bet
 description: Create a new bet directory and bet-decision artifact in oprim/bets/pending/, and add the bet to oprim/sequence.yaml backlog
 ---
 
+## Step 0: Check relevant product decisions
+Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
+
 Create a new bet in `oprim/bets/pending/` and register it on the sequencing board.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
@@ -99,8 +102,8 @@ Prepend the frontmatter block from step 4b, if one was prepared.
 ### 6. Append to oprim/sequence.yaml backlog
 Read → parse YAML → append → write back (2-space indentation):
 ```yaml
-- id: BET-NNN
-  title: "<title>"
+- title: "<title>"
+  id: BET-NNN
   blocked_by: []
   unlocks: []
   requires_pdrs: []

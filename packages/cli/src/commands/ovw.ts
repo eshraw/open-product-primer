@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import chalk from 'chalk';
 import * as yaml from 'js-yaml';
+import { hyperlinkBetEntry } from '../lib/hyperlink';
 
 type RiskLevel = 'Low' | 'Medium' | 'High' | null;
 
@@ -115,14 +116,15 @@ function renderLane(
     return;
   }
   for (const bet of bets) {
+    const entry = hyperlinkBetEntry(betsDir, bet.id, `${bet.id}  ${bet.title}`);
     if (showMeta) {
       const meta = loadBetMeta(betsDir, bet.id);
       const inline = renderInlineMeta(meta);
       const blockers = renderBlockers(bet);
-      console.log(`  ${bet.id}  ${bet.title}  ${inline}${blockers}`);
+      console.log(`  ${entry}  ${inline}${blockers}`);
     } else {
       const blockers = renderBlockers(bet);
-      console.log(`  ${bet.id}  ${bet.title}${blockers}`);
+      console.log(`  ${entry}${blockers}`);
     }
   }
 }

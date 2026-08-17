@@ -3,6 +3,9 @@ name: oprim-sequence
 description: Validate and update the primer sequencing board — triage mode computes board health and surfaces specific suggestions; seeded mode targets a specific context
 ---
 
+## Step 0: Check relevant product decisions
+Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
+
 Manage the primer sequencing board in `oprim/sequence.yaml`.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
@@ -79,7 +82,7 @@ Ask: "Apply this change? (y/N)"
 
 ### 5. Write sequence.yaml
 
-Read `oprim/sequence.yaml`. Remove the bet entry from its current lane. Insert it into the target lane. Write back with 2-space indentation. Do not modify any other entries.
+Read `oprim/sequence.yaml`. Remove the bet entry from its current lane. If the entry's fields are ordered `id:` before `title:`, reorder them to `title:` before `id:` (leave `blocked_by`, `unlocks`, `requires_pdrs` order unchanged). Insert the entry into the target lane. Write back with 2-space indentation. Do not modify any other entries.
 
 ### 6. Regenerate view
 

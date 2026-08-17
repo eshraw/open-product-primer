@@ -3,6 +3,9 @@ name: oprim-context-init
 description: Guide the user through drafting a description before declaring the current project a citable remote context
 ---
 
+## Step 0: Check relevant product decisions
+Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
+
 Declare the current project a citable remote context, with a clear description other projects and agents can use to decide whether to pull it.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.

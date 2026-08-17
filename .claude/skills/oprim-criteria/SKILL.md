@@ -3,6 +3,9 @@ name: oprim-criteria
 description: Create or append to a criteria.yaml contract for a bet, with structured Amplitude and BigQuery source mapping
 ---
 
+## Step 0: Check relevant product decisions
+Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
+
 Create or append to `oprim/bets/pending/BET-NNN/criteria.yaml`.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
