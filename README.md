@@ -176,6 +176,8 @@ Install with `oprim update`, then use in Claude Code, Cursor, Codex, Gemini, Poo
 | `/oprim:sequence` | Validate the sequencing board and suggest rebalancing |
 | `/oprim:archive` | Archive a completed bet — move it out of the active board |
 | `/oprim:context-init` | Guided Q&A to declare the current project a citable remote context |
+| `/oprim:explore` | Investigate a problem and compare candidate framings before a bet is drafted (read-only, hands off to `/oprim:bet`) |
+| `/oprim:reconcile` | Detect and fix drift across linked PDR/bet/criteria/review artifacts, one confirmed fix at a time |
 | `oprim-bet` | Create a new bet directory and bet-decision artifact, added to the sequencing backlog |
 | `oprim-pdr` | Create a new Product Decision Record with an auto-assigned ID |
 | `oprim-note` | Capture a lightweight note ahead of a full bet |

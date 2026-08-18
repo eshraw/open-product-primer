@@ -1,0 +1,13 @@
+id: explore
+skillName: oprim-explore
+title: "OPRIM: Explore"
+description: Investigate a problem and compare candidate framings before a bet is drafted
+claude:
+  skill: true
+  command: explore.md
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: true
+inline: true

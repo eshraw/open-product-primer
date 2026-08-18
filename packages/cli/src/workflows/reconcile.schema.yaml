@@ -1,0 +1,13 @@
+id: reconcile
+skillName: oprim-reconcile
+title: "OPRIM: Reconcile"
+description: Detect and fix drift across linked oprim artifacts (PDR, bet, criteria, review)
+claude:
+  skill: true
+  command: reconcile.md
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: true
+inline: true

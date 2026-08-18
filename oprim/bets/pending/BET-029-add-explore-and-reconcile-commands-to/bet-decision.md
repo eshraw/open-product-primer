@@ -2,7 +2,7 @@
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
-- Decision: Defer
+- Decision: Build now
 - Date: 2026-07-23
 - Owner: Eshane
 - Review date: 2026-09-30
@@ -38,4 +38,5 @@
 ## Links
 - PDRs: None
 - OpenSpec change: to be filled when promoted
+- Spec (delta): oprim/bets/pending/BET-029-add-explore-and-reconcile-commands-to/specs/explore-reconcile-commands/spec.md
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/commands.md
