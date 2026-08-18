@@ -1230,7 +1230,7 @@ describe('project-level workflow overrides (bet-027)', () => {
 // bet-027 — every bundled workflow renders byte-identical output on a fresh install (5.3) ────
 
 describe('fresh install renders every bundled workflow (bet-027)', () => {
-  it('installs all 8 Claude skills, 4 commands, and every Cursor/Poolside/Vibe/Qwen/Kimi skill matching the bundled exports', () => {
+  it('installs all Claude skills, commands, and every Cursor/Poolside/Vibe/Qwen/Kimi skill matching the bundled exports', () => {
     installAgentSkills('claude', tmpDir);
     for (const [name, expected] of Object.entries(CLAUDE_SKILLS)) {
       expect(fs.readFileSync(path.join(tmpDir, '.claude', 'skills', name, 'SKILL.md'), 'utf-8')).toBe(expected);
@@ -1262,6 +1262,84 @@ describe('fresh install renders every bundled workflow (bet-027)', () => {
     installAgentSkills('cursor', tmpDir);
     for (const [filename, expected] of Object.entries(CURSOR_COMMANDS)) {
       expect(fs.readFileSync(path.join(tmpDir, '.cursor', 'commands', filename), 'utf-8')).toBe(expected);
+    }
+  });
+});
+
+// bet-029 — explore and reconcile commands ─────────────────────────────────────
+
+describe('oprim-explore skill installation (bet-029)', () => {
+  it('oprim update writes oprim-explore skill and explore.md command wrapper', () => {
+    installAgentSkills('claude', tmpDir);
+    const skillPath = path.join(tmpDir, '.claude', 'skills', 'oprim-explore', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('never writes a `bet-decision.md`');
+    expect(content).toContain('/oprim:bet');
+
+    const cmdPath = path.join(tmpDir, '.claude', 'commands', 'oprim', 'explore.md');
+    expect(fs.existsSync(cmdPath)).toBe(true);
+    expect(fs.readFileSync(cmdPath, 'utf-8')).toContain('oprim-explore');
+  });
+
+  it('installs for Poolside/Vibe/Qwen/Kimi alongside the other content-driven skills', () => {
+    installAgentSkills('poolside', tmpDir);
+    expect(fs.existsSync(path.join(tmpDir, '.poolside', 'skills', 'oprim-explore', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('vibe', tmpDir);
+    expect(fs.existsSync(path.join(tmpDir, '.vibe', 'skills', 'oprim-explore', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('qwen', tmpDir);
+    expect(fs.existsSync(path.join(tmpDir, '.qwen', 'skills', 'oprim-explore', 'SKILL.md'))).toBe(true);
+
+    installAgentSkills('kimi', tmpDir);
+    expect(fs.existsSync(path.join(tmpDir, '.skills', 'oprim-explore', 'SKILL.md'))).toBe(true);
+  });
+
+  it('does not install a Cursor skill or command (matches archive/sequence, not Cursor-accessible)', () => {
+    installAgentSkills('cursor', tmpDir);
+    expect(fs.existsSync(path.join(tmpDir, '.cursor', 'skills', 'oprim-explore'))).toBe(false);
+    expect(fs.existsSync(path.join(tmpDir, '.cursor', 'commands', 'explore.md'))).toBe(false);
+  });
+});
+
+describe('oprim-reconcile skill installation (bet-029)', () => {
+  it('oprim update writes oprim-reconcile skill and reconcile.md command wrapper', () => {
+    installAgentSkills('claude', tmpDir);
+    const skillPath = path.join(tmpDir, '.claude', 'skills', 'oprim-reconcile', 'SKILL.md');
+    expect(fs.existsSync(skillPath)).toBe(true);
+    const content = fs.readFileSync(skillPath, 'utf-8');
+    expect(content).toContain('Apply this fix? (y/N)');
+    expect(content).toContain('one item at a time');
+
+    const cmdPath = path.join(tmpDir, '.claude', 'commands', 'oprim', 'reconcile.md');
+    expect(fs.existsSync(cmdPath)).toBe(true);
+    expect(fs.readFileSync(cmdPath, 'utf-8')).toContain('oprim-reconcile');
+  });
+});
+
+describe('explore/reconcile workflow inline content (bet-029)', () => {
+  it('codexInstructions includes both new sections', () => {
+    const content = codexInstructions();
+    expect(content).toContain('oprim-explore');
+    expect(content).toContain('oprim-reconcile');
+  });
+
+  it('geminiInstructions and poolsideInstructions include both new sections', () => {
+    expect(geminiInstructions()).toContain('oprim-explore');
+    expect(geminiInstructions()).toContain('oprim-reconcile');
+    expect(poolsideInstructions()).toContain('oprim-explore');
+    expect(poolsideInstructions()).toContain('oprim-reconcile');
+  });
+});
+
+describe('oprim doctor skill-drift check covers explore/reconcile (bet-029)', () => {
+  it('reports no drift for a fresh install', () => {
+    installAgentSkills('claude', tmpDir);
+    for (const skill of ['oprim-explore', 'oprim-reconcile']) {
+      const skillPath = path.join(tmpDir, '.claude', 'skills', skill, 'SKILL.md');
+      const installed = fs.readFileSync(skillPath, 'utf-8');
+      expect(installed).toBe(CLAUDE_SKILLS[skill]);
     }
   });
 });

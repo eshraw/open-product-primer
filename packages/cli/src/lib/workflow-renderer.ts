@@ -2,7 +2,7 @@ import { loadWorkflowSchema, loadWorkflowTemplate, loadWorkflowVariant, Workflow
 
 // Fixed order the pre-refactor oprimWorkflowsInline() concatenated its per-workflow sections in —
 // preserved here so Codex/Gemini/Poolside output is unchanged.
-const INLINE_SECTION_ORDER = ['bet', 'note', 'criteria', 'pdr', 'review', 'archive', 'sequence'];
+const INLINE_SECTION_ORDER = ['bet', 'note', 'criteria', 'pdr', 'review', 'archive', 'sequence', 'explore', 'reconcile'];
 
 function claudeWrapper(name: string, description: string, body: string): string {
   return `---

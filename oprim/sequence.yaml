@@ -1,12 +1,7 @@
 wip_limits:
   now: 2
 
-now:
-  - id: BET-029
-    title: "Add explore and reconcile commands to oprim"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+now: []
 
 next: []
 
@@ -35,8 +30,13 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-045
-    title: "Evaluate DeepSeek coding-agent harness options"
+  - id: BET-048
+    title: "Add DeepSeek Harness dsh skill install support"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-049
+    title: "Explore native dsh plugin for oprim workspace tools"
     blocked_by: []
     unlocks: []
     requires_pdrs: []

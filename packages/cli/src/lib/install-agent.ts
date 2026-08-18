@@ -107,8 +107,8 @@ export async function promptOkfFrontmatter(): Promise<boolean> {
 
 // Workflow ids installed as Claude/Poolside/Cursor skill files — see packages/cli/src/workflows/.
 // Order matches the pre-refactor CLAUDE_SKILLS/POOLSIDE_SKILLS/CURSOR_SKILLS declaration order.
-const CLAUDE_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review', 'archive', 'sequence', 'context'];
-const POOLSIDE_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review', 'archive', 'sequence'];
+const CLAUDE_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review', 'archive', 'sequence', 'context', 'explore', 'reconcile'];
+const POOLSIDE_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review', 'archive', 'sequence', 'explore', 'reconcile'];
 const CURSOR_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review'];
 
 // Claude command wrappers (thin, invoke skill) — filename -> workflow id. Order matches the
@@ -118,6 +118,8 @@ const CLAUDE_COMMAND_WORKFLOWS: Array<{ filename: string; id: string }> = [
   { filename: 'sequence.md', id: 'sequence' },
   { filename: 'archive.md', id: 'archive' },
   { filename: 'context-init.md', id: 'context' },
+  { filename: 'explore.md', id: 'explore' },
+  { filename: 'reconcile.md', id: 'reconcile' },
 ];
 
 // Cursor command files (full inline). Order matches the pre-refactor CURSOR_COMMANDS declaration order.
