@@ -17,6 +17,15 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.7.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.6.0...cli-v2.7.0) (2026-08-18)
+
+
+### Features
+
+* add kimi support ([27ae417](https://github.com/eshraw/open-product-primer/commit/27ae4173eca8220d888358e97ef9a41050d2d0b1))
+* add kimi support and qol improvement for the sequencing ([2e51e23](https://github.com/eshraw/open-product-primer/commit/2e51e239e2ce3ca9cfc19efcab78fcc0839cc0e1))
+* add qwen support ([a59d428](https://github.com/eshraw/open-product-primer/commit/a59d42867b63f78dae9329c9bc13f99fdf9af519))
+
 ## [2.6.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.5.1...cli-v2.6.0) (2026-08-17)
 
 
