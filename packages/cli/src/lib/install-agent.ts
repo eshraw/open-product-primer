@@ -7,8 +7,17 @@ import { readSpecFramework, deriveDefaultSpecFramework } from './config-merge';
 import { loadWorkflowSchema } from './workflow-schema';
 import { renderSkillBody, renderClaudeCommand, renderCursorCommand, renderAgentInstructions } from './workflow-renderer';
 
-export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe';
-export const SUPPORTED_AGENTS: readonly Agent[] = ['claude', 'cursor', 'codex', 'gemini', 'poolside', 'vibe'];
+export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe' | 'qwen' | 'kimi';
+export const SUPPORTED_AGENTS: readonly Agent[] = [
+  'claude',
+  'cursor',
+  'codex',
+  'gemini',
+  'poolside',
+  'vibe',
+  'qwen',
+  'kimi',
+];
 
 // oprim/config.yaml (via integrations.spec_framework) is the source of truth for the
 // selected speccing framework; .claude/hooks/config.json is checked only as a fallback for
@@ -77,6 +86,8 @@ export async function promptAgentSelection(projectRoot: string): Promise<string[
       { name: 'Gemini CLI', value: 'gemini', checked: detected.includes('gemini') },
       { name: 'Poolside', value: 'poolside', checked: detected.includes('poolside') },
       { name: 'Mistral Vibe', value: 'vibe', checked: detected.includes('vibe') },
+      { name: 'Qwen Code', value: 'qwen', checked: detected.includes('qwen') },
+      { name: 'Kimi CLI', value: 'kimi', checked: detected.includes('kimi') },
     ],
   });
 }
@@ -277,6 +288,74 @@ export function installAgentSkills(
     if (dirCreated) {
       console.log(chalk.dim('  .vibe/ created — Mistral Vibe will discover these files automatically.'));
     }
+  } else if (agent === 'qwen') {
+    const qwenDir = path.join(projectRoot, '.qwen');
+    const dirCreated = !fs.existsSync(qwenDir);
+
+    const skillsBase = path.join(qwenDir, 'skills');
+    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+      const schema = loadWorkflowSchema(id, projectRoot);
+      if (!schema.qwen.skill || !schema.skillName) continue;
+      writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
+      console.log(chalk.green('✓') + ` .qwen/skills/${schema.skillName}/SKILL.md`);
+    }
+
+    const qwenSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+    if (framework === 'native') {
+      writeFile(qwenSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
+      console.log(chalk.green('✓') + ' .qwen/skills/oprim-spec/SKILL.md');
+    } else if (fs.existsSync(qwenSpecSkillPath)) {
+      fs.unlinkSync(qwenSpecSkillPath);
+      try { fs.rmdirSync(path.dirname(qwenSpecSkillPath)); } catch { /* not empty or already gone */ }
+      console.log(chalk.dim('  removed .qwen/skills/oprim-spec/SKILL.md'));
+    }
+
+    const agentsFile = path.join(projectRoot, 'AGENTS.md');
+    writeAgentInstructionFile(agentsFile, qwenInstructions());
+    console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
+
+    if (dirCreated) {
+      console.log(chalk.dim('  .qwen/ created — Qwen Code will discover these files automatically.'));
+    }
+  } else if (agent === 'kimi') {
+    // Kimi CLI is a split-path install: .kimi/ is the detection signal, but skills are
+    // discovered from a project-root .skills/ directory, not .kimi/skills/ — see
+    // kimi-cli-agent-support spec.
+    const kimiDir = path.join(projectRoot, '.kimi');
+    const kimiDirCreated = !fs.existsSync(kimiDir);
+    if (kimiDirCreated) {
+      fs.mkdirSync(kimiDir, { recursive: true });
+    }
+
+    const skillsBase = path.join(projectRoot, '.skills');
+    const skillsDirCreated = !fs.existsSync(skillsBase);
+    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+      const schema = loadWorkflowSchema(id, projectRoot);
+      if (!schema.kimi.skill || !schema.skillName) continue;
+      writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
+      console.log(chalk.green('✓') + ` .skills/${schema.skillName}/SKILL.md`);
+    }
+
+    const kimiSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+    if (framework === 'native') {
+      writeFile(kimiSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
+      console.log(chalk.green('✓') + ' .skills/oprim-spec/SKILL.md');
+    } else if (fs.existsSync(kimiSpecSkillPath)) {
+      fs.unlinkSync(kimiSpecSkillPath);
+      try { fs.rmdirSync(path.dirname(kimiSpecSkillPath)); } catch { /* not empty or already gone */ }
+      console.log(chalk.dim('  removed .skills/oprim-spec/SKILL.md'));
+    }
+
+    const agentsFile = path.join(projectRoot, 'AGENTS.md');
+    writeAgentInstructionFile(agentsFile, kimiInstructions());
+    console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
+
+    if (kimiDirCreated) {
+      console.log(chalk.dim('  .kimi/ created — Kimi CLI will discover this directory automatically.'));
+    }
+    if (skillsDirCreated) {
+      console.log(chalk.dim('  .skills/ created — Kimi CLI will discover these files automatically.'));
+    }
   } else if (agent === 'codex') {
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
     writeAgentInstructionFile(agentsFile, codexInstructions());
@@ -442,6 +521,20 @@ export const POOLSIDE_SKILLS: Record<string, string> = Object.fromEntries(
 );
 
 export const VIBE_SKILLS: Record<string, string> = Object.fromEntries(
+  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+    const schema = loadWorkflowSchema(id);
+    return [schema.skillName as string, renderSkillBody(id)];
+  })
+);
+
+export const QWEN_SKILLS: Record<string, string> = Object.fromEntries(
+  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+    const schema = loadWorkflowSchema(id);
+    return [schema.skillName as string, renderSkillBody(id)];
+  })
+);
+
+export const KIMI_SKILLS: Record<string, string> = Object.fromEntries(
   POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
@@ -665,5 +758,13 @@ export function poolsideInstructions(): string {
 }
 
 export function vibeInstructions(): string {
+  return renderAgentInstructions();
+}
+
+export function qwenInstructions(): string {
+  return renderAgentInstructions();
+}
+
+export function kimiInstructions(): string {
   return renderAgentInstructions();
 }

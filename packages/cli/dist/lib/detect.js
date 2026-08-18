@@ -86,6 +86,10 @@ function detectAvailableAgents(projectRoot) {
         detected.push('poolside');
     if (fs.existsSync(path.join(projectRoot, '.vibe')))
         detected.push('vibe');
+    if (fs.existsSync(path.join(projectRoot, '.qwen')))
+        detected.push('qwen');
+    if (fs.existsSync(path.join(projectRoot, '.kimi')))
+        detected.push('kimi');
     return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {

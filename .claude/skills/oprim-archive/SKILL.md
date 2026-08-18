@@ -3,6 +3,9 @@ name: oprim-archive
 description: Archive a completed bet — moves it to oprim/bets/archived/, removes its sequence.yaml entry, and folds any spec deltas under its specs/ directory into oprim/specs/ current truth
 ---
 
+## Step 0: Check relevant product decisions
+Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
+
 Archive a completed bet by moving it to `oprim/bets/archived/`, removing it from `sequence.yaml`, and (if present) merging its spec deltas into current truth.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.

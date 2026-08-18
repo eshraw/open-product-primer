@@ -21,3 +21,4 @@
 ## Links
 - PDRs: None
 - OpenSpec change: <to be filled when promoted>
+- Spec (delta): oprim/bets/pending/BET-046-invert-id-and-title-in-sequence-yaml-to/specs/sequencing-board/spec.md

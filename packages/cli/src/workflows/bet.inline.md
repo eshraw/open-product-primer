@@ -8,6 +8,6 @@ Create a new bet in `oprim/bets/pending/` and register it on the sequencing boar
 4b. Read `oprim/config.yaml`'s `rules.bet` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
 5. Gather: decision (default Build now), owner, review date (YYYY-MM-DD), why now, alternatives, expected outcomes, kill criteria, PDR links.
 6. Write `oprim/bets/pending/BET-NNN/bet-decision.md` with all fields.
-7. Append to `oprim/sequence.yaml` backlog: `{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}`.
+7. Append to `oprim/sequence.yaml` backlog: `{title, id, blocked_by: [], unlocks: [], requires_pdrs: []}`.
 8. Ask: "Scaffold a discovery.md now? (y/N)" — if "y", write `oprim/bets/pending/BET-NNN/discovery.md`.
 9. Report what was created.

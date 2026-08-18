@@ -20,6 +20,6 @@ Promote an atomic note into a bet, or a prioritized bet into a capability spec. 
 2. **Assign the next BET ID** — scan both `oprim/bets/pending/` and `oprim/bets/archived/` for directories matching `BET-(\d+)(-[^/]*)?`, max+1 zero-padded to 3 digits (default 001) — same convention `oprim-bet` uses
 3. **Derive the slug** from the note's title (lowercase, non-alphanumeric → hyphen, collapse/trim hyphens, truncate to 40 chars at a hyphen boundary)
 4. **Draft the bet** — write `oprim/bets/pending/BET-NNN-<slug>/bet-decision.md` from the standard bet-decision structure, pre-filling only `## Why now` from the note's body. Leave `Alternatives considered`, `Expected outcomes`, and `Kill criteria / rollback trigger` as template placeholders — draft from the note, don't fabricate content it doesn't support. Ask for `Owner` and `Review date`; default `Decision: Build now` and `Date` to today.
-5. **Register the new bet** — append to `oprim/sequence.yaml` backlog: `{id, title, blocked_by: [], unlocks: [], requires_pdrs: []}`
+5. **Register the new bet** — append to `oprim/sequence.yaml` backlog: `{title, id, blocked_by: [], unlocks: [], requires_pdrs: []}`
 6. **Link back** — add `Bets: BET-NNN` to the note (creating or extending its `## Bets` section)
 7. **Report** — show the new bet's path and flag that `Alternatives considered`, `Expected outcomes`, and `Kill criteria` still need authoring before this bet can itself be promoted
