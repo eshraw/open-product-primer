@@ -31,6 +31,17 @@
 ## Kill criteria / rollback trigger
 - If no clear consolidation exists by the review date, defer DeepSeek support again and re-run the spike at the next review cycle rather than guessing at a target
 
+## Findings (2026-08-18)
+- Target identified: `deepseek-ai/deepseek-harness` (`dsh`), DeepSeek's own official harness — confirmed via the GitHub API against the `deepseek-ai` org (real, long-standing, 102k followers) and the `@deepseek-ai/dsh` npm package (published from the repo's CI, maintainer on a `@deepseek.com` address). Ends the "no first-party CLI" ambiguity this bet was scoped to resolve.
+- `dsh` has a documented project-local skill-discovery convention (`docs/subsystems/skills.md`): kebab-case `<name>/SKILL.md` bundles or flat `<name>.md`, discovered at `<projectRoot>/.dsh/skills` (project root = nearest `.git` ancestor). This is architecturally identical to the SKILL.md format oprim already writes for Claude/Cursor/Kimi — a direct, low-risk fit for `install-agent.ts`.
+- `dsh` separately has a Cordis-based plugin/bundle system ("everything is a plugin") exposing native tools and human-facing slash commands (`dsh-commands`) — a materially richer integration than a skill file, but bundles install into `$DSH_HOME/profiles/<name>` (machine-local, per-user), not the project directory. This breaks the git-versioned, zero-install pattern every other oprim agent integration relies on, so it does not fit `install-agent.ts` as-is.
+- Caveats: `dsh` is 5 days old at time of research, explicitly labeled "developer preview" with compatibility-breaking changes expected; its primary UX is `dsh web` (Web UI) or `dsh --profile headless` (one-shot), not a shipped-by-default interactive terminal mode like the other seven supported agents.
+- Decision split into two follow-on bets rather than one, since the two integration paths have different risk profiles and shouldn't block each other:
+  - [BET-048](../BET-048-add-deepseek-harness-dsh-skill-install/bet-decision.md) — v1 skills-only port, matching the Kimi/Vibe/Qwen pattern. Build now.
+  - [BET-049](../BET-049-explore-native-dsh-plugin-for-oprim/bet-decision.md) — native plugin/commands integration over oprim workspace state. Deferred pending dsh maturity past developer preview.
+
 ## Links
 - PDRs: None
 - OpenSpec change: <to be filled when promoted>
+- Follow-on bets: BET-048 (build now), BET-049 (deferred)
+- Reference: https://github.com/deepseek-ai/deepseek-harness
