@@ -30,18 +30,13 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-045
-    title: "Evaluate DeepSeek coding-agent harness options"
-    blocked_by: []
-    unlocks: [BET-048, BET-049]
-    requires_pdrs: []
   - id: BET-048
     title: "Add DeepSeek Harness dsh skill install support"
-    blocked_by: [BET-045]
+    blocked_by: []
     unlocks: []
     requires_pdrs: []
   - id: BET-049
     title: "Explore native dsh plugin for oprim workspace tools"
-    blocked_by: [BET-045]
+    blocked_by: []
     unlocks: []
     requires_pdrs: []
