@@ -24,12 +24,6 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-030
-    title: "Add list, show, and status JSON commands"
-    release: v2.X.0
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-048
     title: "Add DeepSeek Harness dsh skill install support"
     blocked_by: []

@@ -2,8 +2,8 @@
 <!-- Naming tip: verb + object [for context] — e.g. "Improve bet naming for scannability" not "Naming" -->
 
 ## Status
-- Decision: Defer
-- Date: 2026-07-23
+- Decision: Build now
+- Date: 2026-08-20
 - Owner: Eshane
 - Review date: 2026-09-30
 
@@ -39,3 +39,4 @@
 - OpenSpec change: to be filled when promoted
 - Supports: BET-028 (validate)
 - Reference: https://github.com/Fission-AI/OpenSpec/blob/main/docs/cli.md
+- Spec (delta): oprim/bets/pending/BET-030-add-list-show-and-status-json-commands/specs/list-show-status-commands/spec.md
