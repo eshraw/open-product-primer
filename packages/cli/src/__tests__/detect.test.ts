@@ -85,13 +85,23 @@ describe('detectAvailableAgents', () => {
     expect(detectAvailableAgents(tmpDir)).not.toContain('kimi');
   });
 
-  it('detects all eight agents when all indicators are present', () => {
+  it('detects dsh when .dsh/ directory exists', () => {
+    fs.mkdirSync(path.join(tmpDir, '.dsh'));
+    expect(detectAvailableAgents(tmpDir)).toContain('dsh');
+  });
+
+  it('does not detect dsh when .dsh/ is absent', () => {
+    expect(detectAvailableAgents(tmpDir)).not.toContain('dsh');
+  });
+
+  it('detects all nine agents when all indicators are present', () => {
     fs.mkdirSync(path.join(tmpDir, '.claude'));
     fs.mkdirSync(path.join(tmpDir, '.cursor'));
     fs.mkdirSync(path.join(tmpDir, '.poolside'));
     fs.mkdirSync(path.join(tmpDir, '.vibe'));
     fs.mkdirSync(path.join(tmpDir, '.qwen'));
     fs.mkdirSync(path.join(tmpDir, '.kimi'));
+    fs.mkdirSync(path.join(tmpDir, '.dsh'));
     fs.writeFileSync(path.join(tmpDir, 'AGENTS.md'), '');
     fs.writeFileSync(path.join(tmpDir, 'GEMINI.md'), '');
     const result = detectAvailableAgents(tmpDir);
@@ -103,6 +113,7 @@ describe('detectAvailableAgents', () => {
     expect(result).toContain('vibe');
     expect(result).toContain('qwen');
     expect(result).toContain('kimi');
+    expect(result).toContain('dsh');
   });
 });
 

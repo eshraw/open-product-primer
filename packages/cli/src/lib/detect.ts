@@ -42,6 +42,7 @@ export function detectAvailableAgents(projectRoot: string): string[] {
   if (fs.existsSync(path.join(projectRoot, '.vibe'))) detected.push('vibe');
   if (fs.existsSync(path.join(projectRoot, '.qwen'))) detected.push('qwen');
   if (fs.existsSync(path.join(projectRoot, '.kimi'))) detected.push('kimi');
+  if (fs.existsSync(path.join(projectRoot, '.dsh'))) detected.push('dsh');
   return detected;
 }
 

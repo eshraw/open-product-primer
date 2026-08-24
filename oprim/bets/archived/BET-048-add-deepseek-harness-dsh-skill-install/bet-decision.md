@@ -38,5 +38,6 @@
 ## Links
 - PDRs: None
 - OpenSpec change: <to be filled when promoted>
+- Spec (delta): oprim/bets/pending/BET-048-add-deepseek-harness-dsh-skill-install/specs/deepseek-harness-agent-support/spec.md
 - Origin: BET-045 (Evaluate DeepSeek coding-agent harness options)
 - Reference: https://github.com/deepseek-ai/deepseek-harness, docs/subsystems/skills.md
