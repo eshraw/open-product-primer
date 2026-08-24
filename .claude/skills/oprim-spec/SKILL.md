@@ -3,9 +3,6 @@ name: oprim-spec
 description: Generate a native oprim capability spec delta at oprim/bets/pending/BET-NNN-<slug>/specs/<capability>/spec.md while a bet is active, in RFC 2119 (SHALL/SHOULD/MAY) requirements and Gherkin scenarios — folded into oprim/specs/<capability>/spec.md (current truth) when the bet is archived. On the first invocation for a bet, also generates design.md and tasks.md alongside the spec delta.
 ---
 
-## Step 0: Check relevant product decisions
-Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
-
 Generate a capability spec delta for an active bet — RFC 2119 requirements plus Gherkin scenarios, no OpenSpec required. This skill never writes to `oprim/specs/` directly; `oprim-archive` folds the delta into current truth when the bet is archived.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.

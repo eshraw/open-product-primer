@@ -3,9 +3,6 @@ name: oprim-sequence
 description: Validate and update the primer sequencing board — triage mode computes board health and surfaces specific suggestions; seeded mode targets a specific context
 ---
 
-## Step 0: Check relevant product decisions
-Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
-
 Manage the primer sequencing board in `oprim/sequence.yaml`.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.

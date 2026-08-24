@@ -25,10 +25,6 @@ notes:
     - usability
 agents:
   - claude
-  - cursor
-  - poolside
-  - codex
-  - gemini
 context: ''
 rules: {}
 remote_context:

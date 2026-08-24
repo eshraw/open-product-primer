@@ -3,9 +3,6 @@ name: oprim-pdr
 description: Create a new Product Decision Record in oprim/decisions/ with auto-assigned ID and guided prompting
 ---
 
-## Step 0: Check relevant product decisions
-Invoke the `oprim:context` skill using the Skill tool. If matching PDRs are surfaced, review them before proceeding. If no PDRs match or `oprim/decisions/` is empty, the skill exits silently — continue to Step 1 immediately.
-
 Create a new Product Decision Record (PDR) in `oprim/decisions/`.
 
 **Interactive prompts:** Use the **AskUserQuestion tool** for every question in this skill — do not write questions as plain text.
