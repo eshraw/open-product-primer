@@ -17,6 +17,13 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.10.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.9.0...cli-v2.10.0) (2026-08-24)
+
+
+### Features
+
+* add deepseek harness skill creation ([8d8806c](https://github.com/eshraw/open-product-primer/commit/8d8806c34e89ae3592eea4fd5d6c106c85d73f6f))
+
 ## [2.9.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.8.0...cli-v2.9.0) (2026-08-20)
 
 
