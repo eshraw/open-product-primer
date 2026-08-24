@@ -90,6 +90,8 @@ function detectAvailableAgents(projectRoot) {
         detected.push('qwen');
     if (fs.existsSync(path.join(projectRoot, '.kimi')))
         detected.push('kimi');
+    if (fs.existsSync(path.join(projectRoot, '.dsh')))
+        detected.push('dsh');
     return detected;
 }
 function writeAgentsToConfig(agents, projectRoot) {

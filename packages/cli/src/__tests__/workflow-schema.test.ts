@@ -179,6 +179,39 @@ describe('loadWorkflowSchema', () => {
     expect(schema.kimi.skill).toBe(false);
   });
 
+  it('dsh.skill defaults to poolside.skill when a schema declares no dsh key (bet-048)', () => {
+    const schema = loadWorkflowSchema('bet', tmpDir);
+    expect(schema.poolside.skill).toBe(true);
+    expect(schema.dsh.skill).toBe(true);
+  });
+
+  it('dsh.skill can be overridden independently of poolside.skill', () => {
+    fs.writeFileSync(
+      path.join(overridesDir, 'bet.schema.yaml'),
+      [
+        'id: bet',
+        'skillName: oprim-bet',
+        'title: null',
+        'description: Custom bet description',
+        'claude:',
+        '  skill: true',
+        '  command: null',
+        'cursor:',
+        '  skill: false',
+        '  command: null',
+        'poolside:',
+        '  skill: true',
+        'dsh:',
+        '  skill: false',
+        'inline: false',
+      ].join('\n')
+    );
+
+    const schema = loadWorkflowSchema('bet', tmpDir);
+    expect(schema.poolside.skill).toBe(true);
+    expect(schema.dsh.skill).toBe(false);
+  });
+
   it('vibe.skill can be overridden independently of poolside.skill', () => {
     fs.writeFileSync(
       path.join(overridesDir, 'bet.schema.yaml'),

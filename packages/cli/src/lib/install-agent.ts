@@ -7,7 +7,7 @@ import { readSpecFramework, deriveDefaultSpecFramework } from './config-merge';
 import { loadWorkflowSchema } from './workflow-schema';
 import { renderSkillBody, renderClaudeCommand, renderCursorCommand, renderAgentInstructions } from './workflow-renderer';
 
-export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe' | 'qwen' | 'kimi';
+export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe' | 'qwen' | 'kimi' | 'dsh';
 export const SUPPORTED_AGENTS: readonly Agent[] = [
   'claude',
   'cursor',
@@ -17,6 +17,7 @@ export const SUPPORTED_AGENTS: readonly Agent[] = [
   'vibe',
   'qwen',
   'kimi',
+  'dsh',
 ];
 
 // oprim/config.yaml (via integrations.spec_framework) is the source of truth for the
@@ -88,6 +89,7 @@ export async function promptAgentSelection(projectRoot: string): Promise<string[
       { name: 'Mistral Vibe', value: 'vibe', checked: detected.includes('vibe') },
       { name: 'Qwen Code', value: 'qwen', checked: detected.includes('qwen') },
       { name: 'Kimi CLI', value: 'kimi', checked: detected.includes('kimi') },
+      { name: 'DeepSeek Harness', value: 'dsh', checked: detected.includes('dsh') },
     ],
   });
 }
@@ -319,6 +321,35 @@ export function installAgentSkills(
     if (dirCreated) {
       console.log(chalk.dim('  .qwen/ created — Qwen Code will discover these files automatically.'));
     }
+  } else if (agent === 'dsh') {
+    const dshDir = path.join(projectRoot, '.dsh');
+    const dirCreated = !fs.existsSync(dshDir);
+
+    const skillsBase = path.join(dshDir, 'skills');
+    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+      const schema = loadWorkflowSchema(id, projectRoot);
+      if (!schema.dsh.skill || !schema.skillName) continue;
+      writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
+      console.log(chalk.green('✓') + ` .dsh/skills/${schema.skillName}/SKILL.md`);
+    }
+
+    const dshSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
+    if (framework === 'native') {
+      writeFile(dshSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
+      console.log(chalk.green('✓') + ' .dsh/skills/oprim-spec/SKILL.md');
+    } else if (fs.existsSync(dshSpecSkillPath)) {
+      fs.unlinkSync(dshSpecSkillPath);
+      try { fs.rmdirSync(path.dirname(dshSpecSkillPath)); } catch { /* not empty or already gone */ }
+      console.log(chalk.dim('  removed .dsh/skills/oprim-spec/SKILL.md'));
+    }
+
+    const agentsFile = path.join(projectRoot, 'AGENTS.md');
+    writeAgentInstructionFile(agentsFile, dshInstructions());
+    console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
+
+    if (dirCreated) {
+      console.log(chalk.dim('  .dsh/ created — DeepSeek Harness will discover these files automatically.'));
+    }
   } else if (agent === 'kimi') {
     // Kimi CLI is a split-path install: .kimi/ is the detection signal, but skills are
     // discovered from a project-root .skills/ directory, not .kimi/skills/ — see
@@ -537,6 +568,13 @@ export const QWEN_SKILLS: Record<string, string> = Object.fromEntries(
 );
 
 export const KIMI_SKILLS: Record<string, string> = Object.fromEntries(
+  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+    const schema = loadWorkflowSchema(id);
+    return [schema.skillName as string, renderSkillBody(id)];
+  })
+);
+
+export const DSH_SKILLS: Record<string, string> = Object.fromEntries(
   POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
@@ -768,5 +806,9 @@ export function qwenInstructions(): string {
 }
 
 export function kimiInstructions(): string {
+  return renderAgentInstructions();
+}
+
+export function dshInstructions(): string {
   return renderAgentInstructions();
 }

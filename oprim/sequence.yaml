@@ -18,11 +18,6 @@ later:
     requires_pdrs: []
 
 backlog:
-  - id: BET-048
-    title: "Add DeepSeek Harness dsh skill install support"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-049
     title: "Explore native dsh plugin for oprim workspace tools"
     blocked_by: []

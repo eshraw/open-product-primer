@@ -23,6 +23,7 @@ export interface WorkflowSchema {
   vibe: { skill: boolean };
   qwen: { skill: boolean };
   kimi: { skill: boolean };
+  dsh: { skill: boolean };
   inline: boolean;
   variants: string[] | null;
 }
@@ -55,12 +56,14 @@ function parseSchema(raw: string, filePath: string): WorkflowSchema {
   const claude = requireField<Record<string, unknown>>(obj, 'claude', filePath);
   const cursor = requireField<Record<string, unknown>>(obj, 'cursor', filePath);
   const poolside = requireField<Record<string, unknown>>(obj, 'poolside', filePath);
-  // vibe/qwen/kimi are optional and mirror poolside by default — see mistral-vibe-agent-support,
-  // qwen-code-agent-support, and kimi-cli-agent-support specs. This keeps existing bundled/forked
-  // schemas (none declare a `vibe:`/`qwen:`/`kimi:` key) working unchanged.
+  // vibe/qwen/kimi/dsh are optional and mirror poolside by default — see mistral-vibe-agent-support,
+  // qwen-code-agent-support, kimi-cli-agent-support, and deepseek-harness-agent-support specs. This
+  // keeps existing bundled/forked schemas (none declare a `vibe:`/`qwen:`/`kimi:`/`dsh:` key) working
+  // unchanged.
   const vibe = (obj.vibe as Record<string, unknown> | undefined) ?? poolside;
   const qwen = (obj.qwen as Record<string, unknown> | undefined) ?? poolside;
   const kimi = (obj.kimi as Record<string, unknown> | undefined) ?? poolside;
+  const dsh = (obj.dsh as Record<string, unknown> | undefined) ?? poolside;
   requireField(obj, 'inline', filePath);
 
   return {
@@ -75,6 +78,7 @@ function parseSchema(raw: string, filePath: string): WorkflowSchema {
     vibe: { skill: Boolean(vibe.skill) },
     qwen: { skill: Boolean(qwen.skill) },
     kimi: { skill: Boolean(kimi.skill) },
+    dsh: { skill: Boolean(dsh.skill) },
     inline: Boolean(obj.inline),
     variants: (obj.variants as string[] | undefined) ?? null,
   };
