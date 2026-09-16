@@ -23,3 +23,123 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
+  - id: BET-050
+    title: "Enforce sequence integrity live via WIP guard mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-051
+    title: "Catch spec-delta drift live via interceptor mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-052
+    title: "Surface cross-bet conflicts live via checker mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-053
+    title: "Gate promote command on definition-of-done mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-054
+    title: "Nudge PDR linkage during bet creation mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-055
+    title: "Streamline archive co-archival into single turn"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-056
+    title: "Auto-sync skill version drift via mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-057
+    title: "Surface remote-context staleness via banner mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-058
+    title: "Check multi-agent install parity via mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-059
+    title: "Dry-run criteria metrics before bet ships"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-060
+    title: "Pre-fill bet draft from note during promotion"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-061
+    title: "Lint requirement headers for near-duplicate collisions"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-062
+    title: "Preview config merge diff before update applies"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-063
+    title: "Warn on OpenSpec and native spec dual-mode drift"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-064
+    title: "Nudge overdue bet reviews at session start"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-065
+    title: "Gate backlog-to-now moves on definition-of-done"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-066
+    title: "Gate bet promotion on discovery-doc completeness"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-067
+    title: "Render sequence board as a dependency graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-068
+    title: "Visualize bet lineage as a dependency graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-069
+    title: "Visualize session changes as a blast-radius graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-070
+    title: "Visualize cross-bet conflicts as a graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-071
+    title: "Visualize multi-agent install parity as a graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-072
+    title: "Visualize spec requirement dependencies as a graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - id: BET-073
+    title: "Visualize remote-context citations as a graph"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
