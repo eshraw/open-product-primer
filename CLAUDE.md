@@ -82,6 +82,8 @@ Drop `oprim/workflows/<id>.schema.yaml` and/or `oprim/workflows/<id>.template.md
 
 Hook registration is merged into `.claude/settings.json` (does not clobber existing hooks).
 
+`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` is a real, official Claude Code beta feature (anthropics/claude-code#91870), not a rumor or third-party env var — relevant when assessing feasibility risk for any mod/bet proposing live in-session hooks (e.g. `BET-050`–`BET-066`).
+
 ### Authority boundaries
 
 - `oprim/` owns **why / order / outcomes** (PDRs, bets, sequencing, KPI reviews)

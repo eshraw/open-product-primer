@@ -1,7 +1,12 @@
 wip_limits:
   now: 2
 
-now: []
+now:
+  - id: BET-051
+    title: "Catch spec-delta drift live via interceptor mod"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
 next: []
 
@@ -25,11 +30,6 @@ backlog:
     requires_pdrs: []
   - id: BET-050
     title: "Enforce sequence integrity live via WIP guard mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-051
-    title: "Catch spec-delta drift live via interceptor mod"
     blocked_by: []
     unlocks: []
     requires_pdrs: []

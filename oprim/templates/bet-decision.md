@@ -20,4 +20,3 @@
 
 ## Links
 - PDRs: <PDR-IDs>
-- OpenSpec change: <path once promoted>
