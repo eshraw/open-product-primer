@@ -1,12 +1,7 @@
 wip_limits:
   now: 2
 
-now:
-  - id: BET-051
-    title: "Catch spec-delta drift live via interceptor mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+now: []
 
 next: []
 
