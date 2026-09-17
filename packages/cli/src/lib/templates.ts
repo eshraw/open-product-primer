@@ -9,6 +9,7 @@ export function configTemplate(
 project:
   name: "${projectName}"
 agents: []
+claude_mods: []
 integrations:
   openspec:
     enabled: ${openspecEnabled}

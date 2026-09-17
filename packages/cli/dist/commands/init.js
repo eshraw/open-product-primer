@@ -147,6 +147,22 @@ function initCommand() {
                 (0, install_agent_1.installAgentSkills)(agent, projectRoot, specFramework, pdrSurfacing);
             }
             console.log('\n' + chalk_1.default.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
+            if (selectedAgents.includes('claude')) {
+                const previousMods = (0, detect_1.readClaudeModsFromConfig)(projectRoot);
+                console.log('');
+                const selectedMods = await (0, install_agent_1.promptClaudeModsSelection)(previousMods);
+                if (selectedMods.length > 0 && !(0, install_agent_1.isFunctionHooksActive)(projectRoot)) {
+                    const enable = await (0, install_agent_1.promptEnableFunctionHooks)();
+                    if (enable) {
+                        (0, install_agent_1.enableFunctionHooks)(projectRoot);
+                        console.log(chalk_1.default.green('✓') + ' .claude/settings.json (function hooks enabled)');
+                    }
+                    else {
+                        (0, install_agent_1.printManualFunctionHooksActivation)();
+                    }
+                }
+                (0, install_agent_1.applyClaudeModsSelection)(projectRoot, selectedMods, previousMods);
+            }
         }
         console.log('\nRun ' + chalk_1.default.cyan('oprim doctor') + ' to verify your setup.');
         console.log('\n' +

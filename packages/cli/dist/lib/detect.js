@@ -39,6 +39,8 @@ exports.readAgentsFromConfig = readAgentsFromConfig;
 exports.readOkfEnabledFromConfig = readOkfEnabledFromConfig;
 exports.detectAvailableAgents = detectAvailableAgents;
 exports.writeAgentsToConfig = writeAgentsToConfig;
+exports.readClaudeModsFromConfig = readClaudeModsFromConfig;
+exports.writeClaudeModsToConfig = writeClaudeModsToConfig;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const yaml = __importStar(require("js-yaml"));
@@ -101,5 +103,23 @@ function writeAgentsToConfig(agents, projectRoot) {
     const content = fs.readFileSync(configPath, 'utf-8');
     const config = yaml.load(content);
     config['agents'] = agents;
+    fs.writeFileSync(configPath, yaml.dump(config, { indent: 2 }), 'utf-8');
+}
+function readClaudeModsFromConfig(projectRoot) {
+    const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
+    if (!fs.existsSync(configPath))
+        return [];
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const config = yaml.load(content);
+    const mods = config?.['claude_mods'];
+    return Array.isArray(mods) ? mods : [];
+}
+function writeClaudeModsToConfig(mods, projectRoot) {
+    const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
+    if (!fs.existsSync(configPath))
+        return;
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const config = yaml.load(content);
+    config['claude_mods'] = mods;
     fs.writeFileSync(configPath, yaml.dump(config, { indent: 2 }), 'utf-8');
 }

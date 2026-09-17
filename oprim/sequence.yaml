@@ -28,11 +28,6 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-051
-    title: "Catch spec-delta drift live via interceptor mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-052
     title: "Surface cross-bet conflicts live via checker mod"
     blocked_by: []

@@ -54,3 +54,21 @@ export function writeAgentsToConfig(agents: string[], projectRoot: string): void
   config['agents'] = agents;
   fs.writeFileSync(configPath, yaml.dump(config, { indent: 2 }), 'utf-8');
 }
+
+export function readClaudeModsFromConfig(projectRoot: string): string[] {
+  const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
+  if (!fs.existsSync(configPath)) return [];
+  const content = fs.readFileSync(configPath, 'utf-8');
+  const config = yaml.load(content) as Record<string, unknown> | null;
+  const mods = config?.['claude_mods'];
+  return Array.isArray(mods) ? (mods as string[]) : [];
+}
+
+export function writeClaudeModsToConfig(mods: string[], projectRoot: string): void {
+  const configPath = path.join(projectRoot, 'oprim', 'config.yaml');
+  if (!fs.existsSync(configPath)) return;
+  const content = fs.readFileSync(configPath, 'utf-8');
+  const config = yaml.load(content) as Record<string, unknown>;
+  config['claude_mods'] = mods;
+  fs.writeFileSync(configPath, yaml.dump(config, { indent: 2 }), 'utf-8');
+}

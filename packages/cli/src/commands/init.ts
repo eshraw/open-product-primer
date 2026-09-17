@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import * as path from 'path';
 import chalk from 'chalk';
-import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig } from '../lib/detect';
+import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig, readClaudeModsFromConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
 import {
   installAgentSkills,
@@ -9,6 +9,12 @@ import {
   promptFrameworkSelection,
   promptPdrSurfacing,
   promptOkfFrontmatter,
+  promptClaudeModsSelection,
+  promptEnableFunctionHooks,
+  isFunctionHooksActive,
+  enableFunctionHooks,
+  printManualFunctionHooksActivation,
+  applyClaudeModsSelection,
   SUPPORTED_AGENTS,
   Agent,
 } from '../lib/install-agent';
@@ -152,6 +158,22 @@ export function initCommand(): Command {
           installAgentSkills(agent as Agent, projectRoot, specFramework, pdrSurfacing);
         }
         console.log('\n' + chalk.green('✓') + ` Agent skills installed: ${selectedAgents.join(', ')}`);
+
+        if (selectedAgents.includes('claude')) {
+          const previousMods = readClaudeModsFromConfig(projectRoot);
+          console.log('');
+          const selectedMods = await promptClaudeModsSelection(previousMods);
+          if (selectedMods.length > 0 && !isFunctionHooksActive(projectRoot)) {
+            const enable = await promptEnableFunctionHooks();
+            if (enable) {
+              enableFunctionHooks(projectRoot);
+              console.log(chalk.green('✓') + ' .claude/settings.json (function hooks enabled)');
+            } else {
+              printManualFunctionHooksActivation();
+            }
+          }
+          applyClaudeModsSelection(projectRoot, selectedMods, previousMods);
+        }
       }
 
       console.log('\nRun ' + chalk.cyan('oprim doctor') + ' to verify your setup.');

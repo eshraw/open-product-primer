@@ -40,6 +40,12 @@ exports.CURSOR_COMMANDS = exports.CURSOR_SKILLS = exports.DSH_SKILLS = exports.K
 exports.promptFrameworkSelection = promptFrameworkSelection;
 exports.resolveSpecFramework = resolveSpecFramework;
 exports.promptAgentSelection = promptAgentSelection;
+exports.promptClaudeModsSelection = promptClaudeModsSelection;
+exports.isFunctionHooksActive = isFunctionHooksActive;
+exports.promptEnableFunctionHooks = promptEnableFunctionHooks;
+exports.enableFunctionHooks = enableFunctionHooks;
+exports.printManualFunctionHooksActivation = printManualFunctionHooksActivation;
+exports.applyClaudeModsSelection = applyClaudeModsSelection;
 exports.promptPdrSurfacing = promptPdrSurfacing;
 exports.promptOkfFrontmatter = promptOkfFrontmatter;
 exports.installAgentSkills = installAgentSkills;
@@ -60,6 +66,7 @@ const detect_1 = require("./detect");
 const config_merge_1 = require("./config-merge");
 const workflow_schema_1 = require("./workflow-schema");
 const workflow_renderer_1 = require("./workflow-renderer");
+const claude_mods_1 = require("./claude-mods");
 exports.SUPPORTED_AGENTS = [
     'claude',
     'cursor',
@@ -144,6 +151,140 @@ async function promptAgentSelection(projectRoot) {
             { name: 'DeepSeek Harness', value: 'dsh', checked: detected.includes('dsh') },
         ],
     });
+}
+// ─── claude-mods ───────────────────────────────────────────────────────────
+async function promptClaudeModsSelection(preChecked) {
+    const { checkbox } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
+    return checkbox({
+        message: 'Which Claude Code mods should be installed?',
+        choices: claude_mods_1.CLAUDE_MODS_REGISTRY.map((mod) => ({
+            name: `${mod.title} — ${mod.description}`,
+            value: mod.id,
+            checked: preChecked.includes(mod.id),
+        })),
+    });
+}
+function isFunctionHooksActive(projectRoot) {
+    if (process.env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS)
+        return true;
+    const settingsPath = path.join(projectRoot, '.claude', 'settings.json');
+    if (!fs.existsSync(settingsPath))
+        return false;
+    try {
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+        const env = settings.env;
+        return Boolean(env?.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS);
+    }
+    catch {
+        return false;
+    }
+}
+async function promptEnableFunctionHooks() {
+    const { confirm } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));
+    return confirm({ message: 'Enable Claude Code function hooks now? (y/n)', default: true });
+}
+function enableFunctionHooks(projectRoot) {
+    const settingsPath = path.join(projectRoot, '.claude', 'settings.json');
+    const settings = readSettings(settingsPath);
+    if (!settings.env)
+        settings.env = {};
+    settings.env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS = '1';
+    writeSettings(settingsPath, settings);
+}
+function printManualFunctionHooksActivation() {
+    console.log(chalk_1.default.yellow('  Function hooks are not active.') +
+        ' Selected mod(s) will no-op until you either:\n' +
+        '    - set CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1 in your shell environment, or\n' +
+        '    - add an "env": { "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1" } block to .claude/settings.json');
+}
+function readSettings(settingsPath) {
+    if (!fs.existsSync(settingsPath))
+        return {};
+    try {
+        return JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+    }
+    catch {
+        return {};
+    }
+}
+function writeSettings(settingsPath, settings) {
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
+}
+function addModHookToSettings(settings, hookFile) {
+    if (!settings.hooks)
+        settings.hooks = {};
+    const hooks = settings.hooks;
+    if (!hooks[hookFile.event])
+        hooks[hookFile.event] = [];
+    const entries = hooks[hookFile.event];
+    const present = entries.some((entry) => {
+        const entryHooks = entry.hooks;
+        return entryHooks?.some((h) => h.command === hookFile.command);
+    });
+    if (!present) {
+        const entry = { hooks: [{ type: 'command', command: hookFile.command }] };
+        if (hookFile.matcher)
+            entry.matcher = hookFile.matcher;
+        entries.push(entry);
+    }
+}
+function removeModHookFromSettings(settings, hookFile) {
+    const hooks = settings.hooks;
+    if (!hooks || !hooks[hookFile.event])
+        return;
+    const entries = hooks[hookFile.event];
+    const filtered = entries.filter((entry) => {
+        const entryHooks = entry.hooks;
+        return !entryHooks?.some((h) => h.command === hookFile.command);
+    });
+    if (filtered.length === 0) {
+        delete hooks[hookFile.event];
+    }
+    else {
+        hooks[hookFile.event] = filtered;
+    }
+}
+/**
+ * Merges newly-selected mods' hookFiles into .claude/settings.json (additive, non-clobbering —
+ * same convention as mergeClaudeSettingsHooks) and removes deselected mods' entries, writing/
+ * deleting each mod's hook script file(s) to match. Persists the resulting selection to
+ * oprim/config.yaml's claude_mods key.
+ */
+function applyClaudeModsSelection(projectRoot, selectedIds, previousIds) {
+    const claudeDir = path.join(projectRoot, '.claude');
+    const hooksDir = path.join(claudeDir, 'hooks');
+    const settingsPath = path.join(claudeDir, 'settings.json');
+    const settings = readSettings(settingsPath);
+    const added = selectedIds.filter((id) => !previousIds.includes(id));
+    const removed = previousIds.filter((id) => !selectedIds.includes(id));
+    for (const id of added) {
+        const mod = (0, claude_mods_1.getClaudeMod)(id);
+        if (!mod)
+            continue;
+        for (const hookFile of mod.hookFiles) {
+            const scriptPath = path.join(hooksDir, hookFile.filename);
+            (0, scaffold_1.writeFile)(scriptPath, hookFile.content);
+            fs.chmodSync(scriptPath, 0o755);
+            addModHookToSettings(settings, hookFile);
+            console.log(chalk_1.default.green('✓') + ` .claude/hooks/${hookFile.filename} (${mod.title})`);
+        }
+    }
+    for (const id of removed) {
+        const mod = (0, claude_mods_1.getClaudeMod)(id);
+        if (!mod)
+            continue;
+        for (const hookFile of mod.hookFiles) {
+            const scriptPath = path.join(hooksDir, hookFile.filename);
+            if (fs.existsSync(scriptPath))
+                fs.unlinkSync(scriptPath);
+            removeModHookFromSettings(settings, hookFile);
+            console.log(chalk_1.default.dim(`  removed .claude/hooks/${hookFile.filename} (${mod.title})`));
+        }
+    }
+    if (added.length > 0 || removed.length > 0) {
+        writeSettings(settingsPath, settings);
+    }
+    (0, detect_1.writeClaudeModsToConfig)(selectedIds, projectRoot);
 }
 async function promptPdrSurfacing() {
     const { confirm } = await Promise.resolve().then(() => __importStar(require('@inquirer/prompts')));

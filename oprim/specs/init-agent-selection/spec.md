@@ -1,15 +1,15 @@
 ## Requirements
 
 ### Requirement: oprim init SHALL prompt the user to select which AI agents to install skills for
-During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL present an interactive multi-select prompt listing supported AI tools (Claude Code, Cursor, Codex, Gemini CLI, Poolside, Mistral Vibe, Qwen Code, Kimi CLI) and install `/oprim:*` skills and instructions for each selected tool.
+During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL present an interactive multi-select prompt listing supported AI tools (Claude Code, Cursor, Codex, Gemini CLI, Poolside, Mistral Vibe, Qwen Code, Kimi CLI) and install `/oprim:*` skills and instructions for each selected tool. If Claude Code is among the selected tools, a second multi-select prompt for claude-mods selection SHALL follow (see the `claude-mods` capability).
 
 #### Scenario: User selects Claude Code only
 - **WHEN** the user runs `oprim init` interactively and selects only Claude Code
-- **THEN** the command installs `/oprim:*` skills and commands into `.claude/skills/` and `.claude/commands/oprim/` and writes `agents: [claude]` to `oprim/config.yaml`
+- **THEN** the command installs `/oprim:*` skills and commands into `.claude/skills/` and `.claude/commands/oprim/`, writes `agents: [claude]` to `oprim/config.yaml`, and follows with the claude-mods selection prompt
 
 #### Scenario: User selects both Claude Code and Cursor
 - **WHEN** the user selects both Claude Code and Cursor during `oprim init`
-- **THEN** the command installs skills and commands into both `.claude/` and `.cursor/` directories and writes `agents: [claude, cursor]` to `oprim/config.yaml`
+- **THEN** the command installs skills and commands into both `.claude/` and `.cursor/` directories, writes `agents: [claude, cursor]` to `oprim/config.yaml`, and follows with the claude-mods selection prompt (Cursor does not trigger its own mods prompt)
 
 #### Scenario: User selects Codex
 - **WHEN** the user selects Codex during `oprim init`
@@ -37,15 +37,15 @@ During `oprim init`, after scaffolding the `oprim/` workspace, the system SHALL 
 
 #### Scenario: User selects all eight agents
 - **WHEN** the user selects Claude Code, Cursor, Codex, Gemini CLI, Poolside, Mistral Vibe, Qwen Code, and Kimi CLI during `oprim init`
-- **THEN** the command installs for all eight agents and writes `agents: [claude, cursor, codex, gemini, poolside, vibe, qwen, kimi]` to `oprim/config.yaml`
+- **THEN** the command installs for all eight agents, writes `agents: [claude, cursor, codex, gemini, poolside, vibe, qwen, kimi]` to `oprim/config.yaml`, and follows with the claude-mods selection prompt
 
 #### Scenario: User selects none
 - **WHEN** the user deselects all options during `oprim init`
-- **THEN** no skill files are written, `agents: []` is stored in `oprim/config.yaml`, and the command suggests running `oprim update` later to install for a specific agent
+- **THEN** no skill files are written, `agents: []` is stored in `oprim/config.yaml`, no claude-mods prompt appears, and the command suggests running `oprim update` later to install for a specific agent
 
 #### Scenario: Re-running init on an existing project with agents already configured
 - **WHEN** `oprim/config.yaml` already contains a non-empty `agents:` list and the user re-runs `oprim init`
-- **THEN** the command re-installs skills for the already-configured agents without re-prompting, preserving the existing selection
+- **THEN** the command re-installs skills for the already-configured agents without re-prompting, preserving the existing selection; if `claude` is among them, the claude-mods prompt still runs (existing selection, if any, pre-checked)
 
 ### Requirement: oprim init SHALL support a --agent flag for non-interactive agent selection
 The system SHALL accept one or more `--agent <name>` flags on `oprim init` to specify agent targets without an interactive prompt, enabling use in CI and scripting contexts. Valid agent names are: `claude`, `cursor`, `codex`, `gemini`, `poolside`, `vibe`, `qwen`, `kimi`.

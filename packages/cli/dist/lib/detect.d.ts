@@ -10,3 +10,5 @@ export declare function readAgentsFromConfig(projectRoot: string): string[] | nu
 export declare function readOkfEnabledFromConfig(projectRoot: string): boolean;
 export declare function detectAvailableAgents(projectRoot: string): string[];
 export declare function writeAgentsToConfig(agents: string[], projectRoot: string): void;
+export declare function readClaudeModsFromConfig(projectRoot: string): string[];
+export declare function writeClaudeModsToConfig(mods: string[], projectRoot: string): void;

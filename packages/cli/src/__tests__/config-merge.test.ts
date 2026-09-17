@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { mergeConfigSchema, readSpecFramework, deriveDefaultSpecFramework, mergeSpecFramework } from '../lib/config-merge';
 
 describe('mergeConfigSchema', () => {
-  it('adds context, rules, and remote_context to a config predating those keys', () => {
+  it('adds context, rules, remote_context, and claude_mods to a config predating those keys', () => {
     const old = 'version: 1\nproject:\n  name: "my-project"\nagents: []\n';
     const { content, changed } = mergeConfigSchema(old);
 
@@ -10,6 +10,7 @@ describe('mergeConfigSchema', () => {
     expect(content).toContain('context: ""');
     expect(content).toContain('rules: {}');
     expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
+    expect(content).toContain('claude_mods: []');
   });
 
   it('adds remote_context to a config that still has the old inert store key, leaving store untouched', () => {
@@ -32,7 +33,7 @@ describe('mergeConfigSchema', () => {
   });
 
   it('is a no-op when all schema keys are already present', () => {
-    const current = 'version: 1\nagents: []\ncontext: ""\nrules: {}\nremote_context:\n  enabled: false\n  sources: []\n';
+    const current = 'version: 1\nagents: []\ncontext: ""\nrules: {}\nremote_context:\n  enabled: false\n  sources: []\nclaude_mods: []\n';
     const { content, changed } = mergeConfigSchema(current);
 
     expect(changed).toBe(false);
