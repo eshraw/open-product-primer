@@ -5,7 +5,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initCommand } from '../commands/init';
 import { updateCommand } from '../commands/update';
 import { readAgentsFromConfig } from '../lib/detect';
-import { confirm, select } from '@inquirer/prompts';
+import { checkbox, confirm, select } from '@inquirer/prompts';
+import { readClaudeModsFromConfig } from '../lib/detect';
 
 vi.mock('@inquirer/prompts', () => ({
   checkbox: vi.fn().mockResolvedValue([]),
@@ -26,6 +27,7 @@ afterEach(() => {
   fs.rmSync(tmpDir, { recursive: true, force: true });
   vi.restoreAllMocks();
   vi.mocked(confirm).mockReset().mockResolvedValue(false);
+  vi.mocked(checkbox).mockReset().mockResolvedValue([]);
 });
 
 // 7.4 ─────────────────────────────────────────────────────────────────────────
@@ -49,6 +51,32 @@ describe('oprim init --agent claude', () => {
 
     // Cursor NOT installed
     expect(fs.existsSync(path.join(tmpDir, '.cursor'))).toBe(false);
+  });
+});
+
+// bet-051 — claude-mods selection prompt during init ──────────────────────────
+
+describe('oprim init --agent claude — claude-mods selection', () => {
+  it('installs a selected mod and offers to enable function hooks', async () => {
+    vi.mocked(checkbox).mockResolvedValueOnce(['spec-delta-drift-interceptor']);
+    // confirm() call order: OKF opt-in, PDR surfacing, then the function-hooks enable prompt
+    vi.mocked(confirm).mockResolvedValueOnce(false).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
+
+    expect(readClaudeModsFromConfig(tmpDir)).toEqual(['spec-delta-drift-interceptor']);
+    expect(fs.existsSync(path.join(tmpDir, '.claude', 'hooks', 'spec-delta-drift-interceptor.js'))).toBe(true);
+
+    const settings = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf-8'));
+    expect(settings.env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS).toBe('1');
+  });
+
+  it('skips the mods prompt for a non-Claude agent', async () => {
+    const cmd = initCommand();
+    await cmd.parseAsync(['--agent', 'cursor'], { from: 'user' });
+
+    expect(checkbox).not.toHaveBeenCalled();
   });
 });
 
@@ -262,7 +290,7 @@ describe('oprim update — persisted OKF flag', () => {
 // bet-025 — oprim update additively merges new config schema keys ─────────────
 
 describe('oprim update — config schema merge', () => {
-  it('adds context, rules, and remote_context to a config predating those keys, preserving existing values', async () => {
+  it('adds context, rules, remote_context, and claude_mods to a config predating those keys, preserving existing values', async () => {
     fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
     fs.writeFileSync(
       path.join(tmpDir, 'oprim', 'config.yaml'),
@@ -278,12 +306,13 @@ describe('oprim update — config schema merge', () => {
     expect(content).toContain('context: ""');
     expect(content).toContain('rules: {}');
     expect(content).toContain('remote_context:\n  enabled: false\n  sources: []');
+    expect(content).toContain('claude_mods: []');
   });
 
   it('is a no-op on a config that already has the current schema', async () => {
     fs.mkdirSync(path.join(tmpDir, 'oprim'), { recursive: true });
     const current =
-      'version: 1\nagents:\n  - claude\nintegrations:\n  spec_framework: openspec\ncontext: ""\nrules: {}\nremote_context:\n  enabled: false\n  sources: []\n';
+      'version: 1\nagents:\n  - claude\nintegrations:\n  spec_framework: openspec\ncontext: ""\nrules: {}\nremote_context:\n  enabled: false\n  sources: []\nclaude_mods: []\n';
     fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), current);
 
     const cmd = updateCommand();

@@ -10,6 +10,7 @@ function configTemplate(projectName, openspecEnabled, graphifyEnabled, okfEnable
 project:
   name: "${projectName}"
 agents: []
+claude_mods: []
 integrations:
   openspec:
     enabled: ${openspecEnabled}

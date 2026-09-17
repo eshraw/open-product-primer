@@ -3,6 +3,18 @@ export declare const SUPPORTED_AGENTS: readonly Agent[];
 export declare function promptFrameworkSelection(projectRoot: string): Promise<string>;
 export declare function resolveSpecFramework(projectRoot: string): string;
 export declare function promptAgentSelection(projectRoot: string): Promise<string[]>;
+export declare function promptClaudeModsSelection(preChecked: string[]): Promise<string[]>;
+export declare function isFunctionHooksActive(projectRoot: string): boolean;
+export declare function promptEnableFunctionHooks(): Promise<boolean>;
+export declare function enableFunctionHooks(projectRoot: string): void;
+export declare function printManualFunctionHooksActivation(): void;
+/**
+ * Merges newly-selected mods' hookFiles into .claude/settings.json (additive, non-clobbering —
+ * same convention as mergeClaudeSettingsHooks) and removes deselected mods' entries, writing/
+ * deleting each mod's hook script file(s) to match. Persists the resulting selection to
+ * oprim/config.yaml's claude_mods key.
+ */
+export declare function applyClaudeModsSelection(projectRoot: string, selectedIds: string[], previousIds: string[]): void;
 export declare function promptPdrSurfacing(): Promise<boolean>;
 export declare function promptOkfFrontmatter(): Promise<boolean>;
 export declare function installAgentSkills(agent: Agent, projectRoot: string, framework?: string, pdrSurfacing?: boolean): void;

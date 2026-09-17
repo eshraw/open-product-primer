@@ -16,6 +16,7 @@ const context_1 = require("./commands/context");
 const list_1 = require("./commands/list");
 const show_1 = require("./commands/show");
 const status_1 = require("./commands/status");
+const claude_mods_1 = require("./commands/claude-mods");
 const package_json_1 = __importDefault(require("../package.json"));
 const program = new commander_1.Command();
 program
@@ -33,4 +34,5 @@ program.addCommand((0, context_1.contextCommand)());
 program.addCommand((0, list_1.listCommand)());
 program.addCommand((0, show_1.showCommand)());
 program.addCommand((0, status_1.statusCommand)());
+program.addCommand((0, claude_mods_1.claudeModsCommand)());
 program.parse();

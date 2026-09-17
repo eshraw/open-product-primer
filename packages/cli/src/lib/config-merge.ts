@@ -15,6 +15,8 @@ const CONFIG_SCHEMA_FIELDS: ConfigSchemaField[] = [
   // merge only adds missing keys, never removes existing ones), but new/updated configs only
   // ever gain `remote_context`.
   { key: 'remote_context', block: 'remote_context:\n  enabled: false\n  sources: []\n' },
+  // bet-051 — installed claude-mods selection, mirroring how `agents:` is stored/rewritten.
+  { key: 'claude_mods', block: 'claude_mods: []\n' },
 ];
 
 function existingTopLevelKeys(content: string): Set<string> {

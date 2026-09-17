@@ -11,6 +11,7 @@ import { contextCommand } from './commands/context';
 import { listCommand } from './commands/list';
 import { showCommand } from './commands/show';
 import { statusCommand } from './commands/status';
+import { claudeModsCommand } from './commands/claude-mods';
 import pkg from '../package.json';
 
 const program = new Command();
@@ -31,5 +32,6 @@ program.addCommand(contextCommand());
 program.addCommand(listCommand());
 program.addCommand(showCommand());
 program.addCommand(statusCommand());
+program.addCommand(claudeModsCommand());
 
 program.parse();
