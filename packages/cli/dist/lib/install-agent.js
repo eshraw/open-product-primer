@@ -245,27 +245,40 @@ function removeModHookFromSettings(settings, hookFile) {
     }
 }
 /**
- * Merges newly-selected mods' hookFiles into .claude/settings.json (additive, non-clobbering —
- * same convention as mergeClaudeSettingsHooks) and removes deselected mods' entries, writing/
- * deleting each mod's hook script file(s) to match. Persists the resulting selection to
- * oprim/config.yaml's claude_mods key.
+ * Merges newly-selected mods into the project and removes deselected mods' entries, writing/
+ * deleting each mod's files to match. A classic mod's hookFiles merge into .claude/settings.json
+ * (additive, non-clobbering — same convention as mergeClaudeSettingsHooks); a plugin mod's
+ * pluginFiles are written under .claude/skills/<mod.id>/ instead, where the skills-directory
+ * auto-load convention picks it up as a function-hooks plugin — settings.json is untouched for
+ * these. Persists the resulting selection to oprim/config.yaml's claude_mods key.
  */
 function applyClaudeModsSelection(projectRoot, selectedIds, previousIds) {
     const claudeDir = path.join(projectRoot, '.claude');
     const hooksDir = path.join(claudeDir, 'hooks');
+    const skillsDir = path.join(claudeDir, 'skills');
     const settingsPath = path.join(claudeDir, 'settings.json');
     const settings = readSettings(settingsPath);
+    let settingsChanged = false;
     const added = selectedIds.filter((id) => !previousIds.includes(id));
     const removed = previousIds.filter((id) => !selectedIds.includes(id));
     for (const id of added) {
         const mod = (0, claude_mods_1.getClaudeMod)(id);
         if (!mod)
             continue;
+        if ((0, claude_mods_1.isPluginMod)(mod)) {
+            const pluginDir = path.join(skillsDir, mod.id);
+            for (const file of mod.pluginFiles) {
+                (0, scaffold_1.writeFile)(path.join(pluginDir, file.path), file.content);
+            }
+            console.log(chalk_1.default.green('✓') + ` .claude/skills/${mod.id}/ (${mod.title})`);
+            continue;
+        }
         for (const hookFile of mod.hookFiles) {
             const scriptPath = path.join(hooksDir, hookFile.filename);
             (0, scaffold_1.writeFile)(scriptPath, hookFile.content);
             fs.chmodSync(scriptPath, 0o755);
             addModHookToSettings(settings, hookFile);
+            settingsChanged = true;
             console.log(chalk_1.default.green('✓') + ` .claude/hooks/${hookFile.filename} (${mod.title})`);
         }
     }
@@ -273,15 +286,23 @@ function applyClaudeModsSelection(projectRoot, selectedIds, previousIds) {
         const mod = (0, claude_mods_1.getClaudeMod)(id);
         if (!mod)
             continue;
+        if ((0, claude_mods_1.isPluginMod)(mod)) {
+            const pluginDir = path.join(skillsDir, mod.id);
+            if (fs.existsSync(pluginDir))
+                fs.rmSync(pluginDir, { recursive: true, force: true });
+            console.log(chalk_1.default.dim(`  removed .claude/skills/${mod.id}/ (${mod.title})`));
+            continue;
+        }
         for (const hookFile of mod.hookFiles) {
             const scriptPath = path.join(hooksDir, hookFile.filename);
             if (fs.existsSync(scriptPath))
                 fs.unlinkSync(scriptPath);
             removeModHookFromSettings(settings, hookFile);
+            settingsChanged = true;
             console.log(chalk_1.default.dim(`  removed .claude/hooks/${hookFile.filename} (${mod.title})`));
         }
     }
-    if (added.length > 0 || removed.length > 0) {
+    if (settingsChanged) {
         writeSettings(settingsPath, settings);
     }
     (0, detect_1.writeClaudeModsToConfig)(selectedIds, projectRoot);

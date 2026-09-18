@@ -138,8 +138,3 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-074
-    title: "Migrate claude-mods to function hooks, add drift-interceptor UI, and scaffold future mod UI"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []

@@ -35,3 +35,5 @@
 ## Links
 - PDRs: None
 - OpenSpec change: (to be filled when promoted)
+- Spec (delta): oprim/bets/pending/BET-074-migrate-claude-mods-to-function-hooks/specs/claude-mods/spec.md
+- Spec (delta): oprim/bets/pending/BET-074-migrate-claude-mods-to-function-hooks/specs/spec-delta-drift-interceptor/spec.md
