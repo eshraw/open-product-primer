@@ -9,10 +9,12 @@ export declare function promptEnableFunctionHooks(): Promise<boolean>;
 export declare function enableFunctionHooks(projectRoot: string): void;
 export declare function printManualFunctionHooksActivation(): void;
 /**
- * Merges newly-selected mods' hookFiles into .claude/settings.json (additive, non-clobbering —
- * same convention as mergeClaudeSettingsHooks) and removes deselected mods' entries, writing/
- * deleting each mod's hook script file(s) to match. Persists the resulting selection to
- * oprim/config.yaml's claude_mods key.
+ * Merges newly-selected mods into the project and removes deselected mods' entries, writing/
+ * deleting each mod's files to match. A classic mod's hookFiles merge into .claude/settings.json
+ * (additive, non-clobbering — same convention as mergeClaudeSettingsHooks); a plugin mod's
+ * pluginFiles are written under .claude/skills/<mod.id>/ instead, where the skills-directory
+ * auto-load convention picks it up as a function-hooks plugin — settings.json is untouched for
+ * these. Persists the resulting selection to oprim/config.yaml's claude_mods key.
  */
 export declare function applyClaudeModsSelection(projectRoot: string, selectedIds: string[], previousIds: string[]): void;
 export declare function promptPdrSurfacing(): Promise<boolean>;

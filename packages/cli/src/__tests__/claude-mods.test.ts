@@ -24,10 +24,15 @@ afterEach(() => {
 });
 
 describe('CLAUDE_MODS_REGISTRY', () => {
-  it('contains the spec-delta-drift interceptor', () => {
+  it('contains the spec-delta-drift interceptor as a plugin-shaped mod', () => {
     const mod = getClaudeMod('spec-delta-drift-interceptor');
     expect(mod).toBeDefined();
-    expect(mod!.hookFiles.length).toBeGreaterThan(0);
+    expect(mod!.shape).toBe('plugin');
+    if (mod!.shape === 'plugin') {
+      expect(mod!.pluginFiles.length).toBeGreaterThan(0);
+      expect(mod!.pluginFiles.some((f) => f.path === '.claude-plugin/plugin.json')).toBe(true);
+      expect(mod!.pluginFiles.some((f) => f.path === 'hooks/hooks.json')).toBe(true);
+    }
     expect(CLAUDE_MODS_REGISTRY.some((m) => m.id === 'spec-delta-drift-interceptor')).toBe(true);
   });
 });
@@ -96,20 +101,22 @@ describe('applyClaudeModsSelection', () => {
     fs.writeFileSync(path.join(tmpDir, 'oprim', 'config.yaml'), 'version: 1\nagents:\n  - claude\nclaude_mods: []\n');
   }
 
-  it('installs a newly-selected mod: writes its hook file and registers it in settings.json', () => {
+  it('installs a newly-selected plugin-shaped mod: writes its plugin files under .claude/skills/', () => {
     setupClaudeProject();
 
     applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], []);
 
-    const scriptPath = path.join(tmpDir, '.claude', 'hooks', 'spec-delta-drift-interceptor.js');
-    expect(fs.existsSync(scriptPath)).toBe(true);
+    const pluginDir = path.join(tmpDir, '.claude', 'skills', 'spec-delta-drift-interceptor');
+    expect(fs.existsSync(path.join(pluginDir, '.claude-plugin', 'plugin.json'))).toBe(true);
+    expect(fs.existsSync(path.join(pluginDir, 'hooks', 'hooks.json'))).toBe(true);
+    expect(fs.existsSync(path.join(pluginDir, 'hooks', 'register.js'))).toBe(true);
 
-    const settings = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf-8'));
-    expect(settings.hooks.PostToolUse.some((e: { matcher?: string }) => e.matcher === 'Write|Edit')).toBe(true);
+    const settingsPath = path.join(tmpDir, '.claude', 'settings.json');
+    expect(fs.existsSync(settingsPath)).toBe(false);
     expect(readClaudeModsFromConfig(tmpDir)).toEqual(['spec-delta-drift-interceptor']);
   });
 
-  it('leaves unrelated existing hooks untouched when installing a mod', () => {
+  it('leaves existing settings.json untouched when installing a plugin-shaped mod', () => {
     setupClaudeProject();
     fs.writeFileSync(
       path.join(tmpDir, '.claude', 'settings.json'),
@@ -120,20 +127,17 @@ describe('applyClaudeModsSelection', () => {
 
     const settings = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf-8'));
     expect(settings.hooks.Stop[0].hooks[0].command).toBe('bash ".claude/hooks/on-stop.sh"');
-    expect(settings.hooks.PostToolUse).toBeDefined();
+    expect(settings.hooks.PostToolUse).toBeUndefined();
   });
 
-  it('removes a deselected mod: deletes its hook file and settings.json entry', () => {
+  it('removes a deselected plugin-shaped mod: deletes its plugin directory only', () => {
     setupClaudeProject();
     applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], []);
 
     applyClaudeModsSelection(tmpDir, [], ['spec-delta-drift-interceptor']);
 
-    const scriptPath = path.join(tmpDir, '.claude', 'hooks', 'spec-delta-drift-interceptor.js');
-    expect(fs.existsSync(scriptPath)).toBe(false);
-
-    const settings = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf-8'));
-    expect(settings.hooks.PostToolUse).toBeUndefined();
+    const pluginDir = path.join(tmpDir, '.claude', 'skills', 'spec-delta-drift-interceptor');
+    expect(fs.existsSync(pluginDir)).toBe(false);
     expect(readClaudeModsFromConfig(tmpDir)).toEqual([]);
   });
 
@@ -142,7 +146,21 @@ describe('applyClaudeModsSelection', () => {
     applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], []);
     applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], ['spec-delta-drift-interceptor']);
 
+    const pluginDir = path.join(tmpDir, '.claude', 'skills', 'spec-delta-drift-interceptor');
+    expect(fs.existsSync(path.join(pluginDir, 'hooks', 'register.js'))).toBe(true);
+  });
+
+  it('does not remove other mods’ or oprim’s own hooks when removing a plugin-shaped mod', () => {
+    setupClaudeProject();
+    fs.writeFileSync(
+      path.join(tmpDir, '.claude', 'settings.json'),
+      JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: 'command', command: 'bash ".claude/hooks/on-stop.sh"' }] }] } })
+    );
+    applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], []);
+
+    applyClaudeModsSelection(tmpDir, [], ['spec-delta-drift-interceptor']);
+
     const settings = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf-8'));
-    expect(settings.hooks.PostToolUse.length).toBe(1);
+    expect(settings.hooks.Stop[0].hooks[0].command).toBe('bash ".claude/hooks/on-stop.sh"');
   });
 });

@@ -66,7 +66,11 @@ describe('oprim init --agent claude — claude-mods selection', () => {
     await cmd.parseAsync(['--agent', 'claude'], { from: 'user' });
 
     expect(readClaudeModsFromConfig(tmpDir)).toEqual(['spec-delta-drift-interceptor']);
-    expect(fs.existsSync(path.join(tmpDir, '.claude', 'hooks', 'spec-delta-drift-interceptor.js'))).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(tmpDir, '.claude', 'skills', 'spec-delta-drift-interceptor', 'hooks', 'register.js')
+      )
+    ).toBe(true);
 
     const settings = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'settings.json'), 'utf-8'));
     expect(settings.env.CLAUDE_CODE_ENABLE_FUNCTION_HOOKS).toBe('1');

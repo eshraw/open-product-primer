@@ -6,7 +6,7 @@ import { detectAvailableAgents, writeClaudeModsToConfig } from './detect';
 import { readSpecFramework, deriveDefaultSpecFramework } from './config-merge';
 import { loadWorkflowSchema } from './workflow-schema';
 import { renderSkillBody, renderClaudeCommand, renderCursorCommand, renderAgentInstructions } from './workflow-renderer';
-import { CLAUDE_MODS_REGISTRY, getClaudeMod, type ClaudeModHookFile } from './claude-mods';
+import { CLAUDE_MODS_REGISTRY, getClaudeMod, isPluginMod, type ClaudeModHookFile } from './claude-mods';
 
 export type Agent = 'claude' | 'cursor' | 'codex' | 'gemini' | 'poolside' | 'vibe' | 'qwen' | 'kimi' | 'dsh';
 export const SUPPORTED_AGENTS: readonly Agent[] = [
@@ -189,16 +189,20 @@ function removeModHookFromSettings(settings: Record<string, unknown>, hookFile: 
 }
 
 /**
- * Merges newly-selected mods' hookFiles into .claude/settings.json (additive, non-clobbering —
- * same convention as mergeClaudeSettingsHooks) and removes deselected mods' entries, writing/
- * deleting each mod's hook script file(s) to match. Persists the resulting selection to
- * oprim/config.yaml's claude_mods key.
+ * Merges newly-selected mods into the project and removes deselected mods' entries, writing/
+ * deleting each mod's files to match. A classic mod's hookFiles merge into .claude/settings.json
+ * (additive, non-clobbering — same convention as mergeClaudeSettingsHooks); a plugin mod's
+ * pluginFiles are written under .claude/skills/<mod.id>/ instead, where the skills-directory
+ * auto-load convention picks it up as a function-hooks plugin — settings.json is untouched for
+ * these. Persists the resulting selection to oprim/config.yaml's claude_mods key.
  */
 export function applyClaudeModsSelection(projectRoot: string, selectedIds: string[], previousIds: string[]): void {
   const claudeDir = path.join(projectRoot, '.claude');
   const hooksDir = path.join(claudeDir, 'hooks');
+  const skillsDir = path.join(claudeDir, 'skills');
   const settingsPath = path.join(claudeDir, 'settings.json');
   const settings = readSettings(settingsPath);
+  let settingsChanged = false;
 
   const added = selectedIds.filter((id) => !previousIds.includes(id));
   const removed = previousIds.filter((id) => !selectedIds.includes(id));
@@ -206,11 +210,20 @@ export function applyClaudeModsSelection(projectRoot: string, selectedIds: strin
   for (const id of added) {
     const mod = getClaudeMod(id);
     if (!mod) continue;
+    if (isPluginMod(mod)) {
+      const pluginDir = path.join(skillsDir, mod.id);
+      for (const file of mod.pluginFiles) {
+        writeFile(path.join(pluginDir, file.path), file.content);
+      }
+      console.log(chalk.green('✓') + ` .claude/skills/${mod.id}/ (${mod.title})`);
+      continue;
+    }
     for (const hookFile of mod.hookFiles) {
       const scriptPath = path.join(hooksDir, hookFile.filename);
       writeFile(scriptPath, hookFile.content);
       fs.chmodSync(scriptPath, 0o755);
       addModHookToSettings(settings, hookFile);
+      settingsChanged = true;
       console.log(chalk.green('✓') + ` .claude/hooks/${hookFile.filename} (${mod.title})`);
     }
   }
@@ -218,15 +231,22 @@ export function applyClaudeModsSelection(projectRoot: string, selectedIds: strin
   for (const id of removed) {
     const mod = getClaudeMod(id);
     if (!mod) continue;
+    if (isPluginMod(mod)) {
+      const pluginDir = path.join(skillsDir, mod.id);
+      if (fs.existsSync(pluginDir)) fs.rmSync(pluginDir, { recursive: true, force: true });
+      console.log(chalk.dim(`  removed .claude/skills/${mod.id}/ (${mod.title})`));
+      continue;
+    }
     for (const hookFile of mod.hookFiles) {
       const scriptPath = path.join(hooksDir, hookFile.filename);
       if (fs.existsSync(scriptPath)) fs.unlinkSync(scriptPath);
       removeModHookFromSettings(settings, hookFile);
+      settingsChanged = true;
       console.log(chalk.dim(`  removed .claude/hooks/${hookFile.filename} (${mod.title})`));
     }
   }
 
-  if (added.length > 0 || removed.length > 0) {
+  if (settingsChanged) {
     writeSettings(settingsPath, settings);
   }
 
