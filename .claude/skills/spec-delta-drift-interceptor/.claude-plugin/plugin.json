@@ -1,0 +1,5 @@
+{
+  "name": "spec-delta-drift-interceptor",
+  "description": "Catches a bet's spec-delta MODIFIED/REMOVED requirement drifting from oprim/specs current truth at write time.",
+  "version": "1.0.0"
+}

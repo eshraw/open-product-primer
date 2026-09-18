@@ -1,0 +1,6 @@
+{
+  "description": "Runs checkSpecDeltaDrift() on a bet spec-delta write and surfaces drift via a toast, at write time.",
+  "modules": [
+    "./register.js"
+  ]
+}

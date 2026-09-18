@@ -8,8 +8,8 @@
 //     {decision, reason} protocol — cannot draw UI).
 //   - 'plugin': a Claude Code function-hooks plugin (manifest + hooks.json + a register(on) module)
 //     installed at .claude/skills/<id>/, loaded via the project-scope skills-directory auto-load
-//     convention. Can draw UI ($.ui.toast, $.ui.render) but requires
-//     CLAUDE_CODE_ENABLE_FUNCTION_HOOKS and is early access — its API may move between releases.
+//     convention. Can draw UI ($.ui.log, $.ui.render) but requires CLAUDE_CODE_ENABLE_FUNCTION_HOOKS
+//     and is early access — its API may move between releases.
 
 export interface ClaudeModHookFile {
   filename: string; // written to .claude/hooks/<filename>
@@ -48,20 +48,25 @@ export function isPluginMod(mod: ClaudeMod): mod is ClaudeModPlugin {
 
 // register(on) module: on a Write/Edit tool.call to a bet's specs/<capability>/spec.md delta,
 // shells out to `oprim validate --json` (already runs checkSpecDeltaDrift()) and surfaces any
-// MODIFIED/REMOVED drift for that capability via a toast, at write time instead of only at
-// validate/CI time. Never denies the call — this is a write-time convenience on top of
+// MODIFIED/REMOVED drift for that capability as a transcript line, at write time instead of only
+// at validate/CI time. Never denies the call — this is a write-time convenience on top of
 // `oprim validate`, never a second source of required failures. Silently no-ops on any failure
 // (oprim not resolvable, malformed report, etc.).
 const SPEC_DELTA_DRIFT_INTERCEPTOR_REGISTER = `// Function-hooks module for the spec-delta-drift-interceptor mod — see claude-mods.ts.
-// EARLY ACCESS: register(on)/$.ui.toast are gated behind CLAUDE_CODE_ENABLE_FUNCTION_HOOKS and
-// may change shape between Claude Code releases.
-
-import { execSync } from 'node:child_process';
+// EARLY ACCESS: register(on)/$.ui.log/$.process.run are gated behind
+// CLAUDE_CODE_ENABLE_FUNCTION_HOOKS and may change shape between Claude Code releases. A hooks
+// module may only import its own files by relative path and "claude-code" — no Node builtins — so
+// shelling out goes through $.process.run, not node:child_process.
+//
+// Surfaces the drift as a transcript line via $.ui.log rather than $.ui.toast: a toast is a
+// transient overlay whose rendering depends on the session's UI surface, while $.ui.log's default
+// destination ("to: transcript") always lands as a plain line every surface shows — see the
+// anthropics/claude-code \`mods/diff\` example, which uses the same call for its panel-toggle
+// messages ("Diff panel shown"/"Diff panel hidden").
 
 export function register(on) {
-  on('tool.call', async ($, e, next) => {
+  on('tool.call', { tool: ['Write', 'Edit'] }, async ($, e, next) => {
     const result = await next(e);
-    if (e.tool !== 'Write' && e.tool !== 'Edit') return result;
 
     try {
       const filePath = String(e.file_path || '').replace(/\\\\/g, '/');
@@ -71,13 +76,11 @@ export function register(on) {
 
       let output;
       try {
-        output = execSync('npx --no-install oprim validate --json', {
-          encoding: 'utf-8',
-          stdio: ['ignore', 'pipe', 'ignore'],
-        });
-      } catch (err) {
         // validate exits non-zero when a required check fails — stdout still carries the report
-        output = err && err.stdout ? err.stdout.toString() : null;
+        const res = await $.process.run(['npx', '--no-install', 'oprim', 'validate', '--json']);
+        output = res.stdout;
+      } catch {
+        output = null;
       }
       if (!output) return result;
 
@@ -88,7 +91,7 @@ export function register(on) {
       if (drift.length === 0) return result;
 
       const reason = drift.map((c) => \`\${c.name}\${c.note ? \` (\${c.note})\` : ''}\`).join('; ');
-      $.ui.toast(\`Spec-delta drift in \${capability}: \${reason}\`, { timeoutMs: 8000 });
+      $.ui.log(\`⚠ Spec-delta drift in \${capability}: \${reason}\`);
     } catch {
       // Graceful degradation — never error or block on interceptor failure.
     }
