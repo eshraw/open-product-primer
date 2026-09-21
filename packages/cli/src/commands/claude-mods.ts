@@ -13,7 +13,11 @@ import {
 export function claudeModsCommand(): Command {
   return new Command('claude-mods')
     .description('Select which Claude Code function-hook mods are installed')
-    .action(async () => {
+    .option(
+      '-u, --update',
+      'reinstall currently-selected mods with the latest bundled content, without changing the selection'
+    )
+    .action(async (options: { update?: boolean }) => {
       const projectRoot = process.cwd();
       const agents = readAgentsFromConfig(projectRoot);
 
@@ -29,6 +33,17 @@ export function claudeModsCommand(): Command {
       }
 
       const previousMods = readClaudeModsFromConfig(projectRoot);
+
+      if (options.update) {
+        if (previousMods.length === 0) {
+          console.log(chalk.dim('  No mods installed — nothing to update.'));
+          return;
+        }
+        applyClaudeModsSelection(projectRoot, previousMods, previousMods, { force: true });
+        console.log(chalk.green('✓') + ` Claude mods reinstalled: ${previousMods.join(', ')}`);
+        return;
+      }
+
       const selectedMods = await promptClaudeModsSelection(previousMods);
 
       if (selectedMods.length > 0 && !isFunctionHooksActive(projectRoot)) {

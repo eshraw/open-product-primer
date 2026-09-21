@@ -196,7 +196,12 @@ function removeModHookFromSettings(settings: Record<string, unknown>, hookFile: 
  * auto-load convention picks it up as a function-hooks plugin — settings.json is untouched for
  * these. Persists the resulting selection to oprim/config.yaml's claude_mods key.
  */
-export function applyClaudeModsSelection(projectRoot: string, selectedIds: string[], previousIds: string[]): void {
+export function applyClaudeModsSelection(
+  projectRoot: string,
+  selectedIds: string[],
+  previousIds: string[],
+  options: { force?: boolean } = {}
+): void {
   const claudeDir = path.join(projectRoot, '.claude');
   const hooksDir = path.join(claudeDir, 'hooks');
   const skillsDir = path.join(claudeDir, 'skills');
@@ -204,7 +209,10 @@ export function applyClaudeModsSelection(projectRoot: string, selectedIds: strin
   const settings = readSettings(settingsPath);
   let settingsChanged = false;
 
-  const added = selectedIds.filter((id) => !previousIds.includes(id));
+  // force rewrites every selected mod's files even if it was already selected — used by
+  // `oprim claude-mods --update` to sync installed files with the current bundled registry
+  // content, since the normal added/removed diff below is a no-op for an unchanged selection.
+  const added = options.force ? selectedIds : selectedIds.filter((id) => !previousIds.includes(id));
   const removed = previousIds.filter((id) => !selectedIds.includes(id));
 
   for (const id of added) {
