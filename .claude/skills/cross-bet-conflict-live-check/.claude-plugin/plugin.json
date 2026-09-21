@@ -1,0 +1,5 @@
+{
+  "name": "cross-bet-conflict",
+  "description": "Surfaces two active bets touching the same requirement header in the same capability's spec delta at write time.",
+  "version": "1.0.0"
+}

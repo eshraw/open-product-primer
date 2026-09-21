@@ -13,15 +13,54 @@ export interface FoldResult {
   notes: string[];
 }
 
+export type ConflictCriticality = 'low' | 'medium' | 'high';
+
 export interface CrossBetConflict {
   betA: string;
   betB: string;
   capability: string;
   header: string;
+  criticality: ConflictCriticality;
+}
+
+interface HeaderInfo {
+  header: string;
+  section: DeltaSection;
+  content: string;
 }
 
 function normalizeHeader(header: string): string {
   return header.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+/** Word-overlap ratio (0–1) between two requirement bodies, used to gauge how much two edits diverge. */
+function contentSimilarity(a: string, b: string): number {
+  const tokenize = (s: string): Set<string> => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
+  const setA = tokenize(a);
+  const setB = tokenize(b);
+  if (setA.size === 0 && setB.size === 0) return 1;
+  let intersection = 0;
+  for (const token of setA) if (setB.has(token)) intersection++;
+  const union = new Set([...setA, ...setB]).size;
+  return union === 0 ? 1 : intersection / union;
+}
+
+/**
+ * Estimates how urgently two bets touching the same requirement header need to coordinate:
+ * one side removing what the other adds/modifies is a direct contradiction (high); both sides
+ * removing the same requirement is agreement, not conflict (low); otherwise it comes down to how
+ * much the two requirement bodies actually diverge.
+ */
+function estimateCriticality(a: HeaderInfo, b: HeaderInfo): ConflictCriticality {
+  const sections = [a.section, b.section];
+  if (sections.includes('REMOVED') && sections.includes('ADDED')) return 'high';
+  if (sections.includes('REMOVED') && sections.includes('MODIFIED')) return 'high';
+  if (a.section === 'REMOVED' && b.section === 'REMOVED') return 'low';
+
+  const similarity = contentSimilarity(a.content, b.content);
+  if (similarity >= 0.8) return 'low';
+  if (similarity >= 0.5) return 'medium';
+  return 'high';
 }
 
 function extractSection(markdown: string, sectionTitle: string): string | null {
@@ -144,24 +183,27 @@ export function findCrossBetConflicts(betsDir: string): CrossBetConflict[] {
     .filter((e) => e.isDirectory() && e.name !== 'archived')
     .map((e) => e.name);
 
-  const betCapHeaders = new Map<string, Map<string, string[]>>();
+  const betCapHeaders = new Map<string, Map<string, HeaderInfo[]>>();
 
   for (const betName of betNames) {
     const specsDir = path.join(betsDir, betName, 'specs');
     if (!fs.existsSync(specsDir)) continue;
 
-    const capMap = new Map<string, string[]>();
+    const capMap = new Map<string, HeaderInfo[]>();
     const capEntries = fs.readdirSync(specsDir, { withFileTypes: true }).filter((e) => e.isDirectory());
     for (const capEntry of capEntries) {
       const specPath = path.join(specsDir, capEntry.name, 'spec.md');
       if (!fs.existsSync(specPath)) continue;
       const content = fs.readFileSync(specPath, 'utf-8');
-      const headers = [
-        ...parseRequirementHeaders(content, 'ADDED'),
-        ...parseRequirementHeaders(content, 'MODIFIED'),
-        ...parseRequirementHeaders(content, 'REMOVED'),
-      ];
-      capMap.set(capEntry.name, headers);
+      const infos: HeaderInfo[] = [];
+      for (const section of ['ADDED', 'MODIFIED', 'REMOVED'] as const) {
+        const sectionContent = extractSection(content, `${section} Requirements`);
+        if (sectionContent === null) continue;
+        for (const block of parseRequirementBlocks(sectionContent)) {
+          infos.push({ header: block.header, section, content: block.content });
+        }
+      }
+      capMap.set(capEntry.name, infos);
     }
     betCapHeaders.set(betName, capMap);
   }
@@ -176,10 +218,16 @@ export function findCrossBetConflicts(betsDir: string): CrossBetConflict[] {
       for (const [capability, headersA] of capMapA) {
         const headersB = capMapB.get(capability);
         if (!headersB) continue;
-        for (const headerA of headersA) {
-          const match = headersB.find((h) => normalizeHeader(h) === normalizeHeader(headerA));
-          if (match) {
-            conflicts.push({ betA: names[i]!, betB: names[j]!, capability, header: headerA });
+        for (const infoA of headersA) {
+          const infoB = headersB.find((h) => normalizeHeader(h.header) === normalizeHeader(infoA.header));
+          if (infoB) {
+            conflicts.push({
+              betA: names[i]!,
+              betB: names[j]!,
+              capability,
+              header: infoA.header,
+              criticality: estimateCriticality(infoA, infoB),
+            });
           }
         }
       }

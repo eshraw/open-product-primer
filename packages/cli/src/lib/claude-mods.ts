@@ -115,12 +115,12 @@ const CROSS_BET_CONFLICT_LIVE_CHECK_REGISTER = `// Function-hooks module for the
 //
 // Reuses checkCrossBetConflicts() (via \`oprim validate --json\`) as the detection primitive rather
 // than forking conflict-matching logic, so this live notice and \`oprim validate\`'s own check never
-// drift apart. Surfaced via $.ui.log (always lands as a transcript line, unlike a toast) with a
-// "[cross-bet conflict]" tag rather than the drift interceptor's warning glyph, since an
-// overlapping delta is a heads-up for the author to go coordinate, not necessarily a confirmed
-// problem yet.
+// drift apart. Surfaced via $.ui.log (always lands as a transcript line, unlike a toast) tagged with
+// the check's own estimated criticality (low/medium/high, from estimateCriticality() in
+// spec-delta.ts) rather than a generic "[cross-bet conflict]" label, so the author can tell a
+// contradictory add-vs-remove from two edits that happen to agree without opening either delta.
 
-const CONFLICT_LINE = /^spec-delta: (BET-\\d+) and (BET-\\d+) both touch "(.*)" in (.+)$/;
+const CONFLICT_LINE = /^spec-delta: (BET-\\d+) and (BET-\\d+) both touch "(.*)" in (.+) \\[criticality: (low|medium|high)\\]$/;
 
 export function register(on) {
   on('tool.call', { tool: ['Write', 'Edit'] }, async ($, e, next) => {
@@ -148,11 +148,11 @@ export function register(on) {
       for (const check of report.checks || []) {
         const lineMatch = check.name && check.name.match(CONFLICT_LINE);
         if (!lineMatch) continue;
-        const [, betA, betB, header, cap] = lineMatch;
+        const [, betA, betB, header, cap, criticality] = lineMatch;
         if (cap !== capability) continue;
         if (betA !== betId && betB !== betId) continue;
         const otherBet = betA === betId ? betB : betA;
-        $.ui.log(\`[cross-bet conflict] \${otherBet} also touches "\${header}" in \${capability} — heads-up, not a blocker\`);
+        $.ui.log(\`[\${criticality}] \${otherBet} also touches "\${header}" in \${capability} — heads-up, not a blocker\`);
       }
     } catch {
       // Graceful degradation — never error or block on live-check failure.
@@ -176,7 +176,7 @@ export const CLAUDE_MODS_REGISTRY: ClaudeMod[] = [
         content:
           JSON.stringify(
             {
-              name: 'spec-delta-drift-interceptor',
+              name: 'spec-drift-check',
               description:
                 "Catches a bet's spec-delta MODIFIED/REMOVED requirement drifting from oprim/specs current truth at write time.",
               version: '1.0.0',
@@ -216,7 +216,7 @@ export const CLAUDE_MODS_REGISTRY: ClaudeMod[] = [
         content:
           JSON.stringify(
             {
-              name: 'cross-bet-conflict-live-check',
+              name: 'cross-bet-conflict',
               description:
                 "Surfaces two active bets touching the same requirement header in the same capability's spec delta at write time.",
               version: '1.0.0',
