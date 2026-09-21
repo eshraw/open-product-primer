@@ -1,9 +1,24 @@
 wip_limits:
   now: 2
 
-now: []
+now:
+  - title: "Gate promote command on definition-of-done mod"
+    id: BET-053
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
-next: []
+next:
+  - title: "Auto-sync skill version drift via mod"
+    id: BET-056
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
+  - title: "Gate backlog-to-now moves on definition-of-done"
+    id: BET-065
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
 
 later:
   - id: BET-014
@@ -16,28 +31,6 @@ later:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-
-backlog:
-  - id: BET-049
-    title: "Explore native dsh plugin for oprim workspace tools"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-050
-    title: "Enforce sequence integrity live via WIP guard mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-052
-    title: "Surface cross-bet conflicts live via checker mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-053
-    title: "Gate promote command on definition-of-done mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-054
     title: "Nudge PDR linkage during bet creation mod"
     blocked_by: []
@@ -45,11 +38,6 @@ backlog:
     requires_pdrs: []
   - id: BET-055
     title: "Streamline archive co-archival into single turn"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-056
-    title: "Auto-sync skill version drift via mod"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
@@ -93,13 +81,15 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-065
-    title: "Gate backlog-to-now moves on definition-of-done"
+  - id: BET-066
+    title: "Gate bet promotion on discovery-doc completeness"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-066
-    title: "Gate bet promotion on discovery-doc completeness"
+
+backlog:
+  - id: BET-049
+    title: "Explore native dsh plugin for oprim workspace tools"
     blocked_by: []
     unlocks: []
     requires_pdrs: []

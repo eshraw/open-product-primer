@@ -1,8 +1,8 @@
 # Decision: BET-052 Surface cross-bet conflicts live via checker mod
 
 ## Status
-- Decision: Defer
-- Date: 2026-09-16
+- Decision: Build now
+- Date: 2026-09-21
 - Owner: Eshane Rawat
 - Review date: 2026-10-16
 
@@ -32,3 +32,4 @@
 ## Links
 - PDRs: None
 - OpenSpec change: <to be filled when promoted>
+- Spec (delta): oprim/bets/pending/BET-052-cross-bet-conflict-live-check-mod/specs/cross-bet-conflict-detection/spec.md
