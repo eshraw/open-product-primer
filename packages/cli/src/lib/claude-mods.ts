@@ -101,6 +101,68 @@ export function register(on) {
 }
 `;
 
+// register(on) module: on a Write/Edit tool.call to a bet's specs/<capability>/spec.md delta,
+// shells out to `oprim validate --json` (already runs checkCrossBetConflicts()) and surfaces any
+// conflict involving this bet's capability as a non-blocking transcript notice, at write time
+// instead of only at validate/CI time. Never denies the call, and reads as a heads-up (the other
+// bet's author may not be in this session, and their delta may itself be abandoned/in-progress) —
+// never an error. Silently no-ops on any failure.
+const CROSS_BET_CONFLICT_LIVE_CHECK_REGISTER = `// Function-hooks module for the cross-bet-conflict-live-check mod — see claude-mods.ts.
+// EARLY ACCESS: register(on)/$.ui.log/$.process.run are gated behind
+// CLAUDE_CODE_ENABLE_FUNCTION_HOOKS and may change shape between Claude Code releases. A hooks
+// module may only import its own files by relative path and "claude-code" — no Node builtins — so
+// shelling out goes through $.process.run, not node:child_process.
+//
+// Reuses checkCrossBetConflicts() (via \`oprim validate --json\`) as the detection primitive rather
+// than forking conflict-matching logic, so this live notice and \`oprim validate\`'s own check never
+// drift apart. Surfaced via $.ui.log (always lands as a transcript line, unlike a toast) with a
+// "[cross-bet conflict]" tag rather than the drift interceptor's warning glyph, since an
+// overlapping delta is a heads-up for the author to go coordinate, not necessarily a confirmed
+// problem yet.
+
+const CONFLICT_LINE = /^spec-delta: (BET-\\d+) and (BET-\\d+) both touch "(.*)" in (.+)$/;
+
+export function register(on) {
+  on('tool.call', { tool: ['Write', 'Edit'] }, async ($, e, next) => {
+    const result = await next(e);
+
+    try {
+      const filePath = String(e.file_path || '').replace(/\\\\/g, '/');
+      const match = filePath.match(/oprim\\/bets\\/pending\\/([^/]+)\\/specs\\/([^/]+)\\/spec\\.md$/);
+      if (!match) return result;
+      const [, betDir, capability] = match;
+      const betIdMatch = betDir.match(/^(BET-\\d+)/);
+      const betId = betIdMatch ? betIdMatch[1] : betDir;
+
+      let output;
+      try {
+        // validate exits non-zero when a required check fails — stdout still carries the report
+        const res = await $.process.run(['npx', '--no-install', 'oprim', 'validate', '--json']);
+        output = res.stdout;
+      } catch {
+        output = null;
+      }
+      if (!output) return result;
+
+      const report = JSON.parse(output);
+      for (const check of report.checks || []) {
+        const lineMatch = check.name && check.name.match(CONFLICT_LINE);
+        if (!lineMatch) continue;
+        const [, betA, betB, header, cap] = lineMatch;
+        if (cap !== capability) continue;
+        if (betA !== betId && betB !== betId) continue;
+        const otherBet = betA === betId ? betB : betA;
+        $.ui.log(\`[cross-bet conflict] \${otherBet} also touches "\${header}" in \${capability} — heads-up, not a blocker\`);
+      }
+    } catch {
+      // Graceful degradation — never error or block on live-check failure.
+    }
+
+    return result;
+  });
+}
+`;
+
 export const CLAUDE_MODS_REGISTRY: ClaudeMod[] = [
   {
     id: 'spec-delta-drift-interceptor',
@@ -139,6 +201,46 @@ export const CLAUDE_MODS_REGISTRY: ClaudeMod[] = [
       {
         path: 'hooks/register.js',
         content: SPEC_DELTA_DRIFT_INTERCEPTOR_REGISTER,
+      },
+    ],
+  },
+  {
+    id: 'cross-bet-conflict-live-check',
+    title: 'Cross-bet conflict live check',
+    description:
+      "Surfaces two active bets touching the same requirement header in the same capability's spec delta at write time, instead of only at oprim validate/CI time.",
+    shape: 'plugin',
+    pluginFiles: [
+      {
+        path: '.claude-plugin/plugin.json',
+        content:
+          JSON.stringify(
+            {
+              name: 'cross-bet-conflict-live-check',
+              description:
+                "Surfaces two active bets touching the same requirement header in the same capability's spec delta at write time.",
+              version: '1.0.0',
+            },
+            null,
+            2
+          ) + '\n',
+      },
+      {
+        path: 'hooks/hooks.json',
+        content:
+          JSON.stringify(
+            {
+              description:
+                'Runs checkCrossBetConflicts() on a bet spec-delta write and surfaces any overlap as a non-blocking notice, at write time.',
+              modules: ['./register.js'],
+            },
+            null,
+            2
+          ) + '\n',
+      },
+      {
+        path: 'hooks/register.js',
+        content: CROSS_BET_CONFLICT_LIVE_CHECK_REGISTER,
       },
     ],
   },

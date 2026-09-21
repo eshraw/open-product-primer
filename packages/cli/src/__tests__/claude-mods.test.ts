@@ -35,6 +35,21 @@ describe('CLAUDE_MODS_REGISTRY', () => {
     }
     expect(CLAUDE_MODS_REGISTRY.some((m) => m.id === 'spec-delta-drift-interceptor')).toBe(true);
   });
+
+  it('contains the cross-bet conflict live check as a plugin-shaped mod', () => {
+    const mod = getClaudeMod('cross-bet-conflict-live-check');
+    expect(mod).toBeDefined();
+    expect(mod!.shape).toBe('plugin');
+    if (mod!.shape === 'plugin') {
+      expect(mod!.pluginFiles.length).toBeGreaterThan(0);
+      expect(mod!.pluginFiles.some((f) => f.path === '.claude-plugin/plugin.json')).toBe(true);
+      expect(mod!.pluginFiles.some((f) => f.path === 'hooks/hooks.json')).toBe(true);
+      const registerFile = mod!.pluginFiles.find((f) => f.path === 'hooks/register.js');
+      expect(registerFile).toBeDefined();
+      expect(() => new Function(registerFile!.content.replace('export function register', 'return function register'))).not.toThrow();
+    }
+    expect(CLAUDE_MODS_REGISTRY.some((m) => m.id === 'cross-bet-conflict-live-check')).toBe(true);
+  });
 });
 
 describe('isFunctionHooksActive', () => {
