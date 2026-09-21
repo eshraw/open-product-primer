@@ -2,11 +2,6 @@ wip_limits:
   now: 2
 
 now:
-  - title: "Enforce sequence integrity live via WIP guard mod"
-    id: BET-050
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - title: "Gate promote command on definition-of-done mod"
     id: BET-053
     blocked_by: []
