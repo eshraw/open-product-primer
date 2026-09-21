@@ -17,6 +17,13 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.13.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.12.1...cli-v2.13.0) (2026-09-21)
+
+
+### Features
+
+* cross-bet conflict mod ([a71e98b](https://github.com/eshraw/open-product-primer/commit/a71e98b62b9330fe6cedbcaee10b7734de4eea4a))
+
 ## [2.12.1](https://github.com/eshraw/open-product-primer/compare/cli-v2.12.0...cli-v2.12.1) (2026-09-18)
 
 
