@@ -7,11 +7,6 @@ now:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - title: "Surface cross-bet conflicts live via checker mod"
-    id: BET-052
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
 
 next:
   - title: "Auto-sync skill version drift via mod"
