@@ -165,6 +165,26 @@ describe('applyClaudeModsSelection', () => {
     expect(fs.existsSync(path.join(pluginDir, 'hooks', 'register.js'))).toBe(true);
   });
 
+  it('force rewrites an already-selected mod’s files instead of no-op-ing', () => {
+    setupClaudeProject();
+    applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], []);
+    const registerPath = path.join(
+      tmpDir,
+      '.claude',
+      'skills',
+      'spec-delta-drift-interceptor',
+      'hooks',
+      'register.js'
+    );
+    fs.writeFileSync(registerPath, '// stale content');
+
+    applyClaudeModsSelection(tmpDir, ['spec-delta-drift-interceptor'], ['spec-delta-drift-interceptor'], {
+      force: true,
+    });
+
+    expect(fs.readFileSync(registerPath, 'utf-8')).not.toContain('stale content');
+  });
+
   it('does not remove other mods’ or oprim’s own hooks when removing a plugin-shaped mod', () => {
     setupClaudeProject();
     fs.writeFileSync(

@@ -16,7 +16,9 @@ export declare function printManualFunctionHooksActivation(): void;
  * auto-load convention picks it up as a function-hooks plugin — settings.json is untouched for
  * these. Persists the resulting selection to oprim/config.yaml's claude_mods key.
  */
-export declare function applyClaudeModsSelection(projectRoot: string, selectedIds: string[], previousIds: string[]): void;
+export declare function applyClaudeModsSelection(projectRoot: string, selectedIds: string[], previousIds: string[], options?: {
+    force?: boolean;
+}): void;
 export declare function promptPdrSurfacing(): Promise<boolean>;
 export declare function promptOkfFrontmatter(): Promise<boolean>;
 export declare function installAgentSkills(agent: Agent, projectRoot: string, framework?: string, pdrSurfacing?: boolean): void;

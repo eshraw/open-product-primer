@@ -41,8 +41,8 @@ function writeConfig(agents: string[], claudeMods: string[] = []): void {
   fs.writeFileSync(path.join(primerDir, 'config.yaml'), `version: 1\n${agentsYaml}${modsYaml}`);
 }
 
-async function run(): Promise<void> {
-  await claudeModsCommand().parseAsync([], { from: 'user' });
+async function run(args: string[] = []): Promise<void> {
+  await claudeModsCommand().parseAsync(args, { from: 'user' });
 }
 
 describe('claudeModsCommand', () => {
@@ -103,6 +103,38 @@ describe('claudeModsCommand', () => {
 
     await run();
 
+    expect(readClaudeModsFromConfig(tmpDir)).toEqual([]);
+  });
+
+  it('--update reinstalls currently-selected mods without prompting or changing the selection', async () => {
+    writeConfig(['claude'], ['spec-delta-drift-interceptor']);
+    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+    const registerPath = path.join(
+      tmpDir,
+      '.claude',
+      'skills',
+      'spec-delta-drift-interceptor',
+      'hooks',
+      'register.js'
+    );
+    fs.mkdirSync(path.dirname(registerPath), { recursive: true });
+    fs.writeFileSync(registerPath, '// stale installed content');
+
+    await run(['--update']);
+
+    expect(checkbox).not.toHaveBeenCalled();
+    expect(readClaudeModsFromConfig(tmpDir)).toEqual(['spec-delta-drift-interceptor']);
+    const content = fs.readFileSync(registerPath, 'utf-8');
+    expect(content).not.toContain('stale installed content');
+  });
+
+  it('--update is a no-op when no mods are installed', async () => {
+    writeConfig(['claude']);
+    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+
+    await run(['--update']);
+
+    expect(checkbox).not.toHaveBeenCalled();
     expect(readClaudeModsFromConfig(tmpDir)).toEqual([]);
   });
 });
