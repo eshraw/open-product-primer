@@ -32,3 +32,4 @@ remote_context:
   sources: []
 claude_mods:
   - spec-delta-drift-interceptor
+  - cross-bet-conflict-live-check

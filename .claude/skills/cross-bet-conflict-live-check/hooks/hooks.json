@@ -1,0 +1,6 @@
+{
+  "description": "Runs checkCrossBetConflicts() on a bet spec-delta write and surfaces any overlap as a non-blocking notice, at write time.",
+  "modules": [
+    "./register.js"
+  ]
+}

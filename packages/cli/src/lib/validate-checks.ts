@@ -105,7 +105,7 @@ export function checkCrossBetConflicts(projectRoot: string, checks: Check[]): vo
   const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
   for (const conflict of findCrossBetConflicts(betsDir)) {
     checks.push({
-      name: `spec-delta: ${extractBetId(conflict.betA)} and ${extractBetId(conflict.betB)} both touch "${conflict.header}" in ${conflict.capability}`,
+      name: `spec-delta: ${extractBetId(conflict.betA)} and ${extractBetId(conflict.betB)} both touch "${conflict.header}" in ${conflict.capability} [criticality: ${conflict.criticality}]`,
       pass: false,
       note: 'Overlapping requirement header between active bets — archiving one first applies last-write-wins to the other (no 3-way merge)',
       required: true,
