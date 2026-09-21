@@ -17,6 +17,14 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [2.15.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.14.0...cli-v2.15.0) (2026-09-21)
+
+
+### Features
+
+* add --update arg to claud-mods cli command ([871cd2f](https://github.com/eshraw/open-product-primer/commit/871cd2feac1a5bdd0ba7f3d7a91511034c6495c5))
+* add --update arg to claud-mods cli command ([5959772](https://github.com/eshraw/open-product-primer/commit/5959772a145f81b9ff6f7b847de3589ea623dd29))
+
 ## [2.14.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.13.0...cli-v2.14.0) (2026-09-21)
 
 
