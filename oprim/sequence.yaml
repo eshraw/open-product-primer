@@ -1,24 +1,9 @@
 wip_limits:
   now: 2
 
-now:
-  - title: "Gate promote command on definition-of-done mod"
-    id: BET-053
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+now: []
 
-next:
-  - title: "Auto-sync skill version drift via mod"
-    id: BET-056
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - title: "Gate backlog-to-now moves on definition-of-done"
-    id: BET-065
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
+next: []
 
 later:
   - id: BET-014
@@ -28,11 +13,6 @@ later:
     requires_pdrs: []
   - id: BET-019
     title: "Add quick-capture mode to bet creation to reduce idea abandonment"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-054
-    title: "Nudge PDR linkage during bet creation mod"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
@@ -46,43 +26,13 @@ later:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-058
-    title: "Check multi-agent install parity via mod"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-059
-    title: "Dry-run criteria metrics before bet ships"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-060
     title: "Pre-fill bet draft from note during promotion"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-061
-    title: "Lint requirement headers for near-duplicate collisions"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-062
-    title: "Preview config merge diff before update applies"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-063
-    title: "Warn on OpenSpec and native spec dual-mode drift"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-064
     title: "Nudge overdue bet reviews at session start"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-066
-    title: "Gate bet promotion on discovery-doc completeness"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
@@ -110,16 +60,6 @@ backlog:
     requires_pdrs: []
   - id: BET-070
     title: "Visualize cross-bet conflicts as a graph"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-071
-    title: "Visualize multi-agent install parity as a graph"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
-  - id: BET-072
-    title: "Visualize spec requirement dependencies as a graph"
     blocked_by: []
     unlocks: []
     requires_pdrs: []
