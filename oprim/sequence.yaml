@@ -43,11 +43,6 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-069
-    title: "Visualize session changes as a blast-radius graph"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-070
     title: "Visualize cross-bet conflicts as a graph"
     blocked_by: []
