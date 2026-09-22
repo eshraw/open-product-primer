@@ -1,0 +1,5 @@
+{
+  "name": "sequence-map",
+  "description": "Renders oprim/sequence.yaml's blocked_by/unlocks edges as a dependency map in a pane, with a Mermaid export.",
+  "version": "1.0.0"
+}

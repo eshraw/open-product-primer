@@ -1,8 +1,8 @@
 # Decision: BET-070 Visualize cross-bet conflicts as a graph
 
 ## Status
-- Decision: Defer
-- Date: 2026-09-16
+- Decision: Build now
+- Date: 2026-09-22
 - Owner: Eshane Rawat
 - Review date: 2026-10-16
 
@@ -30,4 +30,5 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native spec framework)
+- Spec (delta): oprim/bets/pending/BET-070-cross-bet-conflict-graph-mod/specs/cross-bet-conflict-graph/spec.md

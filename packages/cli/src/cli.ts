@@ -12,6 +12,7 @@ import { listCommand } from './commands/list';
 import { showCommand } from './commands/show';
 import { statusCommand } from './commands/status';
 import { claudeModsCommand } from './commands/claude-mods';
+import { sequenceMapCommand } from './commands/sequence-map';
 import pkg from '../package.json';
 
 const program = new Command();
@@ -33,5 +34,6 @@ program.addCommand(listCommand());
 program.addCommand(showCommand());
 program.addCommand(statusCommand());
 program.addCommand(claudeModsCommand());
+program.addCommand(sequenceMapCommand());
 
 program.parse();

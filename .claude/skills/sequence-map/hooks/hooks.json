@@ -1,0 +1,6 @@
+{
+  "description": "Registers /sequence-map, which renders the sequencing board's dependency edges in a pane and offers a Mermaid (.mmd) export.",
+  "modules": [
+    "./register.js"
+  ]
+}

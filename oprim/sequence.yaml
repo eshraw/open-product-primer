@@ -43,11 +43,6 @@ backlog:
     blocked_by: []
     unlocks: []
     requires_pdrs: []
-  - id: BET-067
-    title: "Render sequence board as a dependency graph"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: []
   - id: BET-068
     title: "Visualize bet lineage as a dependency graph"
     blocked_by: []

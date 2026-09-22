@@ -1,8 +1,8 @@
-# Decision: BET-067 Render sequence board as a dependency graph
+# Decision: BET-067 Render sequence board as a sequence map
 
 ## Status
-- Decision: Defer
-- Date: 2026-09-16
+- Decision: Build now
+- Date: 2026-09-22
 - Owner: Eshane Rawat
 - Review date: 2026-10-16
 
@@ -31,4 +31,5 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native spec framework)
+- Spec (delta): oprim/bets/pending/BET-067-sequence-map-mod/specs/sequence-map/spec.md

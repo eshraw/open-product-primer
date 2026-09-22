@@ -1,8 +1,8 @@
 # Decision: BET-073 Visualize remote-context citations as a graph
 
 ## Status
-- Decision: Defer
-- Date: 2026-09-16
+- Decision: Build now
+- Date: 2026-09-22
 - Owner: Eshane Rawat
 - Review date: 2026-10-16
 
@@ -29,4 +29,5 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native spec framework)
+- Spec (delta): oprim/bets/pending/BET-073-remote-context-citation-graph-mod/specs/remote-context-citation-graph/spec.md

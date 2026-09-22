@@ -1,8 +1,8 @@
 # Decision: BET-068 Visualize bet lineage as a dependency graph
 
 ## Status
-- Decision: Defer
-- Date: 2026-09-16
+- Decision: Build now
+- Date: 2026-09-22
 - Owner: Eshane Rawat
 - Review date: 2026-10-16
 
@@ -30,4 +30,5 @@
 
 ## Links
 - PDRs: None
-- OpenSpec change: <to be filled when promoted>
+- OpenSpec change: N/A (native spec framework)
+- Spec (delta): oprim/bets/pending/BET-068-bet-lineage-dependency-graph-mod/specs/bet-lineage-dependency-graph/spec.md
