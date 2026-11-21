@@ -7,7 +7,8 @@ import { scanCriteriaForSourceType } from '../lib/measure';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
 import { checkLegacySpecFormat } from '../lib/validate-checks';
 import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
-import { checkCrossProductRefs } from '../lib/portfolio/refs';
+import { checkCrossProductRefs, RefResolver } from '../lib/portfolio/refs';
+import { checkObjectiveLinks } from '../lib/portfolio/objectives';
 import {
   readRemoteContextConfig,
   resolveIdentityOnly,
@@ -263,8 +264,10 @@ export function doctorCommand(): Command {
       // ── Remote context checks ─────────────────────────────────────────────────
       checkRemoteContexts(projectRoot, checks);
 
-      // ── Cross-product <source>:<ID> references (BET-076) ──────────────────────
-      checkCrossProductRefs(projectRoot, checks);
+      // ── Cross-product <source>:<ID> references (BET-076) + objective links (BET-077) ─
+      const resolver = new RefResolver(projectRoot);
+      checkCrossProductRefs(projectRoot, checks, resolver);
+      checkObjectiveLinks(projectRoot, checks, resolver);
 
       // ── Agent environment checks ──────────────────────────────────────────────
       const configAgents = readAgentsFromConfig(projectRoot);

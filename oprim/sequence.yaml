@@ -1,24 +1,19 @@
 wip_limits:
   now: 2
 
-now: []
-
-next:
-  - id: BET-077
-    title: "Add objectives and OKR links to portfolio and product bets"
-    blocked_by: []
-    unlocks: [BET-078, BET-079]
-    requires_pdrs: [PDR-001]
-
-later:
+now:
   - id: BET-079
     title: "Show a cross-product portfolio view in oprim ovw"
-    blocked_by: [BET-077]
+    blocked_by: []
     unlocks: [BET-081]
     requires_pdrs: [PDR-001]
+
+next: []
+
+later:
   - id: BET-078
     title: "Delegate portfolio bets to product workspaces with two-way links"
-    blocked_by: [BET-077]
+    blocked_by: []
     unlocks: []
     requires_pdrs: [PDR-001]
   - id: BET-081

@@ -53,6 +53,10 @@ Then ask about each of the four risk dimensions (Low / Medium / High + short rat
 - "**Feasibility risk**: Can we build this with our current skills, time, and technology? (Low / Medium / High — and why?)"
 - "**Business viability risk**: Does this solution work for the business (revenue, legal, ops)? (Low / Medium / High — and why?)"
 
+### 4a. Link objectives (only where a portfolio exists)
+This step applies only if `oprim/config.yaml` has `mode: portfolio`, or `oprim context list` labels at least one registered source `portfolio`. Otherwise skip it and leave the `- Objectives:` line out of the file in step 5.
+List the available objectives — this workspace's `oprim/objectives/OBJ-NNN-*.md` and/or the portfolio source's (`oprim context --source <name>`), showing only those whose `## Status` is `Active` — and ask: "Which objective(s) does this bet serve? (comma-separated, or Enter for none)". Write each as `OBJ-NNN` when it lives in this workspace and as `<source>:OBJ-NNN` when it lives in the portfolio source. If the user picks none, write `None` (`oprim doctor` will warn that the bet is not linked to any objective).
+
 ### 4b. Check for OKF frontmatter
 Read `oprim/templates/bet-decision.md`. If it begins with a YAML frontmatter block (`---` ... `---`), this workspace has OKF frontmatter enabled. Ask for a one-line description and comma-separated tags (subject-area keywords). Prepare a frontmatter block with `type: bet-decision`, `title: <title>`, `description: <description>`, `tags: [<tags>]`, `timestamp: <today's date, ISO 8601>`, to prepend in step 5.
 If no frontmatter block is found in the template, skip this step — write the file with no frontmatter, matching current behavior.
@@ -93,6 +97,7 @@ Prepend the frontmatter block from step 4b, if one was prepared.
 
 ## Links
 - PDRs: <PDR-IDs or "None">
+- Objectives: <OBJ refs or "None" — only if step 4a applied; omit this line otherwise>
 - OpenSpec change: <to be filled when promoted>
 ```
 

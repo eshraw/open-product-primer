@@ -222,11 +222,32 @@ function collectFromBetLinks(projectRoot: string, out: CollectedRef[]): void {
   }
 }
 
-/** Every parseable reference (qualified and local) in sequence.yaml and pending bets' `## Links`. */
+// BET-077 — `products[].objectives` in config.yaml accept the same reference grammar.
+function collectFromProducts(projectRoot: string, out: CollectedRef[]): void {
+  const p = path.join(projectRoot, 'oprim', 'config.yaml');
+  if (!fs.existsSync(p)) return;
+  let products: unknown;
+  try {
+    products = (yaml.load(fs.readFileSync(p, 'utf-8')) as Record<string, unknown> | undefined)?.products;
+  } catch {
+    return;
+  }
+  if (!Array.isArray(products)) return;
+  for (const e of products as Array<Record<string, unknown>>) {
+    if (!e || typeof e !== 'object' || !Array.isArray(e.objectives)) continue;
+    for (const v of e.objectives as unknown[]) {
+      const ref = parseRef(String(v));
+      if (ref) out.push({ ref, origin: `config.yaml products ${String(e.source ?? '?')} objectives` });
+    }
+  }
+}
+
+/** Every parseable reference (qualified and local) in sequence.yaml, pending bets' `## Links` and `products:`. */
 export function collectRefs(projectRoot: string): CollectedRef[] {
   const out: CollectedRef[] = [];
   collectFromSequence(projectRoot, out);
   collectFromBetLinks(projectRoot, out);
+  collectFromProducts(projectRoot, out);
   return out;
 }
 

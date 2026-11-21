@@ -84,6 +84,32 @@ const wikiLogBody = `# Wiki log
      wiki/people/, per-product notes in wiki/products/, decision context in wiki/decisions/. -->
 `;
 
+// BET-077 — `oprim/templates/objective.md`. /oprim:objective checks whether it begins with
+// frontmatter to decide whether new objectives carry OKF frontmatter (incl. period and status).
+const objectiveBody = `# OBJ-XXX: <Objective title>
+
+## Status
+Active
+
+## Period
+<e.g. 2027-Q1>
+
+## Key results
+- <metric: baseline → target by end of period>
+
+## Rationale
+<why this objective, why this period; link the PDR or handbook principle it serves>
+`;
+
+export function objectiveTemplate(okfEnabled: boolean): string {
+  if (!okfEnabled) return objectiveBody;
+  const frontmatter = okfFrontmatter('objective', '<Objective title>').replace(
+    /\n---\n\n$/,
+    '\nperiod: "<e.g. 2027-Q1>"\nstatus: Active\n---\n\n'
+  );
+  return frontmatter + objectiveBody;
+}
+
 export interface PortfolioScaffoldFile {
   /** Path relative to the project root, POSIX separators. */
   path: string;
@@ -97,6 +123,7 @@ export function portfolioScaffoldFiles(okfEnabled: boolean): PortfolioScaffoldFi
     { path: 'oprim/handbook/principles.md', content: withFrontmatter(okfEnabled, 'handbook', 'Principles', handbookPrinciplesBody) },
     { path: 'oprim/handbook/glossary.md', content: withFrontmatter(okfEnabled, 'handbook', 'Glossary', handbookGlossaryBody) },
     { path: 'oprim/objectives/.gitkeep', content: '' },
+    { path: 'oprim/templates/objective.md', content: objectiveTemplate(okfEnabled) },
     { path: 'STATE.md', content: withFrontmatter(okfEnabled, 'pm-state', 'State', stateBody) },
     { path: 'inbox.md', content: withFrontmatter(okfEnabled, 'inbox', 'Inbox', inboxBody) },
     { path: 'wiki/log.md', content: withFrontmatter(okfEnabled, 'wiki-log', 'Wiki log', wikiLogBody) },

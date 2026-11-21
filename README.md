@@ -97,7 +97,7 @@ A **portfolio workspace** is a PM's own oprim repo spanning several products: co
 ```
 oprim/
 ├── handbook/             # overview.md, principles.md, glossary.md — human-written, citable by products
-└── objectives/           # OKRs (filled by later workflows)
+└── objectives/           # OKRs — OBJ-NNN-<slug>.md, written by oprim-objective, citable by products
 STATE.md                  # personal working state — never exported
 inbox.md                  # capture-first inbox — never exported
 wiki/                     # append-only knowledge: log.md, people/, products/, decisions/
@@ -124,6 +124,44 @@ products:
 ```
 
 In portfolio mode `doctor`/`validate` report a `products:` entry whose `source` is not registered, or that carries its own `git`/`path`, as a required failure.
+
+#### Objectives (OKRs)
+
+Objectives are first-class portfolio artifacts at `oprim/objectives/OBJ-NNN-<slug>.md`, written by the portfolio-only `oprim-objective` workflow (template: `oprim/templates/objective.md`):
+
+```markdown
+# OBJ-002: Grow repeat purchases
+
+## Status
+Active                    # Active | Achieved | Dropped | Superseded by OBJ-MMM
+
+## Period
+2027-Q1
+
+## Key results
+- Repeat-purchase rate: 18% → 25% by end of quarter
+
+## Rationale
+Why this objective, why this period.
+```
+
+With OKF frontmatter enabled the file also carries `type: objective`, `period` and `status` in its frontmatter. Bets link objectives in their `## Links` section — unqualified in the portfolio itself, qualified from a product — and a `products:` entry's `objectives:` takes the same references:
+
+```markdown
+## Links
+- PDRs: PDR-001
+- Objectives: OBJ-001, acme-portfolio:OBJ-002
+```
+
+`oprim-bet` asks for objectives (and writes the `- Objectives:` line) only in a portfolio workspace or a product with a registered portfolio source. `oprim doctor` / `oprim validate` then report:
+
+| Situation | Result |
+|---|---|
+| unqualified `OBJ-NNN` that does not exist (bet Links or `products[].objectives`) | required failure |
+| qualified `<source>:OBJ-NNN` that does not exist | required failure (cross-product reference check — reported once) |
+| pending bet with no objective link, in a portfolio or a product with a portfolio source | non-required warning |
+| pending bet with no objective link, in a product with no portfolio source | nothing |
+| bet linked only to `Achieved` / `Dropped` / `Superseded` objectives | non-required warning naming them |
 
 #### The PM daily loop (portfolio mode only)
 
@@ -260,6 +298,7 @@ Install with `oprim update`, then use in Claude Code, Cursor, Codex, Gemini, Poo
 | `oprim-note` | Capture a lightweight note ahead of a full bet |
 | `oprim-criteria` | Create or append to a bet's `criteria.yaml` metric contract |
 | `oprim-review` | Create a KPI review artifact for a completed bet, pre-filled from `criteria.yaml` |
+| `oprim-objective` | Portfolio mode only — create an objective (OKR) with an auto-assigned `OBJ-NNN` ID, or supersede one |
 
 ## Authority boundaries
 
