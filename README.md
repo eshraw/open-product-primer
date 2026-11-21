@@ -108,6 +108,23 @@ Everything under `oprim/` is citable by products through remote context; the roo
 
 `oprim doctor` / `oprim validate` report an unknown `mode:` value as a required failure; in portfolio mode they also require `spec_framework: none` and no `specs/` under pending bets, and warn (non-required) when a personal file is missing.
 
+Products are linked by naming an existing `remote_context` source — never with their own `git`/`path` (one linking mechanism, PDR-001):
+
+```yaml
+remote_context:
+  enabled: true
+  sources:
+    - name: checkout
+      git: git@github.com:acme/checkout.git
+products:
+  - source: checkout        # must be a remote_context.sources name
+    owner: Dana             # optional metadata — owner, squad, objectives, status
+    squad: payments
+    status: active          # active | paused | sunset (default active)
+```
+
+In portfolio mode `doctor`/`validate` report a `products:` entry whose `source` is not registered, or that carries its own `git`/`path`, as a required failure.
+
 ### `oprim update`
 
 Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor, Codex, Gemini, Poolside, Mistral Vibe). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.
@@ -120,7 +137,8 @@ Reports pass/fail status for:
 - OpenSpec and Graphify integrations (optional)
 - measurement environment variables (`AMPLITUDE_API_KEY`, `GOOGLE_APPLICATION_CREDENTIALS`)
 - bets missing `discovery.md`
-- sequencing-board integrity (WIP limit overruns, dangling `blocked_by`/`unlocks` references)
+- sequencing-board integrity (WIP limit overruns, dangling `blocked_by`/`unlocks` references; qualified `<source>:<ID>` entries are left to the cross-product check)
+- cross-product `<source>:<ID>` references (see *Cross-product references* below)
 - installed Claude skills that have drifted from the bundled versions (run `oprim update` to refresh)
 - registered `remote_context` sources (reachable, identity resolves, name matches)
 - installed assistant commands and hooks
@@ -183,6 +201,21 @@ An opt-in alternative (or complement) to OpenSpec, chosen at `oprim init` time (
 ### Remote context
 
 Lets one project cite another project's `oprim/` workspace as read-only context — for example, a service repo citing a platform repo's PDRs. The cited project runs `oprim context init` once to become citable; the citing project runs `oprim context register` to add it as a source. See `oprim context` above.
+
+A portfolio workspace's `oprim context init` also writes `mode: portfolio` into its identity, and `oprim context list` labels such sources `portfolio`.
+
+### Cross-product references
+
+Any oprim artifact in a registered source can be cited as `<source>:<ID>`, where `<source>` is a `remote_context.sources` name and `<ID>` is `BET-NNN`, `PDR-NNN`, `OBJ-NNN` or `NOTE-NNN` — e.g. `checkout:BET-012`, `acme-portfolio:PDR-003`. An unqualified ID always means the current workspace. Write it **without a space** after the colon: `[checkout:BET-012]` is a string in YAML, `[checkout: BET-012]` is a map (doctor warns about that).
+
+Qualified references are recognised, in both product and portfolio mode, in `sequence.yaml` (`blocked_by`, `unlocks`, `requires_pdrs`) and in a pending bet's `## Links` lines (`PDRs`, `Objectives`, `Delegated to`, `Delegated from`, `Cross-product`). `oprim doctor` / `oprim validate` resolve each one through remote context — each source is fetched at most once per run — and report the artifact's live state (bets `pending`/`archived`, PDRs/objectives their `## Status`). Nothing is copied into the citing repo.
+
+| Outcome | Result |
+|---|---|
+| unknown qualifier | required failure |
+| source reachable, artifact missing | required failure |
+| source unreachable, no cache | non-required failure |
+| source unreachable, served from last-known-good cache | pass, annotated `(stale)` |
 
 ## Agent commands
 

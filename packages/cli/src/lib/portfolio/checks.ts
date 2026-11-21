@@ -4,6 +4,7 @@ import type { Check } from '../integrity';
 import { readSpecFramework } from '../config-merge';
 import { readWorkspaceMode, validateWorkspaceMode } from '../workspace-mode';
 import { PORTFOLIO_PERSONAL_PATHS } from './templates';
+import { checkProductRegistry } from './products';
 
 /**
  * Non-required: the root personal files (PDR-001 §6) exist. Existence only — their content is
@@ -71,4 +72,5 @@ export function runWorkspaceModeChecks(projectRoot: string, checks: Check[]): vo
   if (readWorkspaceMode(projectRoot) !== 'portfolio') return;
   checkPortfolioScaffold(projectRoot, checks);
   checkPortfolioNoSpecs(projectRoot, checks);
+  checkProductRegistry(projectRoot, checks);
 }

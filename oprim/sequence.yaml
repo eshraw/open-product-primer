@@ -2,11 +2,6 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-076
-    title: "Link products and resolve cross-product references through remote context"
-    blocked_by: []
-    unlocks: [BET-077, BET-078, BET-079]
-    requires_pdrs: [PDR-001]
   - id: BET-080
     title: "Add PM inbox and daily-planning workflows for portfolio mode"
     blocked_by: []
@@ -16,19 +11,19 @@ now:
 next:
   - id: BET-077
     title: "Add objectives and OKR links to portfolio and product bets"
-    blocked_by: [BET-076]
+    blocked_by: []
     unlocks: [BET-078, BET-079]
     requires_pdrs: [PDR-001]
 
 later:
   - id: BET-079
     title: "Show a cross-product portfolio view in oprim ovw"
-    blocked_by: [BET-076, BET-077]
+    blocked_by: [BET-077]
     unlocks: [BET-081]
     requires_pdrs: [PDR-001]
   - id: BET-078
     title: "Delegate portfolio bets to product workspaces with two-way links"
-    blocked_by: [BET-076, BET-077]
+    blocked_by: [BET-077]
     unlocks: []
     requires_pdrs: [PDR-001]
   - id: BET-081

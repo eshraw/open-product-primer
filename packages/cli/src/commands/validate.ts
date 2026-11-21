@@ -6,11 +6,13 @@ import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../l
 import { checkBetDefinitionOfDone, checkSpecDeltaDrift, checkCrossBetConflicts } from '../lib/validate-checks';
 import { foldDelta, resolveBetDirectory } from '../lib/spec-delta';
 import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
+import { checkCrossProductRefs } from '../lib/portfolio/refs';
 
 function runChecks(projectRoot: string): Check[] {
   const checks: Check[] = [];
   runWorkspaceModeChecks(projectRoot, checks);
   checkSequenceIntegrity(projectRoot, checks);
+  checkCrossProductRefs(projectRoot, checks);
   checkSkillVersionDrift(projectRoot, checks);
   checkBetDefinitionOfDone(projectRoot, checks);
   checkSpecDeltaDrift(projectRoot, checks);
