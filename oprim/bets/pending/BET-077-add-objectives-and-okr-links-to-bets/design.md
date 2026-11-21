@@ -27,4 +27,4 @@ Reuse `collectRefs()` from BET-076; the `- Objectives:` line is already in its l
 - Warn on every unlinked bet everywhere — rejected (noise in standalone product repos).
 
 ## Risks
-- Adding a conditional `- Objectives:` line to `bet.template.md` changes the installed `oprim-bet` skill text in product repos (one-time skill-drift on update). Behaviour is unchanged when no portfolio source exists. Flagged for review: alternative is a portfolio-only bet template override.
+- Adding a conditional `- Objectives:` line to `bet.template.md` changes the installed `oprim-bet` skill text in product repos (one-time skill-drift on update). Behaviour is unchanged when no portfolio source exists. Accepted in review (2026-11-21).

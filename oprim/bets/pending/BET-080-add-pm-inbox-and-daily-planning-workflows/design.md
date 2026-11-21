@@ -42,4 +42,4 @@ Triage/ingest reuse the delegation rules (BET-078): local path → confirm then 
 
 ## Risks
 - Value risk High (see bet). Track start-day usage for the kill criterion by the `Last commands` section of `STATE.md`.
-- BET-019 (quick-capture for bets) overlaps `oprim-capture`; decide at review whether BET-019 is killed.
+- BET-019 (quick-capture for bets) overlaps `oprim-capture`; agreed 2026-11-21: kill BET-019 at this bet's review.

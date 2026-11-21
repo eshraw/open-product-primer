@@ -11,7 +11,7 @@
 
 ## 3. Portfolio scaffold
 
-- [ ] 3.1 Create `lib/portfolio/templates.ts` with company/STATE/inbox/wiki templates, OKF and non-OKF variants
+- [ ] 3.1 Create `lib/portfolio/templates.ts` with handbook/STATE/inbox/wiki templates, OKF and non-OKF variants
 - [ ] 3.2 Create `lib/portfolio/scaffold.ts` (`scaffoldPortfolio`) using `writeFileIfAbsent`
 - [ ] 3.3 Add `--mode <product|portfolio>` to `commands/init.ts`; in portfolio mode skip the framework prompt, write `spec_framework: none` and `mode: portfolio`
 - [ ] 3.4 Tests: fresh portfolio init tree; re-run preserves edited files; OKF on/off frontmatter

@@ -19,8 +19,8 @@ Before touching `init.ts`/`update.ts`, add tests that capture the full file tree
 ### 3. Portfolio scaffold lives in `lib/portfolio/scaffold.ts`
 `scaffoldPortfolio(projectRoot, { okf })` uses `writeFileIfAbsent` for every file. Templates in `lib/portfolio/templates.ts` (kept out of `lib/templates.ts` so product templates diff is zero). `init.ts` gains `--mode <mode>`; when `portfolio`, it skips `promptFrameworkSelection` and passes `none`.
 
-### 4. Directory naming: `oprim/company/`, not `context/`
-`context` already means three things (`config.context`, `.oprim-context/`, `oprim context`). `oprim/company/` is under `oprim/` so products can cite principles/glossary via remote context. People notes go to `wiki/people/` (personal, not exported). **Open question for review** — trivially renamed before implementation.
+### 4. Directory naming: `oprim/handbook/`, not `context/`
+`context` already means three things (`config.context`, `.oprim-context/`, `oprim context`). `oprim/handbook/` is under `oprim/` so products can cite principles/glossary via remote context. People notes go to `wiki/people/` (personal, not exported). Name and people-notes placement confirmed in review (2026-11-21).
 
 ### 5. Portfolio-only config merge
 `config-merge.ts` gains a second table `PORTFOLIO_SCHEMA_FIELDS = [{ key: 'products', block: 'products: []\n' }]`, applied by `update.ts` only when `readWorkspaceMode() === 'portfolio'`. `mergeConfigSchema()` keeps its signature and output for product configs.

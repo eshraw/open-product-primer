@@ -32,7 +32,7 @@
 - In portfolio mode (and in product workspaces with a portfolio source), a bet with no objective link is a non-required warning; a dangling objective reference is required.
 
 ## Kill criteria / rollback trigger
-- After one quarter of dogfooding, objectives are not updated at period rollover → demote to a plain `oprim/company/okrs.md` and drop the checks.
+- After one quarter of dogfooding, objectives are not updated at period rollover → demote to a plain `oprim/handbook/okrs.md` and drop the checks.
 - The unlinked-bet warning is suppressed or ignored on > 50% of bets → make it opt-in.
 
 ## Links

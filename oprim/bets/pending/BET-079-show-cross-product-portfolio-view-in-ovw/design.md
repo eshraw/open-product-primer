@@ -35,4 +35,4 @@ Default shows per product: header line with load, then Now and Next bets one lin
 - Merge all boards into one virtual board and reuse `buildAdvisory` — rejected for v1: door-type advisories across teams are noisy; can be added later.
 
 ## Risks
-- `--write` file includes bet titles from products — titles are short identifiers; flagged in case PDR-001's "never copy content" should be read strictly (then write IDs only).
+- Resolved in review (2026-11-21): outputs a human reads (terminal, `portfolio-view.md`) include product bet titles next to IDs; titles are display labels, not copied content. `--json` may stay IDs plus titles for tooling convenience.

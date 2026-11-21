@@ -31,7 +31,7 @@ Constraints that shaped it, all verified in the current code:
 **5. The portfolio never holds specs.** `init --mode portfolio` writes `integrations.spec_framework: none`; `doctor`/`validate` fail if a portfolio workspace has any other value or any `specs/` delta; `oprim-spec` is not installed in portfolio mode.
 
 **6. Workspace layout splits by audience.**
-- Under `oprim/` (citable by products via remote context): `decisions/` (portfolio PDRs), `objectives/` (`OBJ-NNN-<slug>.md`, first-class), `bets/`, `sequence.yaml`, `company/` (overview, principles, glossary — human-written, loaded by every PM workflow).
+- Under `oprim/` (citable by products via remote context): `decisions/` (portfolio PDRs), `objectives/` (`OBJ-NNN-<slug>.md`, first-class), `bets/`, `sequence.yaml`, `handbook/` (overview, principles, glossary — human-written, loaded by every PM workflow).
 - Outside `oprim/` (personal, never exported): `STATE.md`, `inbox.md`, `wiki/` (append-only, incl. `wiki/people/`), `outputs/` (comms drafts, delegation handoffs). Scaffolded by `init --mode portfolio` and maintained by PM workflows; the CLI never parses their content.
 
 **7. Portfolio bets keep the `BET-NNN` namespace.** Collisions are prevented by qualification, not by a prefix: any reference that crosses a workspace boundary must be qualified. This keeps every existing `^BET-\d+` parser working unchanged.

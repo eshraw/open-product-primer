@@ -6,10 +6,11 @@
 ```mermaid
 graph TD
     subgraph Now
+        BET083["BET-083: Fix spec fold data loss, migrate lega..."]
         BET075["BET-075: Add portfolio workspace mode and scaf..."]
-        BET076["BET-076: Link products and resolve cross-produ..."]
     end
     subgraph Next
+        BET076["BET-076: Link products and resolve cross-produ..."]
         BET077["BET-077: Add objectives and OKR links to portf..."]
         BET080["BET-080: Add PM inbox and daily-planning workf..."]
     end
@@ -25,6 +26,15 @@ graph TD
         BET060["BET-060: Pre-fill bet draft from note during p..."]
         BET064["BET-064: Nudge overdue bet reviews at session ..."]
     end
+    BET075 --> [
+    BET075 --> B
+    BET075 --> E
+    BET075 --> T
+    BET075 --> 
+    BET075 --> 0
+    BET075 --> 8
+    BET075 --> 3
+    BET075 --> ]
     BET076 --> [
     BET076 --> B
     BET076 --> E
@@ -33,6 +43,15 @@ graph TD
     BET076 --> 0
     BET076 --> 7
     BET076 --> 5
+    BET076 --> ,
+    BET076 -->  
+    BET076 --> B
+    BET076 --> E
+    BET076 --> T
+    BET076 --> 
+    BET076 --> 0
+    BET076 --> 8
+    BET076 --> 3
     BET076 --> ]
     BET077 --> [
     BET077 --> B

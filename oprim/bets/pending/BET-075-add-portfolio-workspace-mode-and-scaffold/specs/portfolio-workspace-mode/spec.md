@@ -15,19 +15,19 @@
 - **THEN** it reports a required failure `config: unknown mode "portfoilo" (expected product | portfolio)` and exits non-zero
 
 ### Requirement: oprim init SHALL scaffold a portfolio workspace when run with --mode portfolio
-`oprim init --mode portfolio` SHALL create everything product-mode init creates, plus `oprim/company/{overview,principles,glossary}.md`, `oprim/objectives/`, `STATE.md`, `inbox.md`, `wiki/` (with `wiki/people/`, `wiki/products/`, `wiki/decisions/`, `wiki/log.md`) and `outputs/`, and SHALL write `mode: portfolio` to `oprim/config.yaml`. Init SHALL NOT overwrite any of these files when they already exist.
+`oprim init --mode portfolio` SHALL create everything product-mode init creates, plus `oprim/handbook/{overview,principles,glossary}.md`, `oprim/objectives/`, `STATE.md`, `inbox.md`, `wiki/` (with `wiki/people/`, `wiki/products/`, `wiki/decisions/`, `wiki/log.md`) and `outputs/`, and SHALL write `mode: portfolio` to `oprim/config.yaml`. Init SHALL NOT overwrite any of these files when they already exist.
 
 #### Scenario: Fresh portfolio init
 - **GIVEN** an empty directory
 - **WHEN** the user runs `oprim init --mode portfolio`
 - **THEN** all product-mode scaffold files exist
-- **AND** `oprim/company/overview.md`, `oprim/company/principles.md`, `oprim/company/glossary.md`, `STATE.md`, `inbox.md`, `wiki/log.md` and the `oprim/objectives/`, `outputs/` directories exist
+- **AND** `oprim/handbook/overview.md`, `oprim/handbook/principles.md`, `oprim/handbook/glossary.md`, `STATE.md`, `inbox.md`, `wiki/log.md` and the `oprim/objectives/`, `outputs/` directories exist
 - **AND** `oprim/config.yaml` contains `mode: portfolio`
 
 #### Scenario: Re-running portfolio init preserves human-written files
-- **GIVEN** a portfolio workspace where `oprim/company/overview.md` has been edited
+- **GIVEN** a portfolio workspace where `oprim/handbook/overview.md` has been edited
 - **WHEN** the user runs `oprim init --mode portfolio` again
-- **THEN** `oprim/company/overview.md` is unchanged
+- **THEN** `oprim/handbook/overview.md` is unchanged
 
 #### Scenario: Product init is unchanged
 - **WHEN** the user runs `oprim init` without `--mode` (or with `--mode product`)
@@ -75,12 +75,12 @@
 - **THEN** `config.yaml` contains no `mode` and no `products` key afterwards
 
 ### Requirement: Portfolio scaffold files SHALL honour the OKF frontmatter setting
-Each scaffolded `oprim/company/*.md` file SHALL begin with an OKF frontmatter block (`type: company-context`, `title`, `description`, `tags`, `timestamp`) when OKF frontmatter is enabled, and SHALL have no frontmatter when it is disabled. Root personal files (`STATE.md`, `inbox.md`, `wiki/log.md`) SHALL follow the same rule with `type: pm-state`, `type: inbox`, `type: wiki-log`.
+Each scaffolded `oprim/handbook/*.md` file SHALL begin with an OKF frontmatter block (`type: handbook`, `title`, `description`, `tags`, `timestamp`) when OKF frontmatter is enabled, and SHALL have no frontmatter when it is disabled. Root personal files (`STATE.md`, `inbox.md`, `wiki/log.md`) SHALL follow the same rule with `type: pm-state`, `type: inbox`, `type: wiki-log`.
 
 #### Scenario: OKF on
 - **WHEN** the user runs `oprim init --mode portfolio` and enables OKF frontmatter
-- **THEN** `oprim/company/glossary.md` starts with `---` and contains `type: company-context`
+- **THEN** `oprim/handbook/glossary.md` starts with `---` and contains `type: handbook`
 
 #### Scenario: OKF off
 - **WHEN** the user runs `oprim init --mode portfolio` and declines OKF frontmatter
-- **THEN** `oprim/company/glossary.md` starts with a markdown heading, not `---`
+- **THEN** `oprim/handbook/glossary.md` starts with a markdown heading, not `---`
