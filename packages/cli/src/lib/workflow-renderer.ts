@@ -1,8 +1,5 @@
-import { loadWorkflowSchema, loadWorkflowTemplate, loadWorkflowVariant, WorkflowSchema } from './workflow-schema';
-
-// Fixed order the pre-refactor oprimWorkflowsInline() concatenated its per-workflow sections in —
-// preserved here so Codex/Gemini/Poolside output is unchanged.
-const INLINE_SECTION_ORDER = ['bet', 'note', 'criteria', 'pdr', 'review', 'archive', 'sequence', 'explore', 'reconcile'];
+import { loadWorkflowSchema, loadWorkflowTemplate, loadWorkflowVariant, workflowIdsFor, WorkflowSchema } from './workflow-schema';
+import type { WorkspaceMode } from './workspace-mode';
 
 function claudeWrapper(name: string, description: string, body: string): string {
   return `---
@@ -91,9 +88,13 @@ export function renderInlineSection(id: string): string | null {
   return loadWorkflowVariant(`${id}.inline.md`);
 }
 
-/** The full `<!-- oprim:start -->`-delimited inline instruction block written into AGENTS.md/GEMINI.md. */
-export function renderAgentInstructions(): string {
-  const sections = INLINE_SECTION_ORDER.map((id) => {
+/**
+ * The full `<!-- oprim:start -->`-delimited inline instruction block written into AGENTS.md/GEMINI.md.
+ * Sections are the `inline: true` workflows for `mode`, in schema `order` (BET-075) — the bundled
+ * `order:` values reproduce the pre-refactor fixed section order, so product output is unchanged.
+ */
+export function renderAgentInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  const sections = workflowIdsFor('inline', mode, projectRoot).map((id) => {
     const content = renderInlineSection(id);
     if (content === null) throw new Error(`Missing inline section for workflow "${id}"`);
     return content;

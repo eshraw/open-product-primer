@@ -1,4 +1,5 @@
 id: reconcile
+order: 9
 skillName: oprim-reconcile
 title: "OPRIM: Reconcile"
 description: Detect and fix drift across linked oprim artifacts (PDR, bet, criteria, review)

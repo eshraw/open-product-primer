@@ -1,4 +1,5 @@
 id: sequence
+order: 7
 skillName: oprim-sequence
 title: "OPRIM: Sequence"
 description: Validate and update the primer sequencing board

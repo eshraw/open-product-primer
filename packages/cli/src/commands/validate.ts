@@ -5,9 +5,11 @@ import chalk from 'chalk';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
 import { checkBetDefinitionOfDone, checkSpecDeltaDrift, checkCrossBetConflicts } from '../lib/validate-checks';
 import { foldDelta, resolveBetDirectory } from '../lib/spec-delta';
+import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
 
 function runChecks(projectRoot: string): Check[] {
   const checks: Check[] = [];
+  runWorkspaceModeChecks(projectRoot, checks);
   checkSequenceIntegrity(projectRoot, checks);
   checkSkillVersionDrift(projectRoot, checks);
   checkBetDefinitionOfDone(projectRoot, checks);

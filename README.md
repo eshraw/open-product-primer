@@ -90,6 +90,24 @@ Detects OpenSpec (`openspec/`) and Graphify (`graphify-out/`) and enables integr
 
 `oprim/config.yaml` also carries a free-text `context:` block (language, tech stack, project conventions), per-artifact `rules:` (`bet`/`pdr`/`spec`/`review` — custom instructions folded into bet/PDR/spec/review generation prompts when set), and a `remote_context:` block (`enabled`, `sources: []`) for citing other projects' oprim workspaces — see `oprim context` below. All default to empty/inert and don't change generation behavior until set.
 
+#### Portfolio mode — `oprim init --mode portfolio`
+
+A **portfolio workspace** is a PM's own oprim repo spanning several products: company-wide context, objectives and cross-product ordering, while each product keeps its own oprim instance. See [PDR-001](oprim/decisions/PDR-001-separate-portfolio-and-product-authority.md) for the authority split. `--mode portfolio` writes `mode: portfolio` and `integrations.spec_framework: none` (no framework prompt — a portfolio never holds specs), creates everything product mode creates, and adds:
+
+```
+oprim/
+├── handbook/             # overview.md, principles.md, glossary.md — human-written, citable by products
+└── objectives/           # OKRs (filled by later workflows)
+STATE.md                  # personal working state — never exported
+inbox.md                  # capture-first inbox — never exported
+wiki/                     # append-only knowledge: log.md, people/, products/, decisions/
+outputs/                  # comms drafts and handoffs
+```
+
+Everything under `oprim/` is citable by products through remote context; the root personal files are outside `oprim/`, so they are never exported, and the CLI never parses them. Re-running init never overwrites any of these files, and a plain `oprim init` re-run keeps the workspace's existing mode. Converting an existing workspace between modes is not supported. A config with no `mode:` key is a product workspace — nothing is ever added to existing product configs.
+
+`oprim doctor` / `oprim validate` report an unknown `mode:` value as a required failure; in portfolio mode they also require `spec_framework: none` and no `specs/` under pending bets, and warn (non-required) when a personal file is missing.
+
 ### `oprim update`
 
 Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor, Codex, Gemini, Poolside, Mistral Vibe). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.

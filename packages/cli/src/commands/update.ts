@@ -6,7 +6,8 @@ import { installAgentSkills, promptAgentSelection, promptFrameworkSelection, pro
 import { readAgentsFromConfig, writeAgentsToConfig, readOkfEnabledFromConfig } from '../lib/detect';
 import { ensureDir, writeFile } from '../lib/scaffold';
 import { sequenceViewScriptTemplate, decisionsViewScriptTemplate } from '../lib/templates';
-import { mergeConfigSchema, mergeSpecFramework } from '../lib/config-merge';
+import { mergeConfigSchema, mergePortfolioConfigSchema, mergeSpecFramework } from '../lib/config-merge';
+import { readWorkspaceMode } from '../lib/workspace-mode';
 
 // bet-023 — persist the resolved spec_framework into oprim/config.yaml, inserting it only
 // when the key is missing (never overwrites an already-persisted choice).
@@ -39,20 +40,27 @@ export function updateCommand(): Command {
       writeFile(path.join(primerDir, 'scripts', 'generate-decisions-view.js'), decisionsViewScriptTemplate);
 
       const configPath = path.join(primerDir, 'config.yaml');
+      const portfolio = readWorkspaceMode(projectRoot) === 'portfolio';
       if (fs.existsSync(configPath)) {
         const existingConfig = fs.readFileSync(configPath, 'utf-8');
-        const { content: mergedConfig, changed } = mergeConfigSchema(existingConfig);
-        if (changed) {
-          fs.writeFileSync(configPath, mergedConfig, 'utf-8');
+        const base = mergeConfigSchema(existingConfig);
+        // BET-075 — portfolio-only keys (products:) are merged only in portfolio workspaces.
+        const extra = portfolio ? mergePortfolioConfigSchema(base.content) : { content: base.content, changed: false };
+        if (base.changed || extra.changed) {
+          fs.writeFileSync(configPath, extra.content, 'utf-8');
           console.log(chalk.green('✓') + ' oprim/config.yaml — schema updated with new keys (existing values preserved)');
         }
       }
+
+      // PDR-001 §5 — a portfolio never holds specs: skip the framework prompt, always `none`.
+      const selectFramework = (): Promise<string> =>
+        portfolio ? Promise.resolve('none') : promptFrameworkSelection(projectRoot);
 
       if (configAgents !== null && configAgents.length > 0) {
         let specFramework = resolveSpecFramework(projectRoot);
         let pdrSurfacing = false;
         if (configAgents.includes('claude')) {
-          specFramework = await promptFrameworkSelection(projectRoot);
+          specFramework = await selectFramework();
           pdrSurfacing = await promptPdrSurfacing();
         }
         persistSpecFramework(configPath, specFramework);
@@ -65,7 +73,7 @@ export function updateCommand(): Command {
         const legacyAgents: string[] = [];
 
         if (fs.existsSync(path.join(projectRoot, '.claude'))) {
-          const specFramework = await promptFrameworkSelection(projectRoot);
+          const specFramework = await selectFramework();
           persistSpecFramework(configPath, specFramework);
           const pdrSurfacing = await promptPdrSurfacing();
           installAgentSkills('claude', projectRoot, specFramework, pdrSurfacing);
@@ -113,7 +121,7 @@ export function updateCommand(): Command {
       let addSpecFramework = resolveSpecFramework(projectRoot);
       let addPdrSurfacing = false;
       if (selected.includes('claude')) {
-        addSpecFramework = await promptFrameworkSelection(projectRoot);
+        addSpecFramework = await selectFramework();
         addPdrSurfacing = await promptPdrSurfacing();
       }
       persistSpecFramework(configPath, addSpecFramework);

@@ -19,7 +19,7 @@
 - **THEN** it fails with an error naming the override file and the invalid value
 
 ### Requirement: Installed workflow sets SHALL be derived from schemas, not hard-coded per agent
-The per-agent workflow ID lists (Claude skills, Poolside-family skills, Cursor skills, Cursor commands, the inline section order) SHALL be computed from the bundled schemas' agent targets and `modes`. In product mode the computed lists and their order SHALL equal today's hard-coded lists.
+The per-agent workflow ID lists (Claude skills, Poolside-family skills, Cursor skills, Cursor commands, the inline section order) SHALL be computed from the bundled schemas' `order`, agent targets and `modes`. A workflow without `order` SHALL NOT be part of the standard install set. In product mode the computed lists SHALL contain the same workflows as today's hard-coded lists, and the inline block SHALL keep today's section order; a project override that omits `order` or `modes` SHALL inherit the bundled values.
 
 #### Scenario: Product install parity
 - **WHEN** `oprim update` runs in a product workspace with all agents selected

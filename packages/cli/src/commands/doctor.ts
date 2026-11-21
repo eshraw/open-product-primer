@@ -6,6 +6,7 @@ import { readAgentsFromConfig } from '../lib/detect';
 import { scanCriteriaForSourceType } from '../lib/measure';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
 import { checkLegacySpecFormat } from '../lib/validate-checks';
+import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
 import {
   readRemoteContextConfig,
   resolveIdentityOnly,
@@ -171,6 +172,9 @@ export function doctorCommand(): Command {
         note: configExists ? undefined : "Run 'oprim init' to create",
         required: true,
       });
+
+      // BET-075 — invalid mode value always; portfolio scaffold + no-specs only in portfolio mode.
+      runWorkspaceModeChecks(projectRoot, checks);
 
       const sequenceExists = fs.existsSync(path.join(primerDir, 'sequence.yaml'));
       checks.push({

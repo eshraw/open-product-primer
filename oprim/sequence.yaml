@@ -2,27 +2,22 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-075
-    title: "Add portfolio workspace mode and scaffold to oprim init"
-    blocked_by: []
-    unlocks: [BET-076, BET-077, BET-080]
-    requires_pdrs: [PDR-001]
-
-next:
   - id: BET-076
     title: "Link products and resolve cross-product references through remote context"
-    blocked_by: [BET-075]
+    blocked_by: []
     unlocks: [BET-077, BET-078, BET-079]
-    requires_pdrs: [PDR-001]
-  - id: BET-077
-    title: "Add objectives and OKR links to portfolio and product bets"
-    blocked_by: [BET-075, BET-076]
-    unlocks: [BET-078, BET-079]
     requires_pdrs: [PDR-001]
   - id: BET-080
     title: "Add PM inbox and daily-planning workflows for portfolio mode"
-    blocked_by: [BET-075]
+    blocked_by: []
     unlocks: [BET-081]
+    requires_pdrs: [PDR-001]
+
+next:
+  - id: BET-077
+    title: "Add objectives and OKR links to portfolio and product bets"
+    blocked_by: [BET-076]
+    unlocks: [BET-078, BET-079]
     requires_pdrs: [PDR-001]
 
 later:
