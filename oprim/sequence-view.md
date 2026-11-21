@@ -6,29 +6,115 @@
 ```mermaid
 graph TD
     subgraph Now
-        BET050["BET-050: Enforce sequence integrity live via W..."]
-        BET053["BET-053: Gate promote command on definition-of..."]
+        BET075["BET-075: Add portfolio workspace mode and scaf..."]
+        BET076["BET-076: Link products and resolve cross-produ..."]
     end
     subgraph Next
-        BET052["BET-052: Surface cross-bet conflicts live via ..."]
-        BET056["BET-056: Auto-sync skill version drift via mod"]
-        BET065["BET-065: Gate backlog-to-now moves on definiti..."]
+        BET077["BET-077: Add objectives and OKR links to portf..."]
+        BET080["BET-080: Add PM inbox and daily-planning workf..."]
     end
     subgraph Later
+        BET079["BET-079: Show a cross-product portfolio view i..."]
+        BET078["BET-078: Delegate portfolio bets to product wo..."]
+        BET081["BET-081: Add PM prioritization, comms and revi..."]
+        BET082["BET-082: Add a Databricks source for oprim mea..."]
         BET014["BET-014: Improve agent focus during bet discovery"]
         BET019["BET-019: Add quick-capture mode to bet creatio..."]
-        BET054["BET-054: Nudge PDR linkage during bet creation..."]
         BET055["BET-055: Streamline archive co-archival into s..."]
         BET057["BET-057: Surface remote-context staleness via ..."]
-        BET058["BET-058: Check multi-agent install parity via mod"]
-        BET059["BET-059: Dry-run criteria metrics before bet s..."]
         BET060["BET-060: Pre-fill bet draft from note during p..."]
-        BET061["BET-061: Lint requirement headers for near-dup..."]
-        BET062["BET-062: Preview config merge diff before upda..."]
-        BET063["BET-063: Warn on OpenSpec and native spec dual..."]
         BET064["BET-064: Nudge overdue bet reviews at session ..."]
-        BET066["BET-066: Gate bet promotion on discovery-doc c..."]
     end
+    BET076 --> [
+    BET076 --> B
+    BET076 --> E
+    BET076 --> T
+    BET076 --> 
+    BET076 --> 0
+    BET076 --> 7
+    BET076 --> 5
+    BET076 --> ]
+    BET077 --> [
+    BET077 --> B
+    BET077 --> E
+    BET077 --> T
+    BET077 --> 
+    BET077 --> 0
+    BET077 --> 7
+    BET077 --> 5
+    BET077 --> ,
+    BET077 -->  
+    BET077 --> B
+    BET077 --> E
+    BET077 --> T
+    BET077 --> 
+    BET077 --> 0
+    BET077 --> 7
+    BET077 --> 6
+    BET077 --> ]
+    BET080 --> [
+    BET080 --> B
+    BET080 --> E
+    BET080 --> T
+    BET080 --> 
+    BET080 --> 0
+    BET080 --> 7
+    BET080 --> 5
+    BET080 --> ]
+    BET079 --> [
+    BET079 --> B
+    BET079 --> E
+    BET079 --> T
+    BET079 --> 
+    BET079 --> 0
+    BET079 --> 7
+    BET079 --> 6
+    BET079 --> ,
+    BET079 -->  
+    BET079 --> B
+    BET079 --> E
+    BET079 --> T
+    BET079 --> 
+    BET079 --> 0
+    BET079 --> 7
+    BET079 --> 7
+    BET079 --> ]
+    BET078 --> [
+    BET078 --> B
+    BET078 --> E
+    BET078 --> T
+    BET078 --> 
+    BET078 --> 0
+    BET078 --> 7
+    BET078 --> 6
+    BET078 --> ,
+    BET078 -->  
+    BET078 --> B
+    BET078 --> E
+    BET078 --> T
+    BET078 --> 
+    BET078 --> 0
+    BET078 --> 7
+    BET078 --> 7
+    BET078 --> ]
+    BET081 --> [
+    BET081 --> B
+    BET081 --> E
+    BET081 --> T
+    BET081 --> 
+    BET081 --> 0
+    BET081 --> 7
+    BET081 --> 9
+    BET081 --> ,
+    BET081 -->  
+    BET081 --> B
+    BET081 --> E
+    BET081 --> T
+    BET081 --> 
+    BET081 --> 0
+    BET081 --> 8
+    BET081 --> 0
+    BET081 --> ]
 ```
 
 ### Backlog
@@ -37,6 +123,4 @@ graph TD
 - **BET-068**: Visualize bet lineage as a dependency graph
 - **BET-069**: Visualize session changes as a blast-radius graph
 - **BET-070**: Visualize cross-bet conflicts as a graph
-- **BET-071**: Visualize multi-agent install parity as a graph
-- **BET-072**: Visualize spec requirement dependencies as a graph
 - **BET-073**: Visualize remote-context citations as a graph

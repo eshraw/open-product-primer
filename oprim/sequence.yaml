@@ -1,11 +1,51 @@
 wip_limits:
   now: 2
 
-now: []
+now:
+  - id: BET-075
+    title: "Add portfolio workspace mode and scaffold to oprim init"
+    blocked_by: []
+    unlocks: [BET-076, BET-077, BET-080]
+    requires_pdrs: [PDR-001]
+  - id: BET-076
+    title: "Link products and resolve cross-product references through remote context"
+    blocked_by: [BET-075]
+    unlocks: [BET-077, BET-078, BET-079]
+    requires_pdrs: [PDR-001]
 
-next: []
+next:
+  - id: BET-077
+    title: "Add objectives and OKR links to portfolio and product bets"
+    blocked_by: [BET-075, BET-076]
+    unlocks: [BET-078, BET-079]
+    requires_pdrs: [PDR-001]
+  - id: BET-080
+    title: "Add PM inbox and daily-planning workflows for portfolio mode"
+    blocked_by: [BET-075]
+    unlocks: [BET-081]
+    requires_pdrs: [PDR-001]
 
 later:
+  - id: BET-079
+    title: "Show a cross-product portfolio view in oprim ovw"
+    blocked_by: [BET-076, BET-077]
+    unlocks: [BET-081]
+    requires_pdrs: [PDR-001]
+  - id: BET-078
+    title: "Delegate portfolio bets to product workspaces with two-way links"
+    blocked_by: [BET-076, BET-077]
+    unlocks: []
+    requires_pdrs: [PDR-001]
+  - id: BET-081
+    title: "Add PM prioritization, comms and reviewer persona workflows"
+    blocked_by: [BET-079, BET-080]
+    unlocks: []
+    requires_pdrs: [PDR-001]
+  - id: BET-082
+    title: "Add a Databricks source for oprim measure"
+    blocked_by: []
+    unlocks: []
+    requires_pdrs: []
   - id: BET-014
     title: "Improve agent focus during bet discovery"
     blocked_by: []
