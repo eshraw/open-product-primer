@@ -1,0 +1,15 @@
+id: start-day
+order: 15
+modes: [portfolio]
+skillName: oprim-start-day
+title: "OPRIM: Start day"
+description: Plan the day from STATE.md, the inbox and the boards, and update STATE.md
+claude:
+  skill: true
+  command: start-day.md
+cursor:
+  skill: false
+  command: oprim-start-day.md
+poolside:
+  skill: true
+inline: true

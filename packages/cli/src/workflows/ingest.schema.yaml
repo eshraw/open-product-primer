@@ -1,0 +1,15 @@
+id: ingest
+order: 14
+modes: [portfolio]
+skillName: oprim-ingest
+title: "OPRIM: Ingest"
+description: Update wiki/ from a meeting note and propose destinations for the decisions in it
+claude:
+  skill: true
+  command: ingest.md
+cursor:
+  skill: false
+  command: oprim-ingest.md
+poolside:
+  skill: true
+inline: true

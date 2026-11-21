@@ -1,12 +1,7 @@
 wip_limits:
   now: 2
 
-now:
-  - id: BET-080
-    title: "Add PM inbox and daily-planning workflows for portfolio mode"
-    blocked_by: []
-    unlocks: [BET-081]
-    requires_pdrs: [PDR-001]
+now: []
 
 next:
   - id: BET-077
@@ -28,7 +23,7 @@ later:
     requires_pdrs: [PDR-001]
   - id: BET-081
     title: "Add PM prioritization, comms and reviewer persona workflows"
-    blocked_by: [BET-079, BET-080]
+    blocked_by: [BET-079]
     unlocks: []
     requires_pdrs: [PDR-001]
   - id: BET-082

@@ -55,17 +55,20 @@ const handbookGlossaryBody = `# Glossary
 const stateBody = `# State
 
 <!-- Personal, never exported (lives outside oprim/). Your current working picture: what you are
-     focused on, what is waiting on whom. PM workflows read and update this file; the CLI never
-     parses it. -->
+     focused on, what is in flight, what is blocked. /oprim:start-day and /oprim:plan-week read
+     and update these four sections (keep the headings); the CLI never parses it. -->
 
 ## Focus
 -
 
-## Waiting on
+## In progress
 -
 
-## Open loops
+## Blockers
 -
+
+## Last commands
+<!-- One line per PM workflow run: YYYY-MM-DD <command> — newest last. -->
 `;
 
 const inboxBody = `# Inbox

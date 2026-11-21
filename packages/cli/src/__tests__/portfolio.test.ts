@@ -261,10 +261,17 @@ describe('mode-gated workflow install', () => {
     fs.writeFileSync(p('oprim', 'workflows', `${id}.schema.yaml`), bundled + `modes: ${modes}\n`);
   }
 
-  it('bundled schemas: spec-authoring is product-only, everything else installs in both modes', () => {
+  it('bundled schemas: spec-authoring is product-only, PM workflows portfolio-only, the rest both', () => {
     expect(loadWorkflowSchema('spec-authoring').modes).toEqual(['product']);
     expect(loadWorkflowSchema('bet').modes).toEqual(['product', 'portfolio']);
-    expect(workflowIdsFor('claude-skill', 'portfolio')).toEqual(workflowIdsFor('claude-skill', 'product'));
+    expect(workflowIdsFor('claude-skill', 'portfolio')).toEqual([
+      ...workflowIdsFor('claude-skill', 'product'),
+      'capture',
+      'triage',
+      'ingest',
+      'start-day',
+      'plan-week',
+    ]);
   });
 
   it('a portfolio-only workflow is skipped in product mode for every agent surface', async () => {

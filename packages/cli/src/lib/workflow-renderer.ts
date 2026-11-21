@@ -1,5 +1,6 @@
 import { loadWorkflowSchema, loadWorkflowTemplate, loadWorkflowVariant, workflowIdsFor, WorkflowSchema } from './workflow-schema';
 import type { WorkspaceMode } from './workspace-mode';
+import { applyAskFirstBlocks, askFirstEnabled, renderContextFor, type RenderContext } from './workflow-rules';
 
 function claudeWrapper(name: string, description: string, body: string): string {
   return `---
@@ -40,8 +41,9 @@ function promoteVariantBody(id: string, schema: WorkflowSchema, framework: strin
  * The full workflow body — a workflow's own frontmatter (`name:`/`description:`) plus its
  * instructional steps — used verbatim as the Claude/Cursor/Poolside SKILL.md content.
  */
-export function renderSkillBody(id: string, projectRoot?: string): string {
-  return loadWorkflowTemplate(id, projectRoot);
+export function renderSkillBody(id: string, projectRoot?: string, ctx?: RenderContext): string {
+  const context = ctx ?? renderContextFor(projectRoot);
+  return applyAskFirstBlocks(loadWorkflowTemplate(id, projectRoot), askFirstEnabled(id, context));
 }
 
 /**
@@ -67,7 +69,12 @@ export function renderClaudeCommand(id: string, projectRoot?: string, framework 
  * A full Cursor command file: promote's dynamic per-framework content, or a condensed
  * `<id>.cursor-command.md` body (Cursor has no Skill tool, so content is always inlined).
  */
-export function renderCursorCommand(id: string, projectRoot?: string, framework = 'openspec'): string {
+export function renderCursorCommand(
+  id: string,
+  projectRoot?: string,
+  framework = 'openspec',
+  ctx?: RenderContext
+): string {
   const schema = loadWorkflowSchema(id, projectRoot);
   if (!schema.cursor.command) {
     throw new Error(`workflow "${id}" has no Cursor command target`);
@@ -80,12 +87,19 @@ export function renderCursorCommand(id: string, projectRoot?: string, framework 
         if (content === null) throw new Error(`Missing ${id}.cursor-command.md for workflow "${id}"`);
         return content;
       })();
-  return cursorWrapper(cursorId, schema.cursorDescription ?? schema.description, body);
+  const context = ctx ?? renderContextFor(projectRoot);
+  return cursorWrapper(
+    cursorId,
+    schema.cursorDescription ?? schema.description,
+    applyAskFirstBlocks(body, askFirstEnabled(id, context))
+  );
 }
 
 /** A workflow's condensed section for the shared Codex/Gemini/Poolside inline instruction block. */
-export function renderInlineSection(id: string): string | null {
-  return loadWorkflowVariant(`${id}.inline.md`);
+export function renderInlineSection(id: string, ctx?: RenderContext): string | null {
+  const content = loadWorkflowVariant(`${id}.inline.md`);
+  if (content === null) return null;
+  return applyAskFirstBlocks(content, askFirstEnabled(id, ctx ?? renderContextFor()));
 }
 
 /**
@@ -94,8 +108,9 @@ export function renderInlineSection(id: string): string | null {
  * `order:` values reproduce the pre-refactor fixed section order, so product output is unchanged.
  */
 export function renderAgentInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  const ctx: RenderContext = { mode, askFirst: projectRoot ? renderContextFor(projectRoot).askFirst : {} };
   const sections = workflowIdsFor('inline', mode, projectRoot).map((id) => {
-    const content = renderInlineSection(id);
+    const content = renderInlineSection(id, ctx);
     if (content === null) throw new Error(`Missing inline section for workflow "${id}"`);
     return content;
   });

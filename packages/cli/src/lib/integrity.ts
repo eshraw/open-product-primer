@@ -1,7 +1,10 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { CLAUDE_SKILLS, OPRIM_CONTEXT_SKILL_STEP, specAuthoringSkill } from './install-agent';
+import { OPRIM_CONTEXT_SKILL_STEP } from './install-agent';
+import { loadWorkflowSchema, workflowIdsFor } from './workflow-schema';
+import { renderSkillBody } from './workflow-renderer';
+import { renderContextFor } from './workflow-rules';
 import { isQualifiedRef } from './portfolio/refs';
 
 export interface Check {
@@ -98,7 +101,16 @@ export function checkSkillVersionDrift(projectRoot: string, checks: Check[]): vo
   const skillsDir = path.join(projectRoot, '.claude', 'skills');
   if (!fs.existsSync(skillsDir)) return;
 
-  const bundledSkills: Record<string, string> = { ...CLAUDE_SKILLS, 'oprim-spec': specAuthoringSkill() };
+  // Bundled defaults (no project overrides), rendered for this workspace's mode and ask-first
+  // rules — a portfolio install legitimately differs from the product rendering (BET-080).
+  const ctx = renderContextFor(projectRoot);
+  const bundledSkills: Record<string, string> = Object.fromEntries(
+    workflowIdsFor('claude-skill', ctx.mode).map((id) => [
+      loadWorkflowSchema(id).skillName as string,
+      renderSkillBody(id, undefined, ctx),
+    ])
+  );
+  bundledSkills['oprim-spec'] = renderSkillBody('spec-authoring', undefined, ctx);
 
   for (const [name, bundledContent] of Object.entries(bundledSkills)) {
     const skillPath = path.join(skillsDir, name, 'SKILL.md');

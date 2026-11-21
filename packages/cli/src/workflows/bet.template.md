@@ -41,6 +41,11 @@ If `oprim/sequence.yaml` not found: report and stop — advise `oprim init`.
 ### 3b. Check for custom rules
 Read `oprim/config.yaml`. If it has a non-empty `rules.bet` value, treat it as additional guidance from the team — factor it into the questions you ask in step 4 and reflect it in the generated `bet-decision.md` content. If `rules.bet` is absent or empty, skip this step; behavior is unchanged.
 
+<!-- oprim:portfolio:start -->
+### 3c. Ask about assumptions first
+Before drafting any bet content, ask 2–3 questions about the assumptions it rests on — who it is for, what evidence says the problem is real, and what would have to be true for it to work — and wait for the answers. Use the answers to shape everything you draft next, and record any assumption the user could not answer as an open question in the draft. (If `rules.bet` in `oprim/config.yaml` is a map, its `text` key is the custom guidance from the step above; `ask_first: false` there turns this step off.)
+<!-- oprim:portfolio:end -->
+
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 

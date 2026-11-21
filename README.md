@@ -125,6 +125,32 @@ products:
 
 In portfolio mode `doctor`/`validate` report a `products:` entry whose `source` is not registered, or that carries its own `git`/`path`, as a required failure.
 
+#### The PM daily loop (portfolio mode only)
+
+Five workflows are installed only in a portfolio workspace, for every agent. They work with zero linked products and need no calendar or chat integration — if such tools are available in the session they are used, otherwise they are skipped silently.
+
+| Step | Workflow | What it does |
+|---|---|---|
+| Capture | `oprim-capture "<text>"` | Appends `- [ ] <YYYY-MM-DD HH:MM> <text>` to `inbox.md`. No questions, no routing. |
+| Triage | `/oprim:triage` | One question per open inbox item: NOTE in a product, portfolio NOTE, personal task (`STATE.md`) or discard. Local products are written only after you confirm the target path; git products get a handoff in `outputs/handoffs/`. Routed lines become `- [x] … → checkout:NOTE-012`. |
+| Ingest | `/oprim:ingest <meeting note>` | Appends dated entries to `wiki/log.md`, `wiki/people/`, `wiki/products/`, `wiki/decisions/` (append-only), then proposes one destination per decision; nothing outside `wiki/` without confirmation, nothing in a product without a second one. |
+| Start day | `/oprim:start-day` | A one-screen day plan from `STATE.md`, open inbox items and the boards (`oprim ovw --portfolio --json`, falling back to `oprim/sequence.yaml`). |
+| Plan week | `/oprim:plan-week` | Asks "what has to be true by Friday?" and lays out the week. |
+
+`start-day` and `plan-week` maintain four sections of `STATE.md`: `Focus`, `In progress`, `Blockers` and `Last commands` (an append-only log of PM workflow runs).
+
+**Ask first.** In portfolio mode `oprim-bet`, `oprim-pdr` and `oprim-criteria` ask 2–3 questions about the assumptions a draft rests on before drafting it. Turn it off per workflow, or on in a product workspace, with a map-shaped rule (string rules keep working as plain guidance):
+
+```yaml
+rules:
+  bet: "Always link an objective"   # string: custom guidance only
+  pdr:
+    text: "Cite evidence"           # map: guidance + ask_first toggle
+    ask_first: false
+```
+
+Product-mode installs are byte-identical unless a product sets `ask_first: true`.
+
 ### `oprim update`
 
 Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor, Codex, Gemini, Poolside, Mistral Vibe). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.
