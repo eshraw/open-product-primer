@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Doctor warns when installed Claude skills differ from CLI-bundled content
 When `.claude/skills/` exists, doctor SHALL compare each installed `oprim-*` skill file against the content the current CLI would write. If the content differs (after stripping any PDR-surfacing Step 0 block from the installed file), doctor SHALL emit a non-required warning check per drifted skill.

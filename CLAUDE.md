@@ -16,7 +16,7 @@ npm test -- --reporter=verbose  # verbose output
 npx vitest run src/__tests__/detect.test.ts  # run a single test file
 ```
 
-To test the CLI locally:
+To test the CLI locally (`dist/` is not tracked in git — run `npm run build` first; CI fails if anything under `packages/cli/dist/` is committed):
 ```bash
 node dist/cli.js init
 node dist/cli.js doctor
@@ -90,6 +90,7 @@ Hook registration is merged into `.claude/settings.json` (does not clobber exist
 - `openspec/changes/` owns **what / how** (proposals, designs, tasks, specs)
 - The link between layers is the `/oprim:promote` command, which invokes `/opsx:propose` to create the OpenSpec change
 - When the `native` speccing framework is selected (opt-in, alongside/instead of OpenSpec): `oprim/specs/<capability>/spec.md` is current truth; `oprim/bets/pending/BET-NNN.../specs/<capability>/spec.md` holds an in-flight bet's ADDED/MODIFIED/REMOVED delta until `/oprim:archive` folds it into current truth. Bets live under `oprim/bets/pending/` while active and move to `oprim/bets/archived/` on archive. A native-mode bet's first `oprim-spec` pass also scaffolds `design.md`/`tasks.md` alongside the spec delta; `/oprim:archive` warns if `tasks.md` still has unchecked items
+- Current-truth specs have one canonical format: an optional preamble (`# <capability> Specification`, `## Purpose`) followed by a single flat `## Requirements` section. Delta headings (`## ADDED/MODIFIED/REMOVED Requirements`) belong only in a bet's delta; in current truth they are the *legacy* format. `readCurrentTruth()` in `lib/spec-delta.ts` reads both, `foldDelta()` keeps the preamble and every untouched requirement and always writes canonical, and it throws rather than fold into a file whose `### Requirement:` headers it can't all place. `oprim migrate --specs` rewrites legacy files losslessly (verified per file before writing); `oprim doctor` warns when one exists
 
 ### Remote context
 

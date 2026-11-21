@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: `oprim ovw` SHALL print board state from sequence.yaml without agent involvement
 The system SHALL provide an `ovw` subcommand that reads `oprim/sequence.yaml` and prints the board grouped by lane (now / next / later / backlog) directly to stdout. No LLM call, no agent invocation, and no file writes SHALL occur.

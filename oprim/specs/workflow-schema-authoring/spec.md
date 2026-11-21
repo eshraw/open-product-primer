@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Workflow content SHALL be defined as a declarative schema + template pair
 Each oprim workflow artifact (bet, pdr, note, criteria, review, archive, context, sequence, spec-authoring, promote) SHALL be defined by a `<name>.schema.yaml` file (metadata: id, title, description, command name) and a corresponding `<name>.template.md` file (the workflow's instructional content, with `{{placeholder}}` tokens for per-agent substitution), bundled under `packages/cli/src/workflows/`.

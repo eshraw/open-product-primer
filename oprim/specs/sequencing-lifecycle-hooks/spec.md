@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: on-prompt-submit.sh SHALL detect /oprim:bet and write a sequence nudge flag
 When `/oprim:bet` is detected in the submitted prompt, `on-prompt-submit.sh` SHALL write a `.sequence-nudge` flag file with context `"bet-created"` to signal that the board may need updating.

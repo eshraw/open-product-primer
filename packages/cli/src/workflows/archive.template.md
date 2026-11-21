@@ -65,15 +65,17 @@ If `oprim/bets/pending/<resolved-dir>/specs/` does not exist: skip this step ent
 Otherwise, for each capability subdirectory under `oprim/bets/pending/<resolved-dir>/specs/` containing a `spec.md`:
 
 1. Read the delta file's `## ADDED Requirements` / `## MODIFIED Requirements` / `## REMOVED Requirements` sections. Each `### Requirement:` block runs from its header through its body and any `#### Scenario:` sub-entries, up to the next `### Requirement:` or `## ` header.
-2. Read `oprim/specs/<capability>/spec.md` if it exists (current truth uses a single flat `## Requirements` section).
+2. Read `oprim/specs/<capability>/spec.md` if it exists. Current truth is canonically an optional **preamble** (everything above the requirements, e.g. `# <capability> Specification` and `## Purpose`) followed by a single flat `## Requirements` section. A *legacy* file may instead hold its requirements under `## ADDED Requirements` / `## MODIFIED Requirements` headings: treat every block under those as a current requirement, in file order (if a header appears in both, keep the later MODIFIED block), and ignore blocks under a legacy `## REMOVED Requirements` heading.
    - **If it does not exist:**
      - If the delta is entirely `## ADDED Requirements` (no MODIFIED/REMOVED sections): create `oprim/specs/<capability>/spec.md` with a `## Requirements` header and append each ADDED requirement block beneath it.
      - If the delta contains any MODIFIED or REMOVED requirements: stop before moving anything and report an error — "cannot modify/remove requirement '<header>' in capability <capability> — no current-truth spec exists yet for this capability."
    - **If it does exist:**
-     - **ADDED**: append the requirement block to the end of the `## Requirements` section.
+     - **Count first.** Count every `### Requirement:` line in the file and the blocks you collected above. If you collected fewer than there are header lines (e.g. some sit under a heading you don't recognise), stop before writing or moving anything and report: "cannot fold into oprim/specs/<capability>/spec.md: found <N> requirement headers but parsed <M>".
+     - **ADDED**: append the requirement block after the last existing requirement.
      - **MODIFIED**: find the existing `### Requirement:` block whose header text matches the delta's (whitespace-insensitive); replace that entire block (header, body, and scenarios) with the delta's version. If no match is found, treat it as ADDED instead (append) and note this in the final report.
      - **REMOVED**: find and delete the matching block entirely. If no match is found, note this in the final report and continue — nothing to remove.
-3. Write the updated `oprim/specs/<capability>/spec.md`.
+     - **Never drop anything else.** Every existing requirement not explicitly MODIFIED or REMOVED stays, in its original order. The preamble is kept byte-for-byte.
+3. Write the updated `oprim/specs/<capability>/spec.md` in the canonical format: preamble, then `## Requirements`, then all requirement blocks (a legacy file becomes canonical as a side effect). Before writing, check the result has exactly (existing − REMOVED matched + ADDED + unmatched MODIFIED) requirements; if not, stop and report rather than writing. If the `oprim` CLI is available, `oprim validate --diff <BET-ID>` prints the exact same fold as a preview — prefer matching its output.
 
 This fold always overwrites the matched requirement wholesale — it never reconciles two bets' overlapping changes. If a later bet's archive touches the same requirement again, its version simply replaces this one (last-write-wins, confirmed by construction — no 3-way merge).
 

@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Product decisions SHALL be stored as durable PDR artifacts
 The system SHALL support Product Decision Records (PDRs) as durable artifacts under `primer/decisions/` with explicit status, context, decision statement, alternatives, consequences, and related links.

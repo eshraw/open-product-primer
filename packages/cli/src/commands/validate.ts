@@ -61,7 +61,7 @@ function runDiff(projectRoot: string, betIdInput: string): void {
 
     console.log(chalk.bold(`═══ ${capEntry.name} ═══`));
     try {
-      const result = foldDelta(currentTruth, deltaContent);
+      const result = foldDelta(currentTruth, deltaContent, `oprim/specs/${capEntry.name}/spec.md`);
       console.log(result.content);
       for (const note of result.notes) {
         console.log(chalk.yellow(`  note: ${note}`));

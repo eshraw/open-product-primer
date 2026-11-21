@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: validate SHALL flag a promoted bet that has no criteria contract
 For each bet directory under `oprim/bets/` (excluding `archived/`) whose `bet-decision.md` `## Links` section contains an `OpenSpec change:` entry that is not the placeholder value ("to be filled when promoted"), `oprim validate` SHALL check for a `criteria.yaml` file in that bet's directory. If absent, `oprim validate` SHALL emit a check with `required: true` under `--strict`.

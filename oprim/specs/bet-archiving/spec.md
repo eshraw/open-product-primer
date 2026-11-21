@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: The system SHALL provide the oprim:archive skill to archive a completed bet
 The system SHALL provide an `oprim:archive` skill that accepts a bare bet ID (e.g., `BET-005`), resolves it to the actual directory name in `oprim/bets/pending/` (which may include a slug, e.g., `BET-005-improve-xyz/`), moves that directory to `oprim/bets/archived/`, and removes the bet's entry from all buckets in `sequence.yaml`. If the bet directory contains an `specs/` subdirectory with delta spec files, the skill SHALL fold those deltas into the corresponding `oprim/specs/<capability>/spec.md` current-truth files (matching requirements by `### Requirement:` header text, whitespace-insensitive) before completing the move. If the bet directory contains a `tasks.md` with any unchecked `- [ ]` items, the skill SHALL warn that implementation appears incomplete and prompt the user to confirm before proceeding, rather than archiving silently. The skill has no knowledge of OpenSpec changes.

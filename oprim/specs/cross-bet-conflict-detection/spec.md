@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: validate SHALL surface overlapping requirement headers across active bets on demand
 The system SHALL provide a way to check, across all active bet directories under `oprim/bets/` (excluding `archived/`), whether two or more bets' `specs/<capability>/spec.md` deltas contain a `### Requirement:` header for the same capability that matches (whitespace-insensitive), without requiring any bet to be in the process of archiving.

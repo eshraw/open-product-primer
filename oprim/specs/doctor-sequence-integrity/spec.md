@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Doctor warns when now-lane exceeds WIP limit
 Doctor SHALL parse `oprim/sequence.yaml` and compare the count of entries in the `now:` list against `wip_limits.now`. If the count exceeds the limit, doctor SHALL emit a non-required warning check.

@@ -2,21 +2,16 @@ wip_limits:
   now: 2
 
 now:
-  - id: BET-083
-    title: "Fix spec fold data loss, migrate legacy current-truth specs and untrack dist"
-    blocked_by: []
-    unlocks: [BET-075, BET-076]
-    requires_pdrs: []
   - id: BET-075
     title: "Add portfolio workspace mode and scaffold to oprim init"
-    blocked_by: [BET-083]
+    blocked_by: []
     unlocks: [BET-076, BET-077, BET-080]
     requires_pdrs: [PDR-001]
 
 next:
   - id: BET-076
     title: "Link products and resolve cross-product references through remote context"
-    blocked_by: [BET-075, BET-083]
+    blocked_by: [BET-075]
     unlocks: [BET-077, BET-078, BET-079]
     requires_pdrs: [PDR-001]
   - id: BET-077

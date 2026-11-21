@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: oprim SHALL detect a Poolside environment by checking for a .poolside/ directory
 The system SHALL treat a `.poolside/` directory present at the project root as a Poolside environment indicator and SHALL return `'poolside'` from `detectAvailableAgents()` when that directory exists.

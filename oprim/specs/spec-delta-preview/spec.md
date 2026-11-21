@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: validate SHALL preview a bet's spec-delta merge result without writing files
 The system SHALL provide `oprim validate --diff <BET-ID>`, which, for each `<capability>/spec.md` delta under the given bet's `specs/` directory, computes the result of folding that delta into the corresponding `oprim/specs/<capability>/spec.md` (using the same ADDED-append / MODIFIED-replace / REMOVED-delete rules `/oprim:archive` uses) and prints the computed post-merge content, without writing to `oprim/specs/` or moving the bet directory.

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 
 export type DeltaSection = 'ADDED' | 'MODIFIED' | 'REMOVED';
 
-interface RequirementBlock {
+export interface RequirementBlock {
   header: string;
   content: string;
 }
@@ -107,20 +107,105 @@ export function parseRequirementHeaders(deltaContent: string, section: DeltaSect
   return parseRequirementBlocks(sectionContent).map((b) => b.header);
 }
 
-/** Extracts `### Requirement:` header text from current truth's flat `## Requirements` section. */
+const REQUIREMENT_HEADER = /^### Requirement:/;
+const REQUIREMENTS_HEADING = /^## (Requirements|ADDED Requirements|MODIFIED Requirements|REMOVED Requirements)\s*$/;
+
+export interface CurrentTruth {
+  /** Every line above the first requirements heading, byte-for-byte (empty if none). */
+  preamble: string;
+  /** Current requirements in file order (canonical `## Requirements`, plus legacy ADDED/MODIFIED). */
+  blocks: RequirementBlock[];
+  /** Any non-requirements `##` sections found after the requirements began, kept verbatim. */
+  trailer: string;
+  /** True if the file uses delta headings (`## ADDED/MODIFIED/REMOVED Requirements`). */
+  legacy: boolean;
+  /** Raw count of `### Requirement:` lines anywhere in the file. */
+  headerLineCount: number;
+  /** Blocks under a legacy `## REMOVED Requirements` section (not current requirements). */
+  removedCount: number;
+  /** Headers that appeared more than once; the later block wins, at the first one's position. */
+  duplicates: string[];
+}
+
+/**
+ * Reads a current-truth spec in either the canonical format (preamble + one `## Requirements`
+ * section) or the legacy format (delta headings). See BET-083.
+ */
+export function readCurrentTruth(content: string): CurrentTruth {
+  const lines = content.split('\n');
+  const headerLineCount = lines.filter((l) => REQUIREMENT_HEADER.test(l)).length;
+  const firstIdx = lines.findIndex((l) => REQUIREMENTS_HEADING.test(l));
+
+  if (firstIdx === -1) {
+    return { preamble: content, blocks: [], trailer: '', legacy: false, headerLineCount, removedCount: 0, duplicates: [] };
+  }
+
+  const preamble = firstIdx === 0 ? '' : lines.slice(0, firstIdx).join('\n') + '\n';
+  const blocks: RequirementBlock[] = [];
+  const duplicates: string[] = [];
+  const trailerLines: string[] = [];
+  let legacy = false;
+  let removedCount = 0;
+
+  // Split the rest into `## ` sections.
+  const sections: { heading: string; body: string[] }[] = [];
+  for (let i = firstIdx; i < lines.length; i++) {
+    const line = lines[i]!;
+    if (/^##\s/.test(line)) sections.push({ heading: line, body: [] });
+    else sections[sections.length - 1]!.body.push(line);
+  }
+
+  for (const section of sections) {
+    const match = section.heading.match(REQUIREMENTS_HEADING);
+    const kind = match ? match[1]! : null;
+    if (kind !== null && kind !== 'Requirements') legacy = true;
+
+    if (kind === 'REMOVED Requirements') {
+      removedCount += parseRequirementBlocks(section.body.join('\n')).length;
+      continue;
+    }
+    if (kind === null) {
+      // Unknown section: keep it verbatim. Requirement headers inside it are left unparsed,
+      // which trips foldDelta's guard.
+      trailerLines.push(section.heading, ...section.body);
+      continue;
+    }
+    for (const block of parseRequirementBlocks(section.body.join('\n'))) {
+      const idx = blocks.findIndex((b) => normalizeHeader(b.header) === normalizeHeader(block.header));
+      if (idx === -1) {
+        blocks.push(block);
+      } else {
+        blocks[idx] = block;
+        duplicates.push(block.header);
+      }
+    }
+  }
+
+  const trailer = trailerLines.join('\n').trim();
+  return { preamble, blocks, trailer: trailer ? trailer + '\n' : '', legacy, headerLineCount, removedCount, duplicates };
+}
+
+/** Writes a current truth back out in the canonical format. */
+export function writeCurrentTruth(truth: Pick<CurrentTruth, 'preamble' | 'blocks' | 'trailer'>): string {
+  const body = truth.blocks.map((b) => b.content).join('\n\n');
+  const trailer = truth.trailer ? `\n${truth.trailer}` : '';
+  return `${truth.preamble}## Requirements\n\n${body}\n${trailer}`;
+}
+
+/** Extracts `### Requirement:` header text from current truth (canonical or legacy format). */
 export function parseCurrentTruthHeaders(currentTruthContent: string): string[] {
-  const sectionContent = extractSection(currentTruthContent, 'Requirements');
-  if (sectionContent === null) return [];
-  return parseRequirementBlocks(sectionContent).map((b) => b.header);
+  return readCurrentTruth(currentTruthContent).blocks.map((b) => b.header);
 }
 
 /**
  * Folds a bet's spec delta into current truth, mirroring the ADDED-append /
  * MODIFIED-replace-or-note / REMOVED-delete-or-note algorithm `/oprim:archive` uses.
+ * Keeps the preamble and every untouched requirement, and always writes canonical format.
  * Throws if `currentTruth` is null and the delta contains MODIFIED/REMOVED requirements
- * (nothing to modify/remove against yet).
+ * (nothing to modify/remove against yet), or if current truth has requirement headers
+ * the reader could not place (unknown format — refusing beats silently dropping them).
  */
-export function foldDelta(currentTruth: string | null, delta: string): FoldResult {
+export function foldDelta(currentTruth: string | null, delta: string, label = 'current truth'): FoldResult {
   const notes: string[] = [];
 
   const addedSection = extractSection(delta, 'ADDED Requirements');
@@ -141,8 +226,14 @@ export function foldDelta(currentTruth: string | null, delta: string): FoldResul
     return { content: `## Requirements\n\n${body}\n`, notes };
   }
 
-  const reqSection = extractSection(currentTruth, 'Requirements') ?? '';
-  const blocks = parseRequirementBlocks(reqSection);
+  const truth = readCurrentTruth(currentTruth);
+  const accounted = truth.blocks.length + truth.removedCount + truth.duplicates.length;
+  if (accounted < truth.headerLineCount) {
+    throw new Error(
+      `cannot fold into ${label}: found ${truth.headerLineCount} requirement headers but parsed ${accounted}`
+    );
+  }
+  const blocks = [...truth.blocks];
 
   for (const block of modified) {
     const idx = blocks.findIndex((b) => normalizeHeader(b.header) === normalizeHeader(block.header));
@@ -167,8 +258,7 @@ export function foldDelta(currentTruth: string | null, delta: string): FoldResul
     blocks.push(block);
   }
 
-  const body = blocks.map((b) => b.content).join('\n\n');
-  return { content: `## Requirements\n\n${body}\n`, notes };
+  return { content: writeCurrentTruth({ ...truth, blocks }), notes };
 }
 
 /**

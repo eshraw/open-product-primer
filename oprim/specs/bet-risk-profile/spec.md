@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: `bet-decision.md` SHALL include a Door type section
 Every `bet-decision.md` created via the `/oprim:bet` skill SHALL include a `## Door type` section with two checkboxes: one for 2-way door and one for 1-way door. Exactly one SHALL be checked before the bet is considered ready for promotion.

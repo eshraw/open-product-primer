@@ -15,6 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Fail if compiled output is tracked
+        run: |
+          tracked="$(git ls-files dist)"
+          if [ -n "$tracked" ]; then
+            echo "::error::packages/cli/dist/ must not be tracked (prepublishOnly builds it). Tracked files:"
+            echo "$tracked"
+            exit 1
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -23,4 +31,9 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm test
-      - run: npm pack --dry-run
+      - name: Check published package contents
+        run: |
+          npm pack --dry-run --json > pack.json
+          for f in dist/cli.js dist/lib/claude-mods.js dist/workflows/archive.template.md; do
+            grep -q "\"$f\"" pack.json || { echo "::error::$f missing from npm pack"; exit 1; }
+          done

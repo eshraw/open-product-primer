@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: The system SHALL generate Amplitude measurement definitions from criteria entries
 For each metric in `criteria.yaml` with `source.type: amplitude`, the system SHALL write a JSON measurement definition to `primer/bets/BET-NNN/measurements/amplitude-<metric_id>.json` containing the chart type, events, aggregation, segment filters, and computed date window.

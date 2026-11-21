@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { readAgentsFromConfig } from '../lib/detect';
 import { scanCriteriaForSourceType } from '../lib/measure';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
+import { checkLegacySpecFormat } from '../lib/validate-checks';
 import {
   readRemoteContextConfig,
   resolveIdentityOnly,
@@ -250,6 +251,9 @@ export function doctorCommand(): Command {
 
       // ── Skill version drift checks ────────────────────────────────────────────
       checkSkillVersionDrift(projectRoot, checks);
+
+      // ── Current-truth spec format (legacy delta headings) ─────────────────────
+      checkLegacySpecFormat(projectRoot, checks);
 
       // ── Remote context checks ─────────────────────────────────────────────────
       checkRemoteContexts(projectRoot, checks);

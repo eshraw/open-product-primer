@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: oprim SHALL detect a Gemini CLI environment by checking for GEMINI.md
 The system SHALL treat `GEMINI.md` present at the project root as a Gemini CLI environment indicator and SHALL return `'gemini'` from `detectAvailableAgents()` when that file exists.

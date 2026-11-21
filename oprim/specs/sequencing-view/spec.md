@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: A visual view SHALL be generated from sequence.yaml
 The system SHALL produce a Mermaid diagram committed as `oprim/sequence-view.md`, derived from the current state of `oprim/sequence.yaml`. The view SHALL be regenerated whenever the sequencing board is updated via `/oprim:sequence`.

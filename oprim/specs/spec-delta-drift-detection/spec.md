@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: validate SHALL flag MODIFIED/REMOVED delta requirements whose header no longer matches current truth
 For each active bet's `specs/<capability>/spec.md` delta, for every `### Requirement:` header under a `## MODIFIED Requirements` or `## REMOVED Requirements` section, `oprim validate` SHALL check whether a `### Requirement:` header with matching text (whitespace-insensitive) exists in `oprim/specs/<capability>/spec.md`. If no match is found, validate SHALL emit a failing check.

@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: A bet SHALL support an optional discovery.md artifact
 Each bet directory MAY contain a `discovery.md` file co-located with `bet-decision.md`. When present, it SHALL follow the structured template covering problem framing, user research signals, competitive context, and open questions.

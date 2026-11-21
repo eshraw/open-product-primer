@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Open Product Primer SHALL be installable as a global CLI package
 The system SHALL provide a globally installable CLI (for example via npm package `@open-product-primer/cli`) that exposes at minimum `init`, `update`, and `doctor` commands for project setup and maintenance.
