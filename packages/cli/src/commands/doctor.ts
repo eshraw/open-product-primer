@@ -9,6 +9,8 @@ import { checkLegacySpecFormat } from '../lib/validate-checks';
 import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
 import { checkCrossProductRefs, RefResolver } from '../lib/portfolio/refs';
 import { checkObjectiveLinks } from '../lib/portfolio/objectives';
+import { checkPortfolioWip } from '../lib/portfolio/wip';
+import { readWorkspaceMode } from '../lib/workspace-mode';
 import {
   readRemoteContextConfig,
   resolveIdentityOnly,
@@ -268,6 +270,8 @@ export function doctorCommand(): Command {
       const resolver = new RefResolver(projectRoot);
       checkCrossProductRefs(projectRoot, checks, resolver);
       checkObjectiveLinks(projectRoot, checks, resolver);
+      // BET-079 — per-product and portfolio-wide WIP (portfolio mode only).
+      if (readWorkspaceMode(projectRoot) === 'portfolio') checkPortfolioWip(projectRoot, checks, resolver);
 
       // ── Agent environment checks ──────────────────────────────────────────────
       const configAgents = readAgentsFromConfig(projectRoot);

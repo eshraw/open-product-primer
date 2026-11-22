@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`buildPortfolioView > is identical across runs and has no ANSI codes off a TTY 1`] = `
+"portfolio now 1/2
+  now   BET-010  Payments strategy
+checkout now 2/2 · owner alice · squad payments
+  now   BET-031  Wallet checkout
+  now   BET-032  Saved cards
+  next  BET-033  Refunds
+search now 1/3 · owner bob
+  now   BET-020  Facets
+
+── DEPENDENCIES ──
+  checkout:BET-031 (now) blocked by search:BET-014 (later)
+  search:BET-020 (now) blocked by BET-099 (missing)
+
+── COVERAGE ──
+  OBJ-002 has no bet in now/next
+  checkout:BET-033 has no objective
+
+── HYGIENE ──
+  checkout:BET-031 review overdue (2027-01-05)
+  checkout:BET-031 promoted without criteria.yaml"
+`;

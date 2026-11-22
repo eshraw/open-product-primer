@@ -136,6 +136,15 @@ export class RefResolver {
     return result;
   }
 
+  /**
+   * BET-079 — the resolved workspace behind a registered source name (memoised like `resolve`),
+   * or null when no such source is registered.
+   */
+  resolveWorkspace(sourceName: string): ResolvedContent | null {
+    const source = findSourceByName(readRemoteContextConfig(this.projectRoot), sourceName);
+    return source ? this.resolveSource(source) : null;
+  }
+
   resolve(ref: ParsedRef): RefResolution {
     if (ref.source === null) {
       const hit = lookupArtifact(this.projectRoot, ref);

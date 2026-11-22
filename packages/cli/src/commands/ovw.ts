@@ -4,20 +4,11 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import * as yaml from 'js-yaml';
 import { hyperlinkBetEntry } from '../lib/hyperlink';
-
-type RiskLevel = 'Low' | 'Medium' | 'High' | null;
-
-interface RiskProfile {
-  value: RiskLevel;
-  usability: RiskLevel;
-  feasibility: RiskLevel;
-  viability: RiskLevel;
-}
-
-interface BetMeta {
-  doorType: '2-way' | '1-way' | null;
-  risks: RiskProfile | null;
-}
+import { loadBetMeta, type BetMeta, type RiskLevel } from '../lib/bet-meta';
+import { readWorkspaceMode } from '../lib/workspace-mode';
+import { readOkfEnabledFromConfig } from '../lib/detect';
+import { buildPortfolioView } from '../lib/portfolio/view';
+import { renderPortfolioTerminal, renderPortfolioMarkdown } from '../lib/portfolio/render';
 
 interface SequenceBet {
   id: string;
@@ -31,57 +22,6 @@ interface SequenceBoard {
   next?: SequenceBet[];
   later?: SequenceBet[];
   backlog?: SequenceBet[];
-}
-
-function resolveBetDecisionPath(betsDir: string, betId: string): string | null {
-  if (!fs.existsSync(betsDir)) return null;
-  const entries = fs.readdirSync(betsDir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.isDirectory() && entry.name.startsWith(betId)) {
-      const candidate = path.join(betsDir, entry.name, 'bet-decision.md');
-      if (fs.existsSync(candidate)) return candidate;
-    }
-  }
-  return null;
-}
-
-function extractDoorType(content: string): '2-way' | '1-way' | null {
-  if (/\[x\]\s*2-way door/i.test(content)) return '2-way';
-  if (/\[x\]\s*1-way door/i.test(content)) return '1-way';
-  return null;
-}
-
-function extractRiskLevel(content: string, label: string): RiskLevel {
-  const match = content.match(new RegExp(`\\*\\*${label}\\*\\*:\\s*(Low|Medium|High)`, 'i'));
-  if (!match) return null;
-  const raw = match[1];
-  if (raw.toLowerCase() === 'low') return 'Low';
-  if (raw.toLowerCase() === 'medium') return 'Medium';
-  if (raw.toLowerCase() === 'high') return 'High';
-  return null;
-}
-
-function extractRiskProfile(content: string): RiskProfile {
-  return {
-    value: extractRiskLevel(content, 'Value risk'),
-    usability: extractRiskLevel(content, 'Usability risk'),
-    feasibility: extractRiskLevel(content, 'Feasibility risk'),
-    viability: extractRiskLevel(content, 'Business viability risk'),
-  };
-}
-
-function loadBetMeta(betsDir: string, betId: string): BetMeta {
-  const decisionPath = resolveBetDecisionPath(betsDir, betId);
-  if (!decisionPath) return { doorType: null, risks: null };
-  try {
-    const content = fs.readFileSync(decisionPath, 'utf-8');
-    return {
-      doorType: extractDoorType(content),
-      risks: extractRiskProfile(content),
-    };
-  } catch {
-    return { doorType: null, risks: null };
-  }
 }
 
 function abbreviate(level: RiskLevel): string {
@@ -229,11 +169,56 @@ function buildAdvisory(board: SequenceBoard, betsDir: string): string[] {
   return nudges;
 }
 
+function localToday(): string {
+  const d = new Date();
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+interface OvwOptions {
+  portfolio?: boolean;
+  json?: boolean;
+  write?: boolean;
+}
+
+// BET-079 — every product's board, rendered from files only (no agent involvement).
+function runPortfolioView(projectRoot: string, opts: OvwOptions): void {
+  if (readWorkspaceMode(projectRoot) !== 'portfolio') {
+    console.error('--portfolio requires mode: portfolio in oprim/config.yaml');
+    process.exit(1);
+    return;
+  }
+  const view = buildPortfolioView(projectRoot, localToday());
+
+  if (opts.write) {
+    const out = path.join(projectRoot, 'oprim', 'portfolio-view.md');
+    fs.writeFileSync(out, renderPortfolioMarkdown(view, readOkfEnabledFromConfig(projectRoot)));
+    if (!opts.json) console.log('Written: oprim/portfolio-view.md');
+  }
+  if (opts.json) {
+    console.log(JSON.stringify(view, null, 2));
+    return;
+  }
+  if (!opts.write) for (const line of renderPortfolioTerminal(view)) console.log(line);
+}
+
 export function ovwCommand(): Command {
   return new Command('ovw')
     .description('Show the sequencing board with door type, risk profile, and advisory guidance')
-    .action(() => {
+    .option('--portfolio', 'Portfolio mode: show every product\'s Now/Next, cross-product dependencies, objective coverage and hygiene')
+    .option('--json', 'With --portfolio: print the view model as JSON')
+    .option('--write', 'With --portfolio: write oprim/portfolio-view.md')
+    .action((opts: OvwOptions) => {
       const projectRoot = process.cwd();
+      if (opts.portfolio) {
+        runPortfolioView(projectRoot, opts);
+        return;
+      }
+      if (opts.json || opts.write) {
+        console.error('--json and --write are only supported with --portfolio');
+        process.exit(1);
+        return;
+      }
       const sequencePath = path.join(projectRoot, 'oprim', 'sequence.yaml');
       const betsDir = path.join(projectRoot, 'oprim', 'bets', 'pending');
 

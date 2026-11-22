@@ -19,7 +19,7 @@ function activeBetDirs(betsDir: string): fs.Dirent[] {
     .filter((e) => e.isDirectory() && e.name !== 'archived');
 }
 
-function isPromoted(betDecisionContent: string): boolean {
+export function isPromoted(betDecisionContent: string): boolean {
   const linksMatch = betDecisionContent.match(/## Links\n([\s\S]*?)(?=\n## |$)/);
   const linksSection = linksMatch ? linksMatch[1]! : betDecisionContent;
   const lineMatch = linksSection.match(/^- *OpenSpec change:\s*(.*)$/m);

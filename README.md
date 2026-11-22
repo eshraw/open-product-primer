@@ -219,6 +219,23 @@ Generates and runs KPI measurements for a bet from its `criteria.yaml`: writes A
 
 Prints the sequencing board (`now`/`next`/`later`/`backlog`) with each `now`/`next` bet annotated inline with its door type (1-way/2-way) and risk profile (value/usability/feasibility/viability), read from `bet-decision.md`. Follows with an advisory section flagging things like an empty or overloaded `now` lane, a 1-way door bet with no 2-way door "unrisker" in flight, doors sequenced in the wrong order, or elevated risk without a mitigation plan.
 
+#### `oprim ovw --portfolio` (portfolio mode only)
+
+One deterministic view across every product, read from files through remote context (no agent involvement):
+
+```bash
+oprim ovw --portfolio           # per-workspace Now/Next with load (e.g. "checkout now 2/2"), then problem sections
+oprim ovw --portfolio --json    # the same view model as JSON (products, dependencies, coverage, hygiene)
+oprim ovw --portfolio --write   # write oprim/portfolio-view.md (OKF frontmatter lists when okf.enabled, plain tables otherwise)
+```
+
+- **Boards** — the portfolio's own Now/Next, then each non-sunset `products:` entry with owner/squad and Now load against its `wip_limits.now`. A git source served from cache is marked `(stale)`; one with no cache is listed as `unreachable` instead of aborting.
+- **Dependencies** — qualified `blocked_by` entries that don't resolve, or that are out of order (blocked bet in Now, blocker in Later/Backlog or off its board and not archived).
+- **Coverage** — active objectives with no Now/Next bet anywhere (directly, or via a `Delegated to`/`Delegated from` link), and Now/Next bets linked to no objective.
+- **Hygiene** — pending bets whose `Review date` has passed, and promoted bets missing `criteria.yaml`.
+
+In portfolio mode `doctor`/`validate` also warn (non-required) when a product's Now exceeds its own `wip_limits.now`, or when total Now across the portfolio and its products exceeds `wip_limits.portfolio_now` in the portfolio's `sequence.yaml`.
+
 ### `oprim context`
 
 Manage citable connections between oprim workspaces across repositories:
