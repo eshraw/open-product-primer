@@ -13,6 +13,7 @@ import { isPromoted } from '../validate-checks';
 import { readProducts, type ProductStatus } from './products';
 import { listObjectives, isInactiveObjectiveStatus } from './objectives';
 import { parseRef, RefResolver, type ParsedRef } from './refs';
+import { parseDelegatedTo, isPendingHandoff, extractDecision, type DelegationTarget } from './delegation';
 
 export type Lane = 'now' | 'next' | 'later' | 'backlog';
 const LANES: readonly Lane[] = ['now', 'next', 'later', 'backlog'];
@@ -45,11 +46,23 @@ export interface Dependency {
   problem: 'unresolved' | 'out-of-order';
 }
 
+/** BET-078 — a portfolio bet's delegated product bet, its status read live from the product. */
+export interface DelegationRow {
+  bet: string;
+  /** `checkout:BET-031`, or just the product name while a handoff is pending. */
+  target: string;
+  /** Lane name, `archived`, `not on board`, `missing`, `unreachable`, `unknown source` or `pending handoff`. */
+  state: string;
+  /** The product bet's `Decision` (pending bets only). */
+  decision?: string;
+}
+
 export interface PortfolioView {
   generatedAt: string;
   portfolio: WorkspaceBoard;
   products: WorkspaceBoard[];
   dependencies: Dependency[];
+  delegations: DelegationRow[];
   coverage: { objectivesWithoutFlight: string[]; betsWithoutObjective: string[] };
   hygiene: { overdueReviews: Array<{ ref: string; date: string }>; missingCriteria: string[] };
 }
@@ -65,8 +78,11 @@ interface SequenceEntry {
 interface PendingBet {
   objectives: ParsedRef[];
   delegatedTo: ParsedRef[];
+  /** `delegatedTo` plus `<product>:pending-handoff` targets, in file order. */
+  delegations: DelegationTarget[];
   delegatedFrom: ParsedRef[];
   reviewDate: string | null;
+  decision?: string;
   promoted: boolean;
   hasCriteria: boolean;
 }
@@ -138,7 +154,9 @@ function readPendingBets(root: string): Map<string, PendingBet> {
     out.set(id, {
       objectives: refsOf(links.get('objectives'), 'OBJ'),
       delegatedTo: refsOf(links.get('delegated to'), 'BET'),
+      delegations: parseDelegatedTo(links.get('delegated to')),
       delegatedFrom: refsOf(links.get('delegated from'), 'BET'),
+      decision: extractDecision(content),
       reviewDate: extractReviewDate(content),
       promoted: content !== '' && isPromoted(content),
       hasCriteria: fs.existsSync(path.join(dir, entry.name, 'criteria.yaml')),
@@ -294,6 +312,23 @@ function buildDependencies(all: LoadedWorkspace[], lookup: Lookup): Dependency[]
   return out;
 }
 
+function buildDelegations(loaded: LoadedPortfolio, lookup: Lookup): DelegationRow[] {
+  const out: DelegationRow[] = [];
+  for (const [id, bet] of loaded.portfolio.pending) {
+    for (const t of bet.delegations) {
+      if (isPendingHandoff(t)) {
+        out.push({ bet: id, target: t.source, state: 'pending handoff' });
+        continue;
+      }
+      const target = lookup.target(loaded.portfolio, t);
+      const state = blockerState(target, t.id);
+      const decision = target && !target.board.unreachable ? target.pending.get(t.id)?.decision : undefined;
+      out.push({ bet: id, target: t.raw, state, ...(decision ? { decision } : {}) });
+    }
+  }
+  return out;
+}
+
 function buildCoverage(loaded: LoadedPortfolio, all: LoadedWorkspace[], lookup: Lookup): PortfolioView['coverage'] {
   const covered = new Set<string>();
   const betsWithoutObjective: string[] = [];
@@ -364,6 +399,7 @@ export function buildPortfolioView(
     portfolio: loaded.portfolio.board,
     products: loaded.products.map((p) => p.board),
     dependencies: buildDependencies(all, lookup),
+    delegations: buildDelegations(loaded, lookup),
     coverage: buildCoverage(loaded, all, lookup),
     hygiene: buildHygiene(all, today),
   };

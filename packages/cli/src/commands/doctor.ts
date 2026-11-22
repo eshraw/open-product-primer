@@ -10,6 +10,7 @@ import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
 import { checkCrossProductRefs, RefResolver } from '../lib/portfolio/refs';
 import { checkObjectiveLinks } from '../lib/portfolio/objectives';
 import { checkPortfolioWip } from '../lib/portfolio/wip';
+import { checkDelegationLinks } from '../lib/portfolio/delegation';
 import { readWorkspaceMode } from '../lib/workspace-mode';
 import {
   readRemoteContextConfig,
@@ -270,8 +271,11 @@ export function doctorCommand(): Command {
       const resolver = new RefResolver(projectRoot);
       checkCrossProductRefs(projectRoot, checks, resolver);
       checkObjectiveLinks(projectRoot, checks, resolver);
-      // BET-079 — per-product and portfolio-wide WIP (portfolio mode only).
-      if (readWorkspaceMode(projectRoot) === 'portfolio') checkPortfolioWip(projectRoot, checks, resolver);
+      // BET-079 / BET-078 — WIP and two-way delegation links (portfolio mode only).
+      if (readWorkspaceMode(projectRoot) === 'portfolio') {
+        checkPortfolioWip(projectRoot, checks, resolver);
+        checkDelegationLinks(projectRoot, checks, resolver);
+      }
 
       // ── Agent environment checks ──────────────────────────────────────────────
       const configAgents = readAgentsFromConfig(projectRoot);

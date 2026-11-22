@@ -272,6 +272,7 @@ describe('mode-gated workflow install', () => {
       'start-day',
       'plan-week',
       'objective',
+      'delegate',
     ]);
   });
 

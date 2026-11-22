@@ -163,6 +163,39 @@ With OKF frontmatter enabled the file also carries `type: objective`, `period` a
 | pending bet with no objective link, in a product with no portfolio source | nothing |
 | bet linked only to `Achieved` / `Dropped` / `Superseded` objectives | non-required warning naming them |
 
+#### Delegating a bet to a product (portfolio mode only)
+
+`/oprim:delegate BET-NNN --to <product>` turns a portfolio bet into a product team's bet without copying it. The two bets are linked both ways and then evolve independently:
+
+```markdown
+# portfolio oprim/bets/pending/BET-004-…/bet-decision.md
+## Links
+- Delegated to: checkout:BET-031
+
+# checkout oprim/bets/pending/BET-031-…/bet-decision.md
+## Links
+- Objectives: acme-portfolio:OBJ-002
+- Delegated from: acme-portfolio:BET-004
+```
+
+The product bet is drafted from the portfolio bet (title, why now, outcomes, kill criteria, objectives qualified to the portfolio); owner, review date, decision and risks are asked fresh because the product owns them. The `Delegated from` qualifier is whatever name the *product* registered the portfolio under.
+
+- **Local products** (`path:` source): the full bet, its target path and the backlog entry are shown first, and nothing is written to the product until you confirm. Then the bet is created with the product's next free `BET-NNN`, appended to its `sequence.yaml` backlog, and the portfolio bet gets its `Delegated to` line. The product team reviews and commits it.
+- **Git products** (`git:` source): oprim writes `outputs/handoffs/<product>-BET-NNN.md` (a note to the owner, the ready-to-paste bet, the backlog entry) and records `- Delegated to: <product>:pending-handoff`. Once the team has created the bet, `/oprim:delegate BET-NNN --to <product> --link BET-MMM` replaces the placeholder.
+
+**Never-push guarantee:** delegation never writes under the remote-context cache, never creates commits or branches, and never pushes — in any repository.
+
+The portfolio never stores the delegated bet's status: `oprim ovw --portfolio` lists each delegation with the product bet's live lane (or `archived`) and `Decision`. In portfolio mode `doctor`/`validate` check every pair:
+
+| Situation | Result |
+|---|---|
+| `Delegated to: <product>:BET-MMM` with a matching `Delegated from` back-link | pass |
+| `<product>:pending-handoff` | pass, annotated `pending handoff` |
+| product bet missing, back-link missing, or back-link naming another bet | required failure |
+| product bet says `Delegated from` a portfolio bet that doesn't list it back | required failure |
+| handoff applied by the product but still `pending-handoff` in the portfolio | non-required — run `--link` |
+| product unreachable | non-required |
+
 #### The PM daily loop (portfolio mode only)
 
 Five workflows are installed only in a portfolio workspace, for every agent. They work with zero linked products and need no calendar or chat integration — if such tools are available in the session they are used, otherwise they are skipped silently.
@@ -225,12 +258,13 @@ One deterministic view across every product, read from files through remote cont
 
 ```bash
 oprim ovw --portfolio           # per-workspace Now/Next with load (e.g. "checkout now 2/2"), then problem sections
-oprim ovw --portfolio --json    # the same view model as JSON (products, dependencies, coverage, hygiene)
+oprim ovw --portfolio --json    # the same view model as JSON (products, dependencies, delegations, coverage, hygiene)
 oprim ovw --portfolio --write   # write oprim/portfolio-view.md (OKF frontmatter lists when okf.enabled, plain tables otherwise)
 ```
 
 - **Boards** — the portfolio's own Now/Next, then each non-sunset `products:` entry with owner/squad and Now load against its `wip_limits.now`. A git source served from cache is marked `(stale)`; one with no cache is listed as `unreachable` instead of aborting.
 - **Dependencies** — qualified `blocked_by` entries that don't resolve, or that are out of order (blocked bet in Now, blocker in Later/Backlog or off its board and not archived).
+- **Delegations** — each portfolio bet's `Delegated to` targets with the product bet's live lane/`archived` state and `Decision`, or `pending handoff`.
 - **Coverage** — active objectives with no Now/Next bet anywhere (directly, or via a `Delegated to`/`Delegated from` link), and Now/Next bets linked to no objective.
 - **Hygiene** — pending bets whose `Review date` has passed, and promoted bets missing `criteria.yaml`.
 
@@ -316,6 +350,7 @@ Install with `oprim update`, then use in Claude Code, Cursor, Codex, Gemini, Poo
 | `oprim-criteria` | Create or append to a bet's `criteria.yaml` metric contract |
 | `oprim-review` | Create a KPI review artifact for a completed bet, pre-filled from `criteria.yaml` |
 | `oprim-objective` | Portfolio mode only — create an objective (OKR) with an auto-assigned `OBJ-NNN` ID, or supersede one |
+| `/oprim:delegate BET-NNN --to <product>` | Portfolio mode only — delegate a bet to a product with two-way links (confirmed write for local products, handoff file for git products; never pushes) |
 
 ## Authority boundaries
 

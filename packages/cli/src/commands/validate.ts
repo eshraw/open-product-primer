@@ -9,6 +9,7 @@ import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
 import { checkCrossProductRefs, RefResolver } from '../lib/portfolio/refs';
 import { checkObjectiveLinks } from '../lib/portfolio/objectives';
 import { checkPortfolioWip } from '../lib/portfolio/wip';
+import { checkDelegationLinks } from '../lib/portfolio/delegation';
 import { readWorkspaceMode } from '../lib/workspace-mode';
 
 function runChecks(projectRoot: string): Check[] {
@@ -18,7 +19,10 @@ function runChecks(projectRoot: string): Check[] {
   const resolver = new RefResolver(projectRoot);
   checkCrossProductRefs(projectRoot, checks, resolver);
   checkObjectiveLinks(projectRoot, checks, resolver);
-  if (readWorkspaceMode(projectRoot) === 'portfolio') checkPortfolioWip(projectRoot, checks, resolver);
+  if (readWorkspaceMode(projectRoot) === 'portfolio') {
+    checkPortfolioWip(projectRoot, checks, resolver);
+    checkDelegationLinks(projectRoot, checks, resolver);
+  }
   checkSkillVersionDrift(projectRoot, checks);
   checkBetDefinitionOfDone(projectRoot, checks);
   checkSpecDeltaDrift(projectRoot, checks);

@@ -24,6 +24,12 @@ function boardHeader(b: WorkspaceBoard): string {
 const dependencyLine = (d: PortfolioView['dependencies'][number]): string =>
   `${d.from} (${d.fromLane}) blocked by ${d.blocker} (${d.blockerState})`;
 
+const delegationLabel = (d: PortfolioView['delegations'][number]): string =>
+  `${d.state}${d.decision ? ` · ${d.decision}` : ''}`;
+
+const delegationLine = (d: PortfolioView['delegations'][number]): string =>
+  `${d.bet} delegated → ${d.target} (${delegationLabel(d)})`;
+
 /** Terminal lines. Colour comes from chalk, which emits no ANSI codes when stdout is not a TTY. */
 export function renderPortfolioTerminal(view: PortfolioView): string[] {
   const lines: string[] = [];
@@ -41,6 +47,7 @@ export function renderPortfolioTerminal(view: PortfolioView): string[] {
     lines.push('', chalk.bold.yellow(`── ${title} ──`), ...items.map((i) => `  ${i}`));
   };
   section('DEPENDENCIES', view.dependencies.map(dependencyLine));
+  section('DELEGATIONS', view.delegations.map(delegationLine));
   section('COVERAGE', [
     ...view.coverage.objectivesWithoutFlight.map((o) => `${o} has no bet in now/next`),
     ...view.coverage.betsWithoutObjective.map((b) => `${b} has no objective`),
@@ -90,6 +97,12 @@ function frontmatter(view: PortfolioView): string {
       blocker_state: d.blockerState,
       problem: d.problem,
     })),
+    delegations: view.delegations.map((d) => ({
+      bet: d.bet,
+      target: d.target,
+      state: d.state,
+      ...(d.decision ? { decision: d.decision } : {}),
+    })),
     coverage: [
       ...view.coverage.objectivesWithoutFlight.map((ref) => ({ kind: 'objective-without-flight', ref })),
       ...view.coverage.betsWithoutObjective.map((ref) => ({ kind: 'bet-without-objective', ref })),
@@ -131,6 +144,9 @@ export function renderPortfolioMarkdown(view: PortfolioView, okf: boolean): stri
       ['Bet', 'Lane', 'Blocked by', 'Blocker state', 'Problem'],
       view.dependencies.map((d) => [d.from, d.fromLane, d.blocker, d.blockerState, d.problem])
     ),
+    '## Delegations',
+    '',
+    table(['Bet', 'Delegated to', 'State', 'Decision'], view.delegations.map((d) => [d.bet, d.target, d.state, d.decision ?? ''])),
     '## Coverage',
     '',
     table(['Ref', 'Gap'], [
