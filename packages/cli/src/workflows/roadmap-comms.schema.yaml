@@ -1,0 +1,15 @@
+id: roadmap-comms
+order: 21
+modes: [portfolio]
+skillName: oprim-roadmap-comms
+title: "OPRIM: Roadmap comms"
+description: Draft audience-specific roadmap communication (now / next / later) from the boards and objectives into outputs/ — drafts only, never sends
+claude:
+  skill: true
+  command: roadmap-comms.md
+cursor:
+  skill: false
+  command: oprim-roadmap-comms.md
+poolside:
+  skill: true
+inline: true

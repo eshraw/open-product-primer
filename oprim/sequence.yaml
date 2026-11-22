@@ -1,12 +1,7 @@
 wip_limits:
   now: 2
 
-now:
-  - id: BET-081
-    title: "Add PM prioritization, comms and reviewer persona workflows"
-    blocked_by: []
-    unlocks: []
-    requires_pdrs: [PDR-001]
+now: []
 
 next: []
 

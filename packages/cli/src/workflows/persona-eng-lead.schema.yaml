@@ -1,0 +1,16 @@
+id: persona-eng-lead
+order: 31
+modes: [portfolio]
+skillName: null
+title: null
+description: Reviewer persona — an engineering lead critiquing a bet's spec deltas and design.md for feasibility, scope and hidden complexity
+claude:
+  skill: false
+  command: null
+  agent: eng-lead
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: false
+inline: false

@@ -273,7 +273,12 @@ describe('mode-gated workflow install', () => {
       'plan-week',
       'objective',
       'delegate',
+      'prioritize',
+      'stakeholder-update',
+      'roadmap-comms',
+      'publish',
     ]);
+    expect(workflowIdsFor('claude-agent', 'product')).toEqual([]);
   });
 
   it('a portfolio-only workflow is skipped in product mode for every agent surface', async () => {

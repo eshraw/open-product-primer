@@ -347,6 +347,14 @@ export function installAgentSkills(
       console.log(chalk.green('✓') + ` .claude/commands/oprim/${filename}`);
     }
 
+    // BET-081 — reviewer personas as Claude subagents (.claude/agents/<name>.md). Only workflows
+    // with a `claude.agent` target and the workspace mode in `modes:` (bundled: portfolio only).
+    for (const id of workflowIdsFor('claude-agent', mode, projectRoot)) {
+      const name = loadWorkflowSchema(id, projectRoot).claude.agent as string;
+      writeFile(path.join(claudeDir, 'agents', `${name}.md`), renderSkillBody(id, projectRoot));
+      console.log(chalk.green('✓') + ` .claude/agents/${name}.md`);
+    }
+
     // Tombstone cleanup: remove command wrappers deleted in v0.2.0 (bet/criteria/pdr/review
     // became skills-only). Safe to remove this block once the user base has migrated past v0.2.0.
     const tombstones = ['bet.md', 'criteria.md', 'pdr.md', 'review.md'];
@@ -699,6 +707,16 @@ export const CLAUDE_COMMANDS: Record<string, string> = Object.fromEntries(
     renderClaudeCommand(id),
   ])
 );
+
+/** BET-081 — bundled Claude subagent bodies for a mode, keyed by agent name (portfolio personas). */
+export function claudeAgents(mode: WorkspaceMode): Record<string, string> {
+  return Object.fromEntries(
+    workflowIdsFor('claude-agent', mode).map((id) => [
+      loadWorkflowSchema(id).claude.agent as string,
+      renderSkillBody(id, undefined, { mode, askFirst: {} }),
+    ])
+  );
+}
 
 export const POOLSIDE_SKILLS: Record<string, string> = Object.fromEntries(
   workflowIdsFor('poolside-skill', 'product').map((id) => {

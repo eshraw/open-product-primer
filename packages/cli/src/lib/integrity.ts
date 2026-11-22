@@ -5,6 +5,7 @@ import { OPRIM_CONTEXT_SKILL_STEP } from './install-agent';
 import { loadWorkflowSchema, workflowIdsFor } from './workflow-schema';
 import { renderSkillBody } from './workflow-renderer';
 import { renderContextFor } from './workflow-rules';
+import type { WorkspaceMode } from './workspace-mode';
 import { isQualifiedRef } from './portfolio/refs';
 
 export interface Check {
@@ -98,12 +99,14 @@ export function checkSequenceIntegrity(projectRoot: string, checks: Check[]): vo
 }
 
 export function checkSkillVersionDrift(projectRoot: string, checks: Check[]): void {
+  const ctx = renderContextFor(projectRoot);
+  checkAgentVersionDrift(projectRoot, ctx.mode, checks);
+
   const skillsDir = path.join(projectRoot, '.claude', 'skills');
   if (!fs.existsSync(skillsDir)) return;
 
   // Bundled defaults (no project overrides), rendered for this workspace's mode and ask-first
   // rules — a portfolio install legitimately differs from the product rendering (BET-080).
-  const ctx = renderContextFor(projectRoot);
   const bundledSkills: Record<string, string> = Object.fromEntries(
     workflowIdsFor('claude-skill', ctx.mode).map((id) => [
       loadWorkflowSchema(id).skillName as string,
@@ -121,6 +124,25 @@ export function checkSkillVersionDrift(projectRoot: string, checks: Check[]): vo
     if (stripped !== bundledContent) {
       checks.push({
         name: `agent: Claude skill ${name} is out of date`,
+        pass: false,
+        note: "Run 'oprim update' to refresh",
+        required: false,
+      });
+    }
+  }
+}
+
+// BET-081 — installed reviewer-persona subagents (.claude/agents/<name>.md) vs the bundled bodies.
+function checkAgentVersionDrift(projectRoot: string, mode: WorkspaceMode, checks: Check[]): void {
+  const agentsDir = path.join(projectRoot, '.claude', 'agents');
+  if (!fs.existsSync(agentsDir)) return;
+  for (const id of workflowIdsFor('claude-agent', mode)) {
+    const name = loadWorkflowSchema(id).claude.agent as string;
+    const agentPath = path.join(agentsDir, `${name}.md`);
+    if (!fs.existsSync(agentPath)) continue;
+    if (fs.readFileSync(agentPath, 'utf-8') !== renderSkillBody(id, undefined, { mode, askFirst: {} })) {
+      checks.push({
+        name: `agent: Claude subagent ${name} is out of date`,
         pass: false,
         note: "Run 'oprim update' to refresh",
         required: false,

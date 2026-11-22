@@ -1,0 +1,16 @@
+id: persona-data-eng
+order: 32
+modes: [portfolio]
+skillName: null
+title: null
+description: Reviewer persona — a data engineer critiquing a bet's criteria.yaml (or its decision) for measurability and data availability
+claude:
+  skill: false
+  command: null
+  agent: data-eng
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: false
+inline: false

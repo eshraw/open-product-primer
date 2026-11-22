@@ -222,6 +222,29 @@ rules:
 
 Product-mode installs are byte-identical unless a product sets `ask_first: true`.
 
+#### Prioritization, comms and reviewer personas (portfolio mode only)
+
+Four more workflows turn the boards into proposals and drafts. None of them changes a board or sends anything: outputs land in `outputs/` (personal, never exported through remote context) for you to edit and act on.
+
+| Workflow | What it does |
+|---|---|
+| `/oprim:prioritize` | Ranks pending bets across the portfolio and its products by objective fit (Active objectives only), risk profile and door type, showing those inputs per bet with a one-line rationale. Outputs a proposed `diff` for the portfolio `sequence.yaml` and suggestions addressed to product owners — it never writes any `sequence.yaml`. |
+| `/oprim:stakeholder-update` | Asks audience (exec / eng / sales / customers) and period, reads the boards, objectives, KPI reviews and bet decisions, and writes `outputs/<period-end>-stakeholder-update-<audience>.md`. |
+| `/oprim:roadmap-comms` | Same inputs, a now / next / exploring roadmap at `outputs/<period-end>-roadmap-comms-<audience>.md`. |
+| `/oprim:publish <ref>` | Renders a Notion-compatible PRD from a local or qualified bet or PDR (decision, `criteria.yaml`, specs) to `outputs/publish/<ref>.md`, headed "Source of truth: `<ref>` in git". Uploads to Notion only when you explicitly ask and a Notion tool is available; never reads back. |
+
+Comms drafts start with `> DRAFT — verify before sending.`, cite every bet as `<source>:BET-NNN`, write `[TBD — confirm with <owner>]` instead of inventing a commitment, and ask about the audience first (the `ask_first` rule above applies: `rules.stakeholder-update` / `rules.roadmap-comms`).
+
+**Reviewer personas (Claude only).** A portfolio install with Claude also writes three subagents to `.claude/agents/`:
+
+| Agent | Reviews |
+|---|---|
+| `c-level` | a bet decision — strategic fit, opportunity cost, risk |
+| `eng-lead` | a bet's spec deltas or `design.md` — testability, scope, hidden complexity |
+| `data-eng` | a bet's `criteria.yaml` (or its decision) — measurability, events/tables, baselines |
+
+Ask Claude to "have the c-level agent review BET-004". Each persona appends one dated `## <persona> perspective` section and never edits existing content; re-reviewing appends a new section. In `criteria.yaml` the data-eng review is written as `# ` comment lines so the file parses to the same data and `oprim measure` keeps working. Fork a persona like any workflow with `oprim/workflows/persona-<name>.template.md`.
+
 ### `oprim update`
 
 Refreshes `/oprim:*` assistant commands for detected AI tools (Claude Code, Cursor, Codex, Gemini, Poolside, Mistral Vibe). Also additively merges any `oprim/config.yaml` schema keys introduced since the project was last updated — adding missing keys with their defaults, never touching values you've already set.

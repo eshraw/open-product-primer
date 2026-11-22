@@ -12,13 +12,18 @@ export interface WorkflowAgentTarget {
   command: string | null;
 }
 
+export interface ClaudeTarget extends WorkflowAgentTarget {
+  /** BET-081 — name of a Claude subagent written to `.claude/agents/<agent>.md` (reviewer personas). */
+  agent: string | null;
+}
+
 export interface WorkflowSchema {
   id: string;
   skillName: string | null;
   title: string | null;
   description: string;
   cursorDescription: string | null;
-  claude: WorkflowAgentTarget;
+  claude: ClaudeTarget;
   cursor: WorkflowAgentTarget;
   poolside: { skill: boolean };
   vibe: { skill: boolean };
@@ -68,6 +73,17 @@ function parseOrder(obj: Record<string, unknown>, filePath: string): number | nu
   return obj.order;
 }
 
+// A subagent name becomes a filename under .claude/agents/, so keep it to a safe slug.
+function parseAgentName(value: unknown, filePath: string): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(value)) {
+    throw new Error(
+      `Invalid workflow schema at ${filePath}: "claude.agent" must be a lowercase slug (e.g. c-level)`
+    );
+  }
+  return value;
+}
+
 function overridesDir(projectRoot: string): string {
   return path.join(projectRoot, 'oprim', 'workflows');
 }
@@ -115,7 +131,11 @@ function parseSchema(raw: string, filePath: string, fallback?: WorkflowSchema): 
     title: (obj.title as string | undefined) ?? null,
     description: obj.description as string,
     cursorDescription: (obj.cursorDescription as string | undefined) ?? null,
-    claude: { skill: Boolean(claude.skill), command: (claude.command as string | undefined) ?? null },
+    claude: {
+      skill: Boolean(claude.skill),
+      command: (claude.command as string | undefined) ?? null,
+      agent: parseAgentName(claude.agent, filePath),
+    },
     cursor: { skill: Boolean(cursor.skill), command: (cursor.command as string | undefined) ?? null },
     poolside: { skill: Boolean(poolside.skill) },
     vibe: { skill: Boolean(vibe.skill) },
@@ -189,6 +209,7 @@ export function bundledWorkflowIds(): string[] {
 export type WorkflowInstallTarget =
   | 'claude-skill'
   | 'claude-command'
+  | 'claude-agent'
   | 'cursor-skill'
   | 'cursor-command'
   | 'poolside-skill'
@@ -204,6 +225,8 @@ function targets(schema: WorkflowSchema, target: WorkflowInstallTarget): boolean
       return schema.claude.skill && schema.skillName !== null;
     case 'claude-command':
       return schema.claude.command !== null;
+    case 'claude-agent':
+      return schema.claude.agent !== null;
     case 'cursor-skill':
       return schema.cursor.skill && schema.skillName !== null;
     case 'cursor-command':

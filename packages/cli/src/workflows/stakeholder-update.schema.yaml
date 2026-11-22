@@ -1,0 +1,15 @@
+id: stakeholder-update
+order: 20
+modes: [portfolio]
+skillName: oprim-stakeholder-update
+title: "OPRIM: Stakeholder update"
+description: Draft an audience-specific stakeholder update for a period from the boards, objectives and KPI reviews into outputs/ — drafts only, never sends
+claude:
+  skill: true
+  command: stakeholder-update.md
+cursor:
+  skill: false
+  command: oprim-stakeholder-update.md
+poolside:
+  skill: true
+inline: true
