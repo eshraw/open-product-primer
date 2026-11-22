@@ -17,6 +17,28 @@ The 0.7.x–0.14.x releases focused on reliability and first-run experience. The
 
 1.0.0 marks the point where the core loop — bet → sequence → promote → ship → archive — is stable enough for external use without active guidance from the project authors.
 
+## [3.0.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.14.0...cli-v3.0.0) (2026-11-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* portfolio mode
+
+### Features
+
+* add objectives and links to bet ([4c943f9](https://github.com/eshraw/open-product-primer/commit/4c943f9c4e47ae8e1aa2c5d5ad4e1e7909dbfbf4))
+* add pm workflows ([bee390e](https://github.com/eshraw/open-product-primer/commit/bee390e51327239ff112337026965790b6987b80))
+* cross product portfolio view ([d5b1ad2](https://github.com/eshraw/open-product-primer/commit/d5b1ad2e3fc396e67d921b750673e7059e940a7f))
+* delegate bets to product workspace ([bff84d0](https://github.com/eshraw/open-product-primer/commit/bff84d0ca8f20b748b6cccfe7d01f683cfd87047))
+* link products ([ba5dc26](https://github.com/eshraw/open-product-primer/commit/ba5dc263bdc86240cb90abf2fbf2c4c108a61438))
+* portfolio mode ([72f0142](https://github.com/eshraw/open-product-primer/commit/72f014287c9444c9161eca6c783ac7442651a10e))
+* reviewr personas ([39f4938](https://github.com/eshraw/open-product-primer/commit/39f4938c74ad8e572481a4f2b5bbdc010ea0b019))
+
+
+### Bug Fixes
+
+* fold data loss and legacy specs ([99a69a6](https://github.com/eshraw/open-product-primer/commit/99a69a6e8869821ac20003caf12805568deb74b4))
+
 ## [2.14.0](https://github.com/eshraw/open-product-primer/compare/cli-v2.13.0...cli-v2.14.0) (2026-09-21)
 
 
