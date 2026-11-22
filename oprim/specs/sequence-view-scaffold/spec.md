@@ -1,4 +1,4 @@
-## MODIFIED Requirements
+## Requirements
 
 ### Requirement: oprim init SHALL scaffold oprim/scripts/ and generate-sequence-view.js
 During `oprim init`, the system SHALL create `oprim/scripts/` and write `generate-sequence-view.js` into it. The script SHALL have no external dependencies — YAML parsing is handled inline.

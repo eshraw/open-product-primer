@@ -1,4 +1,5 @@
 id: archive
+order: 6
 skillName: oprim-archive
 title: "OPRIM: Archive"
 description: Archive a completed bet — move it out of the active board

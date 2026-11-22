@@ -5,6 +5,13 @@ import chalk from 'chalk';
 import { readAgentsFromConfig } from '../lib/detect';
 import { scanCriteriaForSourceType } from '../lib/measure';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
+import { checkLegacySpecFormat } from '../lib/validate-checks';
+import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
+import { checkCrossProductRefs, RefResolver } from '../lib/portfolio/refs';
+import { checkObjectiveLinks } from '../lib/portfolio/objectives';
+import { checkPortfolioWip } from '../lib/portfolio/wip';
+import { checkDelegationLinks } from '../lib/portfolio/delegation';
+import { readWorkspaceMode } from '../lib/workspace-mode';
 import {
   readRemoteContextConfig,
   resolveIdentityOnly,
@@ -171,6 +178,9 @@ export function doctorCommand(): Command {
         required: true,
       });
 
+      // BET-075 — invalid mode value always; portfolio scaffold + no-specs only in portfolio mode.
+      runWorkspaceModeChecks(projectRoot, checks);
+
       const sequenceExists = fs.existsSync(path.join(primerDir, 'sequence.yaml'));
       checks.push({
         name: 'config: oprim/sequence.yaml',
@@ -251,8 +261,21 @@ export function doctorCommand(): Command {
       // ── Skill version drift checks ────────────────────────────────────────────
       checkSkillVersionDrift(projectRoot, checks);
 
+      // ── Current-truth spec format (legacy delta headings) ─────────────────────
+      checkLegacySpecFormat(projectRoot, checks);
+
       // ── Remote context checks ─────────────────────────────────────────────────
       checkRemoteContexts(projectRoot, checks);
+
+      // ── Cross-product <source>:<ID> references (BET-076) + objective links (BET-077) ─
+      const resolver = new RefResolver(projectRoot);
+      checkCrossProductRefs(projectRoot, checks, resolver);
+      checkObjectiveLinks(projectRoot, checks, resolver);
+      // BET-079 / BET-078 — WIP and two-way delegation links (portfolio mode only).
+      if (readWorkspaceMode(projectRoot) === 'portfolio') {
+        checkPortfolioWip(projectRoot, checks, resolver);
+        checkDelegationLinks(projectRoot, checks, resolver);
+      }
 
       // ── Agent environment checks ──────────────────────────────────────────────
       const configAgents = readAgentsFromConfig(projectRoot);

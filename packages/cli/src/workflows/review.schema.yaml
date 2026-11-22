@@ -1,4 +1,5 @@
 id: review
+order: 5
 skillName: oprim-review
 title: null
 description: Create a KPI review artifact for a completed bet, pre-filled from criteria.yaml with actuals gathered from the user

@@ -28,14 +28,29 @@ function existingTopLevelKeys(content: string): Set<string> {
   return keys;
 }
 
-export function mergeConfigSchema(existingContent: string): { content: string; changed: boolean } {
+function appendMissingFields(
+  existingContent: string,
+  fields: ConfigSchemaField[]
+): { content: string; changed: boolean } {
   const present = existingTopLevelKeys(existingContent);
-  const missing = CONFIG_SCHEMA_FIELDS.filter((field) => !present.has(field.key));
+  const missing = fields.filter((field) => !present.has(field.key));
   if (missing.length === 0) return { content: existingContent, changed: false };
 
   const separator = existingContent.endsWith('\n') ? '' : '\n';
   const additions = missing.map((field) => field.block).join('');
   return { content: existingContent + separator + additions, changed: true };
+}
+
+export function mergeConfigSchema(existingContent: string): { content: string; changed: boolean } {
+  return appendMissingFields(existingContent, CONFIG_SCHEMA_FIELDS);
+}
+
+// BET-075 — keys that only exist in portfolio workspaces (PDR-001 §4). Applied by `oprim update`
+// only when readWorkspaceMode() is `portfolio`, with the same append-only merge as above.
+const PORTFOLIO_SCHEMA_FIELDS: ConfigSchemaField[] = [{ key: 'products', block: 'products: []\n' }];
+
+export function mergePortfolioConfigSchema(existingContent: string): { content: string; changed: boolean } {
+  return appendMissingFields(existingContent, PORTFOLIO_SCHEMA_FIELDS);
 }
 
 // bet-023 — integrations.spec_framework is nested under `integrations:` rather than a

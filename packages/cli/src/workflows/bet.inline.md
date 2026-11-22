@@ -6,7 +6,11 @@ Create a new bet in `oprim/bets/pending/` and register it on the sequencing boar
 3. Assign next BET ID: scan `oprim/bets/pending/BET-(\d+)` and `oprim/bets/archived/BET-(\d+)` dirs, max+1 zero-padded to 3 digits (default 001).
 4. Check `oprim/sequence.yaml` exists — stop if not, advise `oprim init`.
 4b. Read `oprim/config.yaml`'s `rules.bet` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
+<!-- oprim:portfolio:start -->
+4c. Before drafting any bet content, ask 2–3 questions about the assumptions it rests on and wait for the answers (skip if `rules.bet.ask_first` is false).
+<!-- oprim:portfolio:end -->
 5. Gather: decision (default Build now), owner, review date (YYYY-MM-DD), why now, alternatives, expected outcomes, kill criteria, PDR links.
+5b. Only if `oprim/config.yaml` has `mode: portfolio` or `oprim context list` labels a registered source `portfolio`: ask which Active objective(s) the bet serves and add `- Objectives: OBJ-NNN` (local) or `<source>:OBJ-NNN` (portfolio source), or `None`, to `## Links`; otherwise omit that line.
 6. Write `oprim/bets/pending/BET-NNN/bet-decision.md` with all fields.
 7. Append to `oprim/sequence.yaml` backlog: `{title, id, blocked_by: [], unlocks: [], requires_pdrs: []}`.
 8. Ask: "Scaffold a discovery.md now? (y/N)" — if "y", write `oprim/bets/pending/BET-NNN/discovery.md`.

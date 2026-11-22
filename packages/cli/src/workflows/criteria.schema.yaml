@@ -1,4 +1,5 @@
 id: criteria
+order: 3
 skillName: oprim-criteria
 title: null
 description: Create or append to a criteria.yaml contract for a bet, with structured Amplitude and BigQuery source mapping

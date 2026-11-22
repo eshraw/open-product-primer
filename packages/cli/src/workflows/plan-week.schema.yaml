@@ -1,0 +1,15 @@
+id: plan-week
+order: 16
+modes: [portfolio]
+skillName: oprim-plan-week
+title: "OPRIM: Plan week"
+description: Plan the week from STATE.md, the inbox and the boards, and update STATE.md
+claude:
+  skill: true
+  command: plan-week.md
+cursor:
+  skill: false
+  command: oprim-plan-week.md
+poolside:
+  skill: true
+inline: true

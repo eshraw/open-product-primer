@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Success criteria SHALL be converted into repo-native metric contracts
 The system SHALL support storing structured success criteria per bet in a machine-readable contract format that includes metric identity, baseline, target, timeframe, and data source.

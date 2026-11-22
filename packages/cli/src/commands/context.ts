@@ -15,6 +15,7 @@ import {
   type RemoteContextSource,
 } from '../lib/remote-context';
 import { fileExists } from '../lib/scaffold';
+import { readWorkspaceMode } from '../lib/workspace-mode';
 
 function sourceKind(source: RemoteContextSource): 'git' | 'path' {
   return isGitSource(source) ? 'git' : 'path';
@@ -32,10 +33,17 @@ function initSubcommand(): Command {
       }
 
       const name = path.basename(projectRoot);
-      writeIdentity(projectRoot, { name, version: '1', description: opts.description });
+      const isPortfolio = readWorkspaceMode(projectRoot) === 'portfolio';
+      writeIdentity(projectRoot, {
+        name,
+        version: '1',
+        description: opts.description,
+        ...(isPortfolio ? { mode: 'portfolio' as const } : {}),
+      });
 
       console.log(chalk.green('✓') + ' .oprim-context/context.yaml created');
       console.log(`  name: ${name}`);
+      if (isPortfolio) console.log('  mode: portfolio');
       if (opts.description) {
         console.log(`  description: ${opts.description}`);
       } else {
@@ -120,9 +128,10 @@ function listSubcommand(): Command {
 
       for (const source of config.sources) {
         const kind = sourceKind(source);
-        console.log(`${chalk.bold(source.name)} ${chalk.dim(`(${kind})`)}`);
-
         const result = resolveIdentityOnly(source);
+        const label = result.identity?.mode === 'portfolio' ? ' ' + chalk.magenta('portfolio') : '';
+        console.log(`${chalk.bold(source.name)} ${chalk.dim(`(${kind})`)}${label}`);
+
         if (result.error) {
           console.log('  ' + chalk.red(`unresolved: ${result.error}`));
         } else {

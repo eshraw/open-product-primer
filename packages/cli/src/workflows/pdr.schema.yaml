@@ -1,4 +1,5 @@
 id: pdr
+order: 4
 skillName: oprim-pdr
 title: null
 description: Create a new Product Decision Record in oprim/decisions/ with auto-assigned ID and guided prompting

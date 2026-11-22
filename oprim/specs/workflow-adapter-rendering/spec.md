@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: The CLI SHALL render per-agent output from a workflow schema+template pair
 Given a resolved workflow schema+template pair (see `workflow-schema-authoring`), the system SHALL render the appropriate output for each supported agent from that single source: a Claude `SKILL.md` plus command wrapper, a Cursor inline command file, and a Codex/Gemini/Poolside inline instruction block suitable for insertion between `<!-- oprim:start -->`/`<!-- oprim:end -->` markers.

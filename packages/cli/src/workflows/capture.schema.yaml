@@ -1,0 +1,16 @@
+id: capture
+order: 12
+modes: [portfolio]
+skillName: oprim-capture
+title: null
+description: Append a timestamped item to inbox.md — capture now, triage later
+cursorDescription: Capture a timestamped item into inbox.md
+claude:
+  skill: true
+  command: null
+cursor:
+  skill: true
+  command: null
+poolside:
+  skill: true
+inline: true

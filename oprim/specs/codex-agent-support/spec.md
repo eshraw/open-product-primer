@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: oprim SHALL detect a Codex environment by checking for AGENTS.md
 The system SHALL treat `AGENTS.md` present at the project root as a Codex environment indicator and SHALL return `'codex'` from `detectAvailableAgents()` when that file exists.

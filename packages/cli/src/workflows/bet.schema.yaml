@@ -1,4 +1,5 @@
 id: bet
+order: 1
 skillName: oprim-bet
 title: null
 description: Create a new bet directory and bet-decision artifact in oprim/bets/pending/, and add the bet to oprim/sequence.yaml backlog

@@ -1,0 +1,15 @@
+id: delegate
+order: 18
+modes: [portfolio]
+skillName: oprim-delegate
+title: "OPRIM: Delegate"
+description: Delegate a portfolio bet to a product workspace with two-way Delegated to/from links — writes the product bet only after confirmation (local products) or a handoff file (git products); never commits or pushes
+claude:
+  skill: true
+  command: delegate.md
+cursor:
+  skill: false
+  command: oprim-delegate.md
+poolside:
+  skill: true
+inline: true

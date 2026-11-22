@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: The system SHALL execute Amplitude measurement definitions and return actuals
 For each `amplitude-<metric_id>.json` in `primer/bets/BET-NNN/measurements/`, the system SHALL call the Amplitude Chart API using `AMPLITUDE_API_KEY` from the environment and return the computed actual value.

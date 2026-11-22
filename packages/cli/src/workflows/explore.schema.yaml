@@ -1,4 +1,5 @@
 id: explore
+order: 8
 skillName: oprim-explore
 title: "OPRIM: Explore"
 description: Investigate a problem and compare candidate framings before a bet is drafted

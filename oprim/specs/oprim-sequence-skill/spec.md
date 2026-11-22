@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: oprim-sequence skill SHALL support triage mode when no intention is provided
 When invoked without a pre-seeded intention, the skill SHALL read `oprim/sequence.yaml` and the active bets directory, compute board health, and present a ranked list of specific actionable move suggestions before asking the user what to do.

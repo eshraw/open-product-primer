@@ -41,6 +41,11 @@ If `oprim/sequence.yaml` not found: report and stop — advise `oprim init`.
 ### 3b. Check for custom rules
 Read `oprim/config.yaml`. If it has a non-empty `rules.bet` value, treat it as additional guidance from the team — factor it into the questions you ask in step 4 and reflect it in the generated `bet-decision.md` content. If `rules.bet` is absent or empty, skip this step; behavior is unchanged.
 
+<!-- oprim:portfolio:start -->
+### 3c. Ask about assumptions first
+Before drafting any bet content, ask 2–3 questions about the assumptions it rests on — who it is for, what evidence says the problem is real, and what would have to be true for it to work — and wait for the answers. Use the answers to shape everything you draft next, and record any assumption the user could not answer as an open question in the draft. (If `rules.bet` in `oprim/config.yaml` is a map, its `text` key is the custom guidance from the step above; `ask_first: false` there turns this step off.)
+<!-- oprim:portfolio:end -->
+
 ### 4. Gather content
 Ask: Decision (Build now / Defer / Kill, default Build now), Owner, Review date (YYYY-MM-DD), Why now, Alternatives considered, Expected outcomes (metric: baseline → target in timeframe), Kill criteria / rollback trigger, PDR links (optional).
 
@@ -52,6 +57,10 @@ Then ask about each of the four risk dimensions (Low / Medium / High + short rat
 - "**Usability risk**: Can users figure out how to use it without help? (Low / Medium / High — and why?)"
 - "**Feasibility risk**: Can we build this with our current skills, time, and technology? (Low / Medium / High — and why?)"
 - "**Business viability risk**: Does this solution work for the business (revenue, legal, ops)? (Low / Medium / High — and why?)"
+
+### 4a. Link objectives (only where a portfolio exists)
+This step applies only if `oprim/config.yaml` has `mode: portfolio`, or `oprim context list` labels at least one registered source `portfolio`. Otherwise skip it and leave the `- Objectives:` line out of the file in step 5.
+List the available objectives — this workspace's `oprim/objectives/OBJ-NNN-*.md` and/or the portfolio source's (`oprim context --source <name>`), showing only those whose `## Status` is `Active` — and ask: "Which objective(s) does this bet serve? (comma-separated, or Enter for none)". Write each as `OBJ-NNN` when it lives in this workspace and as `<source>:OBJ-NNN` when it lives in the portfolio source. If the user picks none, write `None` (`oprim doctor` will warn that the bet is not linked to any objective).
 
 ### 4b. Check for OKF frontmatter
 Read `oprim/templates/bet-decision.md`. If it begins with a YAML frontmatter block (`---` ... `---`), this workspace has OKF frontmatter enabled. Ask for a one-line description and comma-separated tags (subject-area keywords). Prepare a frontmatter block with `type: bet-decision`, `title: <title>`, `description: <description>`, `tags: [<tags>]`, `timestamp: <today's date, ISO 8601>`, to prepend in step 5.
@@ -93,6 +102,7 @@ Prepend the frontmatter block from step 4b, if one was prepared.
 
 ## Links
 - PDRs: <PDR-IDs or "None">
+- Objectives: <OBJ refs or "None" — only if step 4a applied; omit this line otherwise>
 - OpenSpec change: <to be filled when promoted>
 ```
 

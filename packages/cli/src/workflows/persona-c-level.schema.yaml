@@ -1,0 +1,16 @@
+id: persona-c-level
+order: 30
+modes: [portfolio]
+skillName: null
+title: null
+description: Reviewer persona — a C-level executive critiquing a bet decision for strategic fit, opportunity cost and risk
+claude:
+  skill: false
+  command: null
+  agent: c-level
+cursor:
+  skill: false
+  command: null
+poolside:
+  skill: false
+inline: false

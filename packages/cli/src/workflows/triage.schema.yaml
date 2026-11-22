@@ -1,0 +1,15 @@
+id: triage
+order: 13
+modes: [portfolio]
+skillName: oprim-triage
+title: "OPRIM: Triage"
+description: Route each open inbox.md item to a product note, portfolio note, personal task or discard — one question per item
+claude:
+  skill: true
+  command: triage.md
+cursor:
+  skill: false
+  command: oprim-triage.md
+poolside:
+  skill: true
+inline: true

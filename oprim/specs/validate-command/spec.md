@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: oprim SHALL provide a standalone validate command with a CI-appropriate exit code
 The system SHALL provide `oprim validate`, which aggregates sequence-integrity checks, skill-version-drift checks, and this bet's new bet/spec checks (`bet-definition-of-done`, `spec-delta-drift-detection`, `cross-bet-conflict-detection`) into a single report, and SHALL exit with a non-zero status code if any check marked `required` fails.

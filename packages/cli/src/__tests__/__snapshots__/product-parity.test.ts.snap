@@ -1,0 +1,755 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`product-mode parity — oprim init > init framework=native okf=false 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "2ba3eee5c31e2efe",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "8596f54cf84a301f",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".claude/skills/oprim-spec/": "dir",
+  ".claude/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "e5cccd95925fb605",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "e0dae57b2dfbb2ef",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "cb07df90161423cb",
+  "oprim/templates/note.md": "723932aadba03e0a",
+  "oprim/templates/pdr.md": "50e3bbe368df8b36",
+}
+`;
+
+exports[`product-mode parity — oprim init > init framework=native okf=true 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "2ba3eee5c31e2efe",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "8596f54cf84a301f",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".claude/skills/oprim-spec/": "dir",
+  ".claude/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "0d4b8546c96e5cc6",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/index.md": "face991ea5e58e14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "7cafa3e2f3d14303",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "1568947fe89464d1",
+  "oprim/templates/note.md": "d791a308f63af6f6",
+  "oprim/templates/pdr.md": "e50b81fe8116519b",
+}
+`;
+
+exports[`product-mode parity — oprim init > init framework=none okf=false 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "bc98d06f3658faee",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "8dd8c1ea679f48f0",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "deea5518ee083865",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "e0dae57b2dfbb2ef",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "cb07df90161423cb",
+  "oprim/templates/note.md": "723932aadba03e0a",
+  "oprim/templates/pdr.md": "50e3bbe368df8b36",
+}
+`;
+
+exports[`product-mode parity — oprim init > init framework=none okf=true 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "bc98d06f3658faee",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "8dd8c1ea679f48f0",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "cb64abc56eafef2b",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/index.md": "face991ea5e58e14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "7cafa3e2f3d14303",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "1568947fe89464d1",
+  "oprim/templates/note.md": "d791a308f63af6f6",
+  "oprim/templates/pdr.md": "e50b81fe8116519b",
+}
+`;
+
+exports[`product-mode parity — oprim init > init framework=openspec okf=false 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "54b8977d11b1276d",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "ffd9ccf8a7eda7d5",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "29d46cf27a6db9ee",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "e0dae57b2dfbb2ef",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "cb07df90161423cb",
+  "oprim/templates/note.md": "723932aadba03e0a",
+  "oprim/templates/pdr.md": "50e3bbe368df8b36",
+}
+`;
+
+exports[`product-mode parity — oprim init > init framework=openspec okf=true 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "54b8977d11b1276d",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "ffd9ccf8a7eda7d5",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "7aa0db8e20fbec1e",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/index.md": "face991ea5e58e14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "7cafa3e2f3d14303",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "1568947fe89464d1",
+  "oprim/templates/note.md": "d791a308f63af6f6",
+  "oprim/templates/pdr.md": "e50b81fe8116519b",
+}
+`;
+
+exports[`product-mode parity — oprim update > install parity: update with every agent selected 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "2ba3eee5c31e2efe",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "8596f54cf84a301f",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".claude/skills/oprim-spec/": "dir",
+  ".claude/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  ".cursor/": "dir",
+  ".cursor/commands/": "dir",
+  ".cursor/commands/oprim-bet.md": "712fa23271d719e6",
+  ".cursor/commands/oprim-criteria.md": "ea2fe2d31411072f",
+  ".cursor/commands/oprim-note.md": "87ef68d5d70bafc1",
+  ".cursor/commands/oprim-pdr.md": "76434b6fa9c0957a",
+  ".cursor/commands/oprim-promote.md": "7f2ecccd33ab59a0",
+  ".cursor/commands/oprim-review.md": "882869394d74caff",
+  ".cursor/commands/oprim-sequence.md": "9aad41f036e3e510",
+  ".cursor/skills/": "dir",
+  ".cursor/skills/oprim-bet/": "dir",
+  ".cursor/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".cursor/skills/oprim-criteria/": "dir",
+  ".cursor/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".cursor/skills/oprim-note/": "dir",
+  ".cursor/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".cursor/skills/oprim-pdr/": "dir",
+  ".cursor/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".cursor/skills/oprim-review/": "dir",
+  ".cursor/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".cursor/skills/oprim-spec/": "dir",
+  ".cursor/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  ".dsh/": "dir",
+  ".dsh/skills/": "dir",
+  ".dsh/skills/oprim-archive/": "dir",
+  ".dsh/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".dsh/skills/oprim-bet/": "dir",
+  ".dsh/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".dsh/skills/oprim-criteria/": "dir",
+  ".dsh/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".dsh/skills/oprim-explore/": "dir",
+  ".dsh/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".dsh/skills/oprim-note/": "dir",
+  ".dsh/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".dsh/skills/oprim-pdr/": "dir",
+  ".dsh/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".dsh/skills/oprim-reconcile/": "dir",
+  ".dsh/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".dsh/skills/oprim-review/": "dir",
+  ".dsh/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".dsh/skills/oprim-sequence/": "dir",
+  ".dsh/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".dsh/skills/oprim-spec/": "dir",
+  ".dsh/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  ".kimi/": "dir",
+  ".poolside/": "dir",
+  ".poolside/skills/": "dir",
+  ".poolside/skills/oprim-archive/": "dir",
+  ".poolside/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".poolside/skills/oprim-bet/": "dir",
+  ".poolside/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".poolside/skills/oprim-criteria/": "dir",
+  ".poolside/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".poolside/skills/oprim-explore/": "dir",
+  ".poolside/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".poolside/skills/oprim-note/": "dir",
+  ".poolside/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".poolside/skills/oprim-pdr/": "dir",
+  ".poolside/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".poolside/skills/oprim-reconcile/": "dir",
+  ".poolside/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".poolside/skills/oprim-review/": "dir",
+  ".poolside/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".poolside/skills/oprim-sequence/": "dir",
+  ".poolside/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".poolside/skills/oprim-spec/": "dir",
+  ".poolside/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  ".qwen/": "dir",
+  ".qwen/skills/": "dir",
+  ".qwen/skills/oprim-archive/": "dir",
+  ".qwen/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".qwen/skills/oprim-bet/": "dir",
+  ".qwen/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".qwen/skills/oprim-criteria/": "dir",
+  ".qwen/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".qwen/skills/oprim-explore/": "dir",
+  ".qwen/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".qwen/skills/oprim-note/": "dir",
+  ".qwen/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".qwen/skills/oprim-pdr/": "dir",
+  ".qwen/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".qwen/skills/oprim-reconcile/": "dir",
+  ".qwen/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".qwen/skills/oprim-review/": "dir",
+  ".qwen/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".qwen/skills/oprim-sequence/": "dir",
+  ".qwen/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".qwen/skills/oprim-spec/": "dir",
+  ".qwen/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  ".skills/": "dir",
+  ".skills/oprim-archive/": "dir",
+  ".skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".skills/oprim-bet/": "dir",
+  ".skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".skills/oprim-criteria/": "dir",
+  ".skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".skills/oprim-explore/": "dir",
+  ".skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".skills/oprim-note/": "dir",
+  ".skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".skills/oprim-pdr/": "dir",
+  ".skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".skills/oprim-reconcile/": "dir",
+  ".skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".skills/oprim-review/": "dir",
+  ".skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".skills/oprim-sequence/": "dir",
+  ".skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".skills/oprim-spec/": "dir",
+  ".skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  ".vibe/": "dir",
+  ".vibe/skills/": "dir",
+  ".vibe/skills/oprim-archive/": "dir",
+  ".vibe/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".vibe/skills/oprim-bet/": "dir",
+  ".vibe/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".vibe/skills/oprim-criteria/": "dir",
+  ".vibe/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".vibe/skills/oprim-explore/": "dir",
+  ".vibe/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".vibe/skills/oprim-note/": "dir",
+  ".vibe/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".vibe/skills/oprim-pdr/": "dir",
+  ".vibe/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".vibe/skills/oprim-reconcile/": "dir",
+  ".vibe/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".vibe/skills/oprim-review/": "dir",
+  ".vibe/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".vibe/skills/oprim-sequence/": "dir",
+  ".vibe/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  ".vibe/skills/oprim-spec/": "dir",
+  ".vibe/skills/oprim-spec/SKILL.md": "788af7744aeaed13",
+  "AGENTS.md": "63ae3566c414a1c0",
+  "GEMINI.md": "63ae3566c414a1c0",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "606c6f6dfc7bd842",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "e0dae57b2dfbb2ef",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "cb07df90161423cb",
+  "oprim/templates/note.md": "723932aadba03e0a",
+  "oprim/templates/pdr.md": "50e3bbe368df8b36",
+}
+`;
+
+exports[`product-mode parity — oprim update > install parity: update with every agent selected 2`] = `
+"<!-- oprim:start -->
+
+## oprim workflows
+
+### Bet authoring (oprim-bet)
+Create a new bet in \`oprim/bets/pending/\` and register it on the sequencing board.
+
+1. Show naming tip: "verb + object [for context] — e.g. 'Improve bet naming for scannability'"
+2. Ask for the bet title. Validate: fewer than 4 words OR fewer than 25 chars → warn, suggest reformulation, ask "Proceed anyway? (y/N)".
+3. Assign next BET ID: scan \`oprim/bets/pending/BET-(\\d+)\` and \`oprim/bets/archived/BET-(\\d+)\` dirs, max+1 zero-padded to 3 digits (default 001).
+4. Check \`oprim/sequence.yaml\` exists — stop if not, advise \`oprim init\`.
+4b. Read \`oprim/config.yaml\`'s \`rules.bet\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
+5. Gather: decision (default Build now), owner, review date (YYYY-MM-DD), why now, alternatives, expected outcomes, kill criteria, PDR links.
+5b. Only if \`oprim/config.yaml\` has \`mode: portfolio\` or \`oprim context list\` labels a registered source \`portfolio\`: ask which Active objective(s) the bet serves and add \`- Objectives: OBJ-NNN\` (local) or \`<source>:OBJ-NNN\` (portfolio source), or \`None\`, to \`## Links\`; otherwise omit that line.
+6. Write \`oprim/bets/pending/BET-NNN/bet-decision.md\` with all fields.
+7. Append to \`oprim/sequence.yaml\` backlog: \`{title, id, blocked_by: [], unlocks: [], requires_pdrs: []}\`.
+8. Ask: "Scaffold a discovery.md now? (y/N)" — if "y", write \`oprim/bets/pending/BET-NNN/discovery.md\`.
+9. Report what was created.
+
+### Note authoring (oprim-note)
+Create a new note in \`oprim/notes/\` for lightweight thinking capture — not a bet, no owner or kill criterion.
+
+1. Ask for a short title.
+2. Assign next NOTE ID: scan \`oprim/notes/NOTE-(\\d+)-\`, max+1 zero-padded to 3 digits (default 001).
+3. Ask for the note body (free-form), tags, and optional related BET-IDs.
+4. Tags: check against \`oprim/config.yaml\`'s \`notes.tags\` — accept and append any new tag rather than rejecting it (the vocabulary grows from usage).
+5. Check \`oprim/templates/note.md\`: a \`description:\` field in its frontmatter means the OKF tier (gather a one-line description); no field means the minimal tier; if the file is missing, fall back to \`okf.enabled\` in \`oprim/config.yaml\`.
+6. Write \`oprim/notes/NOTE-NNN-<slug>.md\` with the correct frontmatter tier and a \`## Bets\` section.
+7. For each related bet, append \`- Notes: NOTE-NNN\` to that bet's \`## Links\` section.
+8. Report what was created.
+
+### Criteria authoring (oprim-criteria)
+Create or append to \`oprim/bets/pending/BET-NNN/criteria.yaml\`.
+
+1. Ask which bet (e.g. BET-042). Verify dir exists.
+2. Gather: metric ID (snake_case), name, baseline, target, timeframe, launch date, segment.
+3. Ask source type (amplitude / bigquery).
+   - Amplitude: event, aggregation (unique_users/event_count/property_sum), denominator_event.
+   - BigQuery: table, metric_column, filter, aggregation, denominator_query.
+4. If file exists: append to \`metrics\` list (never overwrite). If not: create.
+5. Ask if adding more metrics.
+6. Report what was created.
+
+### PDR authoring (oprim-pdr)
+Create a new Product Decision Record in \`oprim/decisions/\`.
+
+1. Ask for decision title.
+2. Assign next PDR ID: scan \`oprim/decisions/PDR-(\\d+)-\`, max+1 zero-padded to 3 digits (default 001).
+2b. Read \`oprim/config.yaml\`'s \`rules.pdr\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
+3. Gather: context, decision, alternatives, consequences, evidence, related bets/specs.
+4. Ask if superseding an existing PDR.
+5. Write \`oprim/decisions/PDR-NNN-<slug>.md\`. If superseding, update old PDR Status.
+6. Report what was created.
+7. Run \`node oprim/scripts/generate-decisions-view.js\` from the project root to update \`oprim/decisions-view.md\`.
+
+### KPI review (oprim-review)
+Create a KPI review artifact in \`oprim/reviews/\`.
+
+1. Ask which bet (e.g. BET-042).
+1b. Read \`oprim/config.yaml\`'s \`rules.review\` — if non-empty, apply it as additional guidance and reflect it in the generated content; if empty, behavior is unchanged.
+2. Read \`oprim/bets/pending/BET-NNN/criteria.yaml\` for pre-fill. Check \`oprim/bets/pending/BET-NNN/measurements/\` for \`run-*.yaml\` — use most recent if present.
+3. If no run result, ask for each metric's actual value.
+4. Status: actual >= target → hit; actual < target → missed; not provided → pending.
+5. Ask reviewer name and decision quality notes.
+6. Write \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\`.
+7. Report what was created.
+
+### Bet archiving (oprim-archive)
+Archive a completed bet.
+
+1. Ask for bet ID (accept bet-005, 005, 5, BET-005 — normalize to BET-NNN).
+2. Verify \`oprim/bets/pending/BET-NNN/\` exists.
+3. Check \`oprim/sequence.yaml\` for entries where \`blocked_by\` or \`unlocks\` reference the target bet — warn if found. Also check other active bet dirs for delta specs against the same requirement (matching \`### Requirement:\` headers, whitespace-insensitive) — warn if an overlap is found. Also check the bet's \`tasks.md\` (if present) for unchecked \`- [ ]\` items — warn with the count if any remain. Ask "Archive anyway? (y/N)" if any warning fires.
+4. If \`oprim/bets/pending/BET-NNN/specs/\` exists, fold each capability's \`## ADDED\`/\`## MODIFIED\`/\`## REMOVED Requirements\` delta into \`oprim/specs/<capability>/spec.md\` (matching by \`### Requirement:\` header; create the current-truth file if the delta is entirely ADDED). Keep the preamble (title, \`## Purpose\`) and every requirement the delta doesn't MODIFY/REMOVE — including ones under legacy \`## ADDED\`/\`## MODIFIED Requirements\` headings in current truth — and write the result as preamble + one \`## Requirements\` section. Stop without writing if current truth has \`### Requirement:\` headers you couldn't place — last-write-wins on overlaps, no 3-way merge. Skip this step entirely if no \`specs/\` dir is present.
+5. Move directory: \`oprim/bets/pending/BET-NNN → oprim/bets/archived/BET-NNN\`.
+6. Remove the bet entry from \`oprim/sequence.yaml\`.
+7. Report what was done.
+
+### Sequencing board (oprim-sequence)
+Validate the primer sequencing board and regenerate the visual view.
+
+1. **Read board** — load \`oprim/sequence.yaml\`
+2. **Check WIP limits** — compare \`now\` count against \`wip_limits.now\`
+3. **Validate blockers** — for each bet in \`now\`, confirm all \`blocked_by\` entries are complete or absent
+4. **Validate PDR preconditions** — confirm all \`requires_pdrs\` entries exist in \`oprim/decisions/\`
+5. **Report violations** — list any WIP excess, unresolved blockers, or missing PDRs
+6. **Suggest moves** — recommend bets to defer to \`next\` or \`later\` to resolve violations
+7. **Regenerate view** — run \`node oprim/scripts/generate-sequence-view.js\` from the project root to update \`oprim/sequence-view.md\`
+
+### Problem exploration (oprim-explore)
+Investigate a problem or opportunity and compare candidate framings, before any decision artifact is written. Read-only and non-committal — never writes a \`bet-decision.md\`.
+
+1. Ask for the problem or opportunity (a sentence or two).
+2. Surface related PDRs: scan \`oprim/decisions/PDR-*.md\`, extract keywords from the problem statement, list matches by filename/title/body relevance.
+3. Surface related notes: scan \`oprim/notes/NOTE-*.md\` the same way.
+4. Surface related bets: scan \`oprim/bets/pending/\` and \`oprim/bets/archived/\` for bet-decisions with similar titles or "Why now" content — flag archived matches explicitly, since they may mean this ground has been covered before.
+5. Ask for candidate approaches/framings (description + main tradeoff each) and present them side by side without recommending one, unless asked.
+6. Report what was surfaced and, if the user has converged on a candidate, tell them to run \`/oprim:bet\` to draft the decision — explore does not create the bet itself.
+
+
+### Artifact reconciliation (oprim-reconcile)
+Detect and fix drift across linked oprim artifacts (PDR ↔ bet, bet ↔ review). Never batch-applies a fix — every proposed change is confirmed individually before being written.
+
+1. Scan every \`bet-decision.md\` under \`oprim/bets/pending/\` and \`oprim/bets/archived/\`: check each \`## Links\` reference (PDRs, Notes, Spec (delta), OpenSpec change) actually resolves to an existing file/path.
+2. Scan every \`oprim/reviews/YYYY-MM-DD-BET-NNN-kpi.md\` filename: check the referenced BET-NNN still exists in pending or archived bets.
+3. If nothing is found, report "No drift detected" and stop.
+4. Otherwise, list every drift entry, propose a specific fix per entry (e.g. remove a dangling ID from a \`## Links\` line), and ask "Apply this fix? (y/N)" one item at a time — apply only confirmed fixes.
+5. Report how many drift entries were found, fixed, and left unresolved.
+
+
+<!-- oprim:end -->
+"
+`;
+
+exports[`product-mode parity — oprim update > update on an existing product workspace leaves config.yaml unchanged when schema is current 1`] = `
+{
+  ".claude/": "dir",
+  ".claude/commands/": "dir",
+  ".claude/commands/oprim/": "dir",
+  ".claude/commands/oprim/archive.md": "805d76430424f833",
+  ".claude/commands/oprim/context-init.md": "9cb8f49548a3352f",
+  ".claude/commands/oprim/explore.md": "e51162794d285e27",
+  ".claude/commands/oprim/promote.md": "54b8977d11b1276d",
+  ".claude/commands/oprim/reconcile.md": "2c703398419e77a1",
+  ".claude/commands/oprim/sequence.md": "323523a1ea76eeeb",
+  ".claude/hooks/": "dir",
+  ".claude/hooks/config.json": "ffd9ccf8a7eda7d5",
+  ".claude/hooks/on-prompt-submit.sh": "44069961d953a2c5",
+  ".claude/hooks/on-stop.sh": "e84c2147186b4060",
+  ".claude/settings.json": "05f70238e23d512f",
+  ".claude/skills/": "dir",
+  ".claude/skills/oprim-archive/": "dir",
+  ".claude/skills/oprim-archive/SKILL.md": "9df0617447be8e2c",
+  ".claude/skills/oprim-bet/": "dir",
+  ".claude/skills/oprim-bet/SKILL.md": "d1ee3d17ad84f39a",
+  ".claude/skills/oprim-context-init/": "dir",
+  ".claude/skills/oprim-context-init/SKILL.md": "3cf3c81e36be017a",
+  ".claude/skills/oprim-criteria/": "dir",
+  ".claude/skills/oprim-criteria/SKILL.md": "d38e78337bbeb3e4",
+  ".claude/skills/oprim-explore/": "dir",
+  ".claude/skills/oprim-explore/SKILL.md": "ed2685123bc39831",
+  ".claude/skills/oprim-note/": "dir",
+  ".claude/skills/oprim-note/SKILL.md": "1405a1c1574b78a6",
+  ".claude/skills/oprim-pdr/": "dir",
+  ".claude/skills/oprim-pdr/SKILL.md": "515ec0b0342b8936",
+  ".claude/skills/oprim-reconcile/": "dir",
+  ".claude/skills/oprim-reconcile/SKILL.md": "2ea32837a7b6bbe4",
+  ".claude/skills/oprim-review/": "dir",
+  ".claude/skills/oprim-review/SKILL.md": "e3ee1f95f3a8fc70",
+  ".claude/skills/oprim-sequence/": "dir",
+  ".claude/skills/oprim-sequence/SKILL.md": "53c2c8511aa03def",
+  "oprim/": "dir",
+  "oprim/bets/": "dir",
+  "oprim/bets/pending/": "dir",
+  "oprim/bets/pending/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/config.yaml": "29d46cf27a6db9ee",
+  "oprim/decisions/": "dir",
+  "oprim/decisions/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/notes/": "dir",
+  "oprim/notes/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/reviews/": "dir",
+  "oprim/reviews/.gitkeep": "e3b0c44298fc1c14",
+  "oprim/scripts/": "dir",
+  "oprim/scripts/generate-decisions-view.js": "bfb2165c145e2efe",
+  "oprim/scripts/generate-sequence-view.js": "a99f0f89a4b3ab14",
+  "oprim/sequence.yaml": "f96c00368236145f",
+  "oprim/templates/": "dir",
+  "oprim/templates/bet-decision.md": "e0dae57b2dfbb2ef",
+  "oprim/templates/criteria.yaml": "f9a54762f52048e2",
+  "oprim/templates/discovery.md": "ae3118ec707ccb72",
+  "oprim/templates/kpi-review.md": "cb07df90161423cb",
+  "oprim/templates/note.md": "723932aadba03e0a",
+  "oprim/templates/pdr.md": "50e3bbe368df8b36",
+}
+`;

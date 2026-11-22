@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { type Check } from './integrity';
-import { parseRequirementHeaders, parseCurrentTruthHeaders, findCrossBetConflicts } from './spec-delta';
+import { parseRequirementHeaders, parseCurrentTruthHeaders, findCrossBetConflicts, readCurrentTruth } from './spec-delta';
 
 function normalizeHeader(header: string): string {
   return header.trim().replace(/\s+/g, ' ').toLowerCase();
@@ -19,7 +19,7 @@ function activeBetDirs(betsDir: string): fs.Dirent[] {
     .filter((e) => e.isDirectory() && e.name !== 'archived');
 }
 
-function isPromoted(betDecisionContent: string): boolean {
+export function isPromoted(betDecisionContent: string): boolean {
   const linksMatch = betDecisionContent.match(/## Links\n([\s\S]*?)(?=\n## |$)/);
   const linksSection = linksMatch ? linksMatch[1]! : betDecisionContent;
   const lineMatch = linksSection.match(/^- *OpenSpec change:\s*(.*)$/m);
@@ -109,6 +109,33 @@ export function checkCrossBetConflicts(projectRoot: string, checks: Check[]): vo
       pass: false,
       note: 'Overlapping requirement header between active bets — archiving one first applies last-write-wins to the other (no 3-way merge)',
       required: true,
+    });
+  }
+}
+
+/**
+ * Doctor-only hint: flags current-truth specs still using legacy delta headings
+ * (`## ADDED Requirements` etc.). Non-required — reading is tolerant, so a legacy file is
+ * untidy rather than dangerous.
+ */
+export function checkLegacySpecFormat(projectRoot: string, checks: Check[]): void {
+  const specsDir = path.join(projectRoot, 'oprim', 'specs');
+  if (!fs.existsSync(specsDir)) return;
+
+  const capabilities = fs
+    .readdirSync(specsDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name)
+    .sort();
+
+  for (const capability of capabilities) {
+    const specPath = path.join(specsDir, capability, 'spec.md');
+    if (!fs.existsSync(specPath)) continue;
+    if (!readCurrentTruth(fs.readFileSync(specPath, 'utf-8')).legacy) continue;
+    checks.push({
+      name: `spec: ${capability} uses legacy delta headings — run 'oprim migrate --specs'`,
+      pass: false,
+      required: false,
     });
   }
 }

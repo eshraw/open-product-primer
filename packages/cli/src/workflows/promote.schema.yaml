@@ -1,4 +1,5 @@
 id: promote
+order: 11
 skillName: null
 title: "OPRIM: Promote"
 description: Promote a note into a bet, or a prioritized bet into a capability spec

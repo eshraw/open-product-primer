@@ -1,0 +1,15 @@
+id: prioritize
+order: 19
+modes: [portfolio]
+skillName: oprim-prioritize
+title: "OPRIM: Prioritize"
+description: Rank pending bets by objective fit, risk profile and door type and propose a portfolio sequence.yaml diff — proposes only, never edits any board
+claude:
+  skill: true
+  command: prioritize.md
+cursor:
+  skill: false
+  command: oprim-prioritize.md
+poolside:
+  skill: true
+inline: true

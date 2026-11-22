@@ -4,7 +4,8 @@ import chalk from 'chalk';
 import { writeFile } from './scaffold';
 import { detectAvailableAgents, writeClaudeModsToConfig } from './detect';
 import { readSpecFramework, deriveDefaultSpecFramework } from './config-merge';
-import { loadWorkflowSchema } from './workflow-schema';
+import { loadWorkflowSchema, workflowIdsFor } from './workflow-schema';
+import { readWorkspaceMode, type WorkspaceMode } from './workspace-mode';
 import { renderSkillBody, renderClaudeCommand, renderCursorCommand, renderAgentInstructions } from './workflow-renderer';
 import { CLAUDE_MODS_REGISTRY, getClaudeMod, isPluginMod, type ClaudeModHookFile } from './claude-mods';
 
@@ -266,25 +267,13 @@ export async function promptOkfFrontmatter(): Promise<boolean> {
   });
 }
 
-// Workflow ids installed as Claude/Poolside/Cursor skill files — see packages/cli/src/workflows/.
-// Order matches the pre-refactor CLAUDE_SKILLS/POOLSIDE_SKILLS/CURSOR_SKILLS declaration order.
-const CLAUDE_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review', 'archive', 'sequence', 'context', 'explore', 'reconcile'];
-const POOLSIDE_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review', 'archive', 'sequence', 'explore', 'reconcile'];
-const CURSOR_SKILL_WORKFLOW_IDS = ['pdr', 'bet', 'note', 'criteria', 'review'];
-
-// Claude command wrappers (thin, invoke skill) — filename -> workflow id. Order matches the
-// pre-refactor CLAUDE_COMMANDS declaration order.
-const CLAUDE_COMMAND_WORKFLOWS: Array<{ filename: string; id: string }> = [
-  { filename: 'promote.md', id: 'promote' },
-  { filename: 'sequence.md', id: 'sequence' },
-  { filename: 'archive.md', id: 'archive' },
-  { filename: 'context-init.md', id: 'context' },
-  { filename: 'explore.md', id: 'explore' },
-  { filename: 'reconcile.md', id: 'reconcile' },
-];
-
-// Cursor command files (full inline). Order matches the pre-refactor CURSOR_COMMANDS declaration order.
-const CURSOR_COMMAND_WORKFLOW_IDS = ['promote', 'sequence', 'pdr', 'bet', 'note', 'criteria', 'review'];
+// BET-075 — which workflows each agent surface installs is derived from the bundled schemas
+// (`order:` + agent targets + `modes:`) via workflowIdsFor(), not hard-coded per agent. See
+// packages/cli/src/workflows/. spec-authoring has no `order` and is installed separately below,
+// gated on spec_framework: native and its own `modes`.
+function specSkillEnabled(framework: string, mode: WorkspaceMode, projectRoot: string): boolean {
+  return framework === 'native' && loadWorkflowSchema('spec-authoring', projectRoot).modes.includes(mode);
+}
 
 export function installAgentSkills(
   agent: Agent,
@@ -292,6 +281,8 @@ export function installAgentSkills(
   framework = 'openspec',
   pdrSurfacing = false
 ): void {
+  const mode = readWorkspaceMode(projectRoot);
+  const specEnabled = specSkillEnabled(framework, mode, projectRoot);
   if (agent === 'claude') {
     const claudeDir = path.join(projectRoot, '.claude');
     const dirCreated = !fs.existsSync(claudeDir);
@@ -310,7 +301,7 @@ export function installAgentSkills(
     }
 
     // oprim skills — prepend Step 0 when opted in
-    for (const id of CLAUDE_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('claude-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.claude.skill || !schema.skillName) continue;
       const body = renderSkillBody(id, projectRoot);
@@ -321,7 +312,7 @@ export function installAgentSkills(
 
     // oprim-spec (native spec authoring) — install only when spec_framework is native, remove otherwise
     const specSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       const specBody = renderSkillBody('spec-authoring', projectRoot);
       const specSkillContent = pdrSurfacing ? withContextStep(specBody) : specBody;
       writeFile(specSkillPath, specSkillContent);
@@ -349,10 +340,19 @@ export function installAgentSkills(
     }
 
     const cmdsDir = path.join(claudeDir, 'commands', 'oprim');
-    for (const { filename, id } of CLAUDE_COMMAND_WORKFLOWS) {
+    for (const id of workflowIdsFor('claude-command', mode, projectRoot)) {
+      const filename = loadWorkflowSchema(id, projectRoot).claude.command as string;
       const content = renderClaudeCommand(id, projectRoot, framework);
       writeFile(path.join(cmdsDir, filename), content);
       console.log(chalk.green('✓') + ` .claude/commands/oprim/${filename}`);
+    }
+
+    // BET-081 — reviewer personas as Claude subagents (.claude/agents/<name>.md). Only workflows
+    // with a `claude.agent` target and the workspace mode in `modes:` (bundled: portfolio only).
+    for (const id of workflowIdsFor('claude-agent', mode, projectRoot)) {
+      const name = loadWorkflowSchema(id, projectRoot).claude.agent as string;
+      writeFile(path.join(claudeDir, 'agents', `${name}.md`), renderSkillBody(id, projectRoot));
+      console.log(chalk.green('✓') + ` .claude/agents/${name}.md`);
     }
 
     // Tombstone cleanup: remove command wrappers deleted in v0.2.0 (bet/criteria/pdr/review
@@ -398,7 +398,7 @@ export function installAgentSkills(
     const dirCreated = !fs.existsSync(poolsideDir);
 
     const skillsBase = path.join(poolsideDir, 'skills');
-    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('poolside-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.poolside.skill || !schema.skillName) continue;
       writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
@@ -406,7 +406,7 @@ export function installAgentSkills(
     }
 
     const poolsideSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       writeFile(poolsideSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
       console.log(chalk.green('✓') + ' .poolside/skills/oprim-spec/SKILL.md');
     } else if (fs.existsSync(poolsideSpecSkillPath)) {
@@ -416,7 +416,7 @@ export function installAgentSkills(
     }
 
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    writeAgentInstructionFile(agentsFile, poolsideInstructions());
+    writeAgentInstructionFile(agentsFile, poolsideInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
 
     if (dirCreated) {
@@ -427,7 +427,7 @@ export function installAgentSkills(
     const dirCreated = !fs.existsSync(vibeDir);
 
     const skillsBase = path.join(vibeDir, 'skills');
-    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('vibe-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.vibe.skill || !schema.skillName) continue;
       writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
@@ -435,7 +435,7 @@ export function installAgentSkills(
     }
 
     const vibeSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       writeFile(vibeSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
       console.log(chalk.green('✓') + ' .vibe/skills/oprim-spec/SKILL.md');
     } else if (fs.existsSync(vibeSpecSkillPath)) {
@@ -445,7 +445,7 @@ export function installAgentSkills(
     }
 
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    writeAgentInstructionFile(agentsFile, vibeInstructions());
+    writeAgentInstructionFile(agentsFile, vibeInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
 
     if (dirCreated) {
@@ -456,7 +456,7 @@ export function installAgentSkills(
     const dirCreated = !fs.existsSync(qwenDir);
 
     const skillsBase = path.join(qwenDir, 'skills');
-    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('qwen-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.qwen.skill || !schema.skillName) continue;
       writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
@@ -464,7 +464,7 @@ export function installAgentSkills(
     }
 
     const qwenSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       writeFile(qwenSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
       console.log(chalk.green('✓') + ' .qwen/skills/oprim-spec/SKILL.md');
     } else if (fs.existsSync(qwenSpecSkillPath)) {
@@ -474,7 +474,7 @@ export function installAgentSkills(
     }
 
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    writeAgentInstructionFile(agentsFile, qwenInstructions());
+    writeAgentInstructionFile(agentsFile, qwenInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
 
     if (dirCreated) {
@@ -485,7 +485,7 @@ export function installAgentSkills(
     const dirCreated = !fs.existsSync(dshDir);
 
     const skillsBase = path.join(dshDir, 'skills');
-    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('dsh-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.dsh.skill || !schema.skillName) continue;
       writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
@@ -493,7 +493,7 @@ export function installAgentSkills(
     }
 
     const dshSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       writeFile(dshSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
       console.log(chalk.green('✓') + ' .dsh/skills/oprim-spec/SKILL.md');
     } else if (fs.existsSync(dshSpecSkillPath)) {
@@ -503,7 +503,7 @@ export function installAgentSkills(
     }
 
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    writeAgentInstructionFile(agentsFile, dshInstructions());
+    writeAgentInstructionFile(agentsFile, dshInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
 
     if (dirCreated) {
@@ -521,7 +521,7 @@ export function installAgentSkills(
 
     const skillsBase = path.join(projectRoot, '.skills');
     const skillsDirCreated = !fs.existsSync(skillsBase);
-    for (const id of POOLSIDE_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('kimi-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.kimi.skill || !schema.skillName) continue;
       writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
@@ -529,7 +529,7 @@ export function installAgentSkills(
     }
 
     const kimiSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       writeFile(kimiSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
       console.log(chalk.green('✓') + ' .skills/oprim-spec/SKILL.md');
     } else if (fs.existsSync(kimiSpecSkillPath)) {
@@ -539,7 +539,7 @@ export function installAgentSkills(
     }
 
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    writeAgentInstructionFile(agentsFile, kimiInstructions());
+    writeAgentInstructionFile(agentsFile, kimiInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
 
     if (kimiDirCreated) {
@@ -550,18 +550,18 @@ export function installAgentSkills(
     }
   } else if (agent === 'codex') {
     const agentsFile = path.join(projectRoot, 'AGENTS.md');
-    writeAgentInstructionFile(agentsFile, codexInstructions());
+    writeAgentInstructionFile(agentsFile, codexInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' AGENTS.md (oprim section written)');
   } else if (agent === 'gemini') {
     const geminiFile = path.join(projectRoot, 'GEMINI.md');
-    writeAgentInstructionFile(geminiFile, geminiInstructions());
+    writeAgentInstructionFile(geminiFile, geminiInstructions(mode, projectRoot));
     console.log(chalk.green('✓') + ' GEMINI.md (oprim section written)');
   } else if (agent === 'cursor') {
     const cursorDir = path.join(projectRoot, '.cursor');
     const dirCreated = !fs.existsSync(cursorDir);
 
     const skillsBase = path.join(cursorDir, 'skills');
-    for (const id of CURSOR_SKILL_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('cursor-skill', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.cursor.skill || !schema.skillName) continue;
       writeFile(path.join(skillsBase, schema.skillName, 'SKILL.md'), renderSkillBody(id, projectRoot));
@@ -569,7 +569,7 @@ export function installAgentSkills(
     }
 
     const cursorSpecSkillPath = path.join(skillsBase, 'oprim-spec', 'SKILL.md');
-    if (framework === 'native') {
+    if (specEnabled) {
       writeFile(cursorSpecSkillPath, renderSkillBody('spec-authoring', projectRoot));
       console.log(chalk.green('✓') + ' .cursor/skills/oprim-spec/SKILL.md');
     } else if (fs.existsSync(cursorSpecSkillPath)) {
@@ -579,7 +579,7 @@ export function installAgentSkills(
     }
 
     const cmdsDir = path.join(cursorDir, 'commands');
-    for (const id of CURSOR_COMMAND_WORKFLOW_IDS) {
+    for (const id of workflowIdsFor('cursor-command', mode, projectRoot)) {
       const schema = loadWorkflowSchema(id, projectRoot);
       if (!schema.cursor.command) continue;
       const content = renderCursorCommand(id, projectRoot, framework);
@@ -695,60 +695,73 @@ If no PDRs match: exit silently — produce no output.
 // per-project via workflow-schema.ts/workflow-renderer.ts) ────────────────────────────────
 
 export const CLAUDE_SKILLS: Record<string, string> = Object.fromEntries(
-  CLAUDE_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('claude-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const CLAUDE_COMMANDS: Record<string, string> = Object.fromEntries(
-  CLAUDE_COMMAND_WORKFLOWS.map(({ filename, id }) => [filename, renderClaudeCommand(id)])
+  workflowIdsFor('claude-command', 'product').map((id) => [
+    loadWorkflowSchema(id).claude.command as string,
+    renderClaudeCommand(id),
+  ])
 );
 
+/** BET-081 — bundled Claude subagent bodies for a mode, keyed by agent name (portfolio personas). */
+export function claudeAgents(mode: WorkspaceMode): Record<string, string> {
+  return Object.fromEntries(
+    workflowIdsFor('claude-agent', mode).map((id) => [
+      loadWorkflowSchema(id).claude.agent as string,
+      renderSkillBody(id, undefined, { mode, askFirst: {} }),
+    ])
+  );
+}
+
 export const POOLSIDE_SKILLS: Record<string, string> = Object.fromEntries(
-  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('poolside-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const VIBE_SKILLS: Record<string, string> = Object.fromEntries(
-  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('vibe-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const QWEN_SKILLS: Record<string, string> = Object.fromEntries(
-  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('qwen-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const KIMI_SKILLS: Record<string, string> = Object.fromEntries(
-  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('kimi-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const DSH_SKILLS: Record<string, string> = Object.fromEntries(
-  POOLSIDE_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('dsh-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const CURSOR_SKILLS: Record<string, string> = Object.fromEntries(
-  CURSOR_SKILL_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('cursor-skill', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.skillName as string, renderSkillBody(id)];
   })
 );
 
 export const CURSOR_COMMANDS: Record<string, string> = Object.fromEntries(
-  CURSOR_COMMAND_WORKFLOW_IDS.map((id) => {
+  workflowIdsFor('cursor-command', 'product').map((id) => {
     const schema = loadWorkflowSchema(id);
     return [schema.cursor.command as string, renderCursorCommand(id)];
   })
@@ -944,30 +957,30 @@ export function writeAgentInstructionFile(filePath: string, section: string): vo
   }
 }
 
-export function codexInstructions(): string {
-  return renderAgentInstructions();
+export function codexInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }
 
-export function geminiInstructions(): string {
-  return renderAgentInstructions();
+export function geminiInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }
 
-export function poolsideInstructions(): string {
-  return renderAgentInstructions();
+export function poolsideInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }
 
-export function vibeInstructions(): string {
-  return renderAgentInstructions();
+export function vibeInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }
 
-export function qwenInstructions(): string {
-  return renderAgentInstructions();
+export function qwenInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }
 
-export function kimiInstructions(): string {
-  return renderAgentInstructions();
+export function kimiInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }
 
-export function dshInstructions(): string {
-  return renderAgentInstructions();
+export function dshInstructions(mode: WorkspaceMode = 'product', projectRoot?: string): string {
+  return renderAgentInstructions(mode, projectRoot);
 }

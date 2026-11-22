@@ -5,10 +5,24 @@ import chalk from 'chalk';
 import { type Check, checkSequenceIntegrity, checkSkillVersionDrift } from '../lib/integrity';
 import { checkBetDefinitionOfDone, checkSpecDeltaDrift, checkCrossBetConflicts } from '../lib/validate-checks';
 import { foldDelta, resolveBetDirectory } from '../lib/spec-delta';
+import { runWorkspaceModeChecks } from '../lib/portfolio/checks';
+import { checkCrossProductRefs, RefResolver } from '../lib/portfolio/refs';
+import { checkObjectiveLinks } from '../lib/portfolio/objectives';
+import { checkPortfolioWip } from '../lib/portfolio/wip';
+import { checkDelegationLinks } from '../lib/portfolio/delegation';
+import { readWorkspaceMode } from '../lib/workspace-mode';
 
 function runChecks(projectRoot: string): Check[] {
   const checks: Check[] = [];
+  runWorkspaceModeChecks(projectRoot, checks);
   checkSequenceIntegrity(projectRoot, checks);
+  const resolver = new RefResolver(projectRoot);
+  checkCrossProductRefs(projectRoot, checks, resolver);
+  checkObjectiveLinks(projectRoot, checks, resolver);
+  if (readWorkspaceMode(projectRoot) === 'portfolio') {
+    checkPortfolioWip(projectRoot, checks, resolver);
+    checkDelegationLinks(projectRoot, checks, resolver);
+  }
   checkSkillVersionDrift(projectRoot, checks);
   checkBetDefinitionOfDone(projectRoot, checks);
   checkSpecDeltaDrift(projectRoot, checks);
@@ -61,7 +75,7 @@ function runDiff(projectRoot: string, betIdInput: string): void {
 
     console.log(chalk.bold(`═══ ${capEntry.name} ═══`));
     try {
-      const result = foldDelta(currentTruth, deltaContent);
+      const result = foldDelta(currentTruth, deltaContent, `oprim/specs/${capEntry.name}/spec.md`);
       console.log(result.content);
       for (const note of result.notes) {
         console.log(chalk.yellow(`  note: ${note}`));

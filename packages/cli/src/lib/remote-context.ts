@@ -30,6 +30,9 @@ export interface RemoteContextIdentity {
   name: string;
   version: string;
   description?: string;
+  // BET-076: a portfolio declares itself so consumers can tell which source is their portfolio.
+  // Absent means `product`.
+  mode?: 'product' | 'portfolio';
 }
 
 export function isGitSource(source: RemoteContextSource): source is GitSource {
@@ -115,7 +118,8 @@ export function readIdentity(rootDir: string): RemoteContextIdentity | null {
   try {
     const parsed = yaml.load(fs.readFileSync(p, 'utf-8')) as Partial<RemoteContextIdentity>;
     if (!parsed?.name || !parsed?.version) return null;
-    return { name: parsed.name, version: parsed.version, description: parsed.description };
+    const mode = parsed.mode === 'portfolio' || parsed.mode === 'product' ? parsed.mode : undefined;
+    return { name: parsed.name, version: parsed.version, description: parsed.description, ...(mode ? { mode } : {}) };
   } catch {
     return null;
   }

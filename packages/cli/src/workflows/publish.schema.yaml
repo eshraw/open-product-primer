@@ -1,0 +1,15 @@
+id: publish
+order: 22
+modes: [portfolio]
+skillName: oprim-publish
+title: "OPRIM: Publish"
+description: Render a one-way, Notion-ready PRD from a local or qualified bet or PDR into outputs/publish/ — git stays the source of truth; uploads only when explicitly asked
+claude:
+  skill: true
+  command: publish.md
+cursor:
+  skill: false
+  command: oprim-publish.md
+poolside:
+  skill: true
+inline: true

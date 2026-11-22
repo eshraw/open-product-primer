@@ -1,0 +1,16 @@
+id: objective
+order: 17
+modes: [portfolio]
+skillName: oprim-objective
+title: null
+description: Create a new objective (OKR) in oprim/objectives/ with auto-assigned OBJ ID, period and key results, or supersede an existing one
+cursorDescription: Create a new objective with auto-assigned OBJ ID
+claude:
+  skill: true
+  command: null
+cursor:
+  skill: true
+  command: oprim-objective.md
+poolside:
+  skill: true
+inline: true

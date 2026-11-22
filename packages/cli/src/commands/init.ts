@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import * as path from 'path';
+import * as fs from 'fs';
 import chalk from 'chalk';
 import { detectOpenSpec, detectGraphify, readAgentsFromConfig, writeAgentsToConfig, readClaudeModsFromConfig } from '../lib/detect';
 import { ensureDir, writeFileIfAbsent, writeFile } from '../lib/scaffold';
@@ -33,6 +34,9 @@ import {
   noteTemplate,
   noteMinimalFrontmatter,
 } from '../lib/templates';
+import { readWorkspaceMode, isWorkspaceMode, WORKSPACE_MODES, type WorkspaceMode } from '../lib/workspace-mode';
+import { portfolioConfigTemplate } from '../lib/portfolio/templates';
+import { scaffoldPortfolio } from '../lib/portfolio/scaffold';
 
 export function initCommand(): Command {
   return new Command('init')
@@ -44,9 +48,29 @@ export function initCommand(): Command {
       (val: string, prev: string[]) => [...prev, val],
       [] as string[]
     )
+    .option('--mode <mode>', 'workspace mode: product (default) or portfolio')
     .action(async (opts) => {
       const projectRoot = process.cwd();
       const projectName = opts.name ?? path.basename(projectRoot);
+
+      // BET-075 — an explicit --mode must agree with an existing config; without --mode, a
+      // re-run keeps whatever mode the workspace already has (absent config/key → product).
+      if (opts.mode !== undefined && !isWorkspaceMode(opts.mode)) {
+        console.error(chalk.red(`\nUnknown mode: ${opts.mode}`));
+        console.error(`Supported modes: ${WORKSPACE_MODES.join(', ')}`);
+        process.exit(1);
+      }
+      const existingConfig = fs.existsSync(path.join(projectRoot, 'oprim', 'config.yaml'));
+      const existingMode = readWorkspaceMode(projectRoot);
+      if (opts.mode !== undefined && existingConfig && opts.mode !== existingMode) {
+        console.error(
+          chalk.red(`\noprim/config.yaml already exists in ${existingMode} mode; refusing to re-init as ${opts.mode}.`)
+        );
+        console.error('Converting an existing workspace between modes is not supported.');
+        process.exit(1);
+      }
+      const mode: WorkspaceMode = (opts.mode as WorkspaceMode | undefined) ?? existingMode;
+      const portfolio = mode === 'portfolio';
 
       console.log(chalk.bold('oprim') + ' — initializing project workspace...\n');
 
@@ -58,7 +82,8 @@ export function initCommand(): Command {
 
       console.log('');
       const okfEnabled = await promptOkfFrontmatter();
-      const specFramework = await promptFrameworkSelection(projectRoot);
+      // PDR-001 §5 — a portfolio never holds specs, so it never asks for a framework.
+      const specFramework = portfolio ? 'none' : await promptFrameworkSelection(projectRoot);
 
       const primerDir = path.join(projectRoot, 'oprim');
       ensureDir(path.join(primerDir, 'decisions'));
@@ -70,7 +95,9 @@ export function initCommand(): Command {
 
       const configWritten = writeFileIfAbsent(
         path.join(primerDir, 'config.yaml'),
-        configTemplate(projectName, openspec.detected, graphify.detected, okfEnabled, specFramework)
+        portfolio
+          ? portfolioConfigTemplate(projectName, openspec.detected, graphify.detected, okfEnabled)
+          : configTemplate(projectName, openspec.detected, graphify.detected, okfEnabled, specFramework)
       );
       const sequenceWritten = writeFileIfAbsent(path.join(primerDir, 'sequence.yaml'), sequenceTemplate);
 
@@ -113,6 +140,14 @@ export function initCommand(): Command {
       console.log('  ' + chalk.gray('oprim/templates/') + ' — refreshed');
       console.log('  ' + chalk.gray('oprim/scripts/') + ' — refreshed');
       console.log('  ' + chalk.gray('OKF frontmatter') + ' — ' + (okfEnabled ? 'enabled' : 'disabled'));
+
+      if (portfolio) {
+        const written = scaffoldPortfolio(projectRoot, { okf: okfEnabled });
+        console.log(chalk.green('✓') + ' portfolio workspace scaffolded (mode: portfolio, spec_framework: none)');
+        console.log('  ' + chalk.gray('oprim/handbook/, oprim/objectives/') + ' — citable by products via remote context');
+        console.log('  ' + chalk.gray('STATE.md, inbox.md, wiki/, outputs/') + ' — personal, never exported');
+        if (written.length === 0) console.log('  ' + chalk.dim('all portfolio files already existed — preserved'));
+      }
 
       // ── Agent selection ───────────────────────────────────────────────────────
 

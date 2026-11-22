@@ -7,6 +7,7 @@ import {
   findCrossBetConflicts,
   parseRequirementHeaders,
   parseCurrentTruthHeaders,
+  readCurrentTruth,
   resolveBetDirectory,
   normalizeBetId,
 } from '../lib/spec-delta';
@@ -279,5 +280,83 @@ describe('parseCurrentTruthHeaders', () => {
   it('extracts headers from a flat Requirements section', () => {
     const content = `## Requirements\n\n### Requirement: A\n\nBody.\n\n### Requirement: B\n\nBody.\n`;
     expect(parseCurrentTruthHeaders(content)).toEqual(['A', 'B']);
+  });
+});
+
+// ── BET-083: legacy current truth, preamble, guard ────────────────────────────
+
+const req = (name: string, body = `Body of ${name}.`) =>
+  `### Requirement: ${name}\n${body}\n\n#### Scenario: ${name} works\n- **WHEN** x\n- **THEN** y`;
+
+const countReqs = (s: string) => (s.match(/^### Requirement:/gm) ?? []).length;
+
+describe('BET-083 legacy current truth', () => {
+  const legacy = `## ADDED Requirements\n\n${req('A')}\n\n${req('B')}\n\n${req('C')}\n`;
+  const deltaAdd2 = `## ADDED Requirements\n\n${req('D')}\n\n${req('E')}\n`;
+
+  it('1.1 folding an ADDED-only delta into a legacy file keeps existing requirements', () => {
+    const result = foldDelta(legacy, deltaAdd2);
+    expect(countReqs(result.content)).toBe(5);
+    expect(result.content.match(/^## /gm)).toEqual(['## ']);
+    expect(result.content.startsWith('## Requirements\n\n### Requirement: A')).toBe(true);
+    expect(result.content.indexOf('Requirement: C')).toBeLessThan(result.content.indexOf('Requirement: D'));
+  });
+
+  it('1.2 folding keeps the preamble byte-for-byte', () => {
+    const preamble = '# note-authoring Specification\n\n## Purpose\n\nTBD — defines notes.\n\n';
+    const current = `${preamble}## Requirements\n\n${req('A')}\n`;
+    const result = foldDelta(current, deltaAdd2);
+    expect(result.content.startsWith(`${preamble}## Requirements\n\n`)).toBe(true);
+    expect(countReqs(result.content)).toBe(3);
+  });
+
+  it('1.3 parseCurrentTruthHeaders reads a legacy file', () => {
+    expect(parseCurrentTruthHeaders(legacy)).toEqual(['A', 'B', 'C']);
+  });
+
+  it('MODIFIED delta matches a requirement in a legacy file', () => {
+    const delta = `## MODIFIED Requirements\n\n${req('B', 'New body.')}\n`;
+    const result = foldDelta(legacy, delta);
+    expect(result.notes).toEqual([]);
+    expect(countReqs(result.content)).toBe(3);
+    expect(result.content).toContain('New body.');
+    expect(result.content).not.toContain('Body of B.');
+  });
+
+  it('ignores blocks under a legacy REMOVED section', () => {
+    const content = `## ADDED Requirements\n\n${req('A')}\n\n## REMOVED Requirements\n\n${req('Gone')}\n`;
+    const truth = readCurrentTruth(content);
+    expect(truth.blocks.map((b) => b.header)).toEqual(['A']);
+    expect(truth.legacy).toBe(true);
+    const result = foldDelta(content, deltaAdd2);
+    expect(result.content).not.toContain('Gone');
+    expect(countReqs(result.content)).toBe(3);
+  });
+
+  it('a header in both ADDED and MODIFIED is kept once, using the MODIFIED body', () => {
+    const content = `## ADDED Requirements\n\n${req('A')}\n\n${req('B')}\n\n## MODIFIED Requirements\n\n${req('A', 'Modified A.')}\n`;
+    const truth = readCurrentTruth(content);
+    expect(truth.blocks.map((b) => b.header)).toEqual(['A', 'B']);
+    expect(truth.blocks[0]!.content).toContain('Modified A.');
+    expect(truth.duplicates).toEqual(['A']);
+    expect(() => foldDelta(content, deltaAdd2)).not.toThrow();
+  });
+
+  it('canonical file is not legacy', () => {
+    expect(readCurrentTruth(`# t\n\n## Requirements\n\n${req('A')}\n`).legacy).toBe(false);
+  });
+
+  it('guard: throws when requirement headers sit under an unknown heading', () => {
+    const content = `## Requirements\n\n${req('A')}\n\n${req('B')}\n\n## Requirements (deprecated)\n\n${req('C')}\n\n${req('D')}\n`;
+    expect(() => foldDelta(content, deltaAdd2, 'oprim/specs/x/spec.md')).toThrow(
+      'cannot fold into oprim/specs/x/spec.md: found 4 requirement headers but parsed 2'
+    );
+  });
+
+  it('keeps unknown trailing sections that hold no requirements', () => {
+    const content = `## Requirements\n\n${req('A')}\n\n## Notes\n\nKeep me.\n`;
+    const result = foldDelta(content, deltaAdd2);
+    expect(result.content).toContain('## Notes\n\nKeep me.');
+    expect(countReqs(result.content)).toBe(3);
   });
 });
